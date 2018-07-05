@@ -67,18 +67,18 @@ resource "ccloud_quota" "quota" {
   }
 
   network {
-		floating_ips         = 4
-		networks             = 1
-		ports                = 512
-		routers              = 2
-		security_group_rules = 64
-		security_groups      = 4
-		subnets              = 1
-		healthmonitors       = 10
-		l7policies           = 8 
-		listeners            = 16
-		loadbalancers        = 8  
-		pools                = 8 
+    floating_ips         = 4
+    networks             = 1
+    ports                = 512
+    routers              = 2
+    security_group_rules = 64
+    security_groups      = 4
+    subnets              = 1
+    healthmonitors       = 10
+    l7policies           = 8 
+    listeners            = 16
+    loadbalancers        = 8  
+    pools                = 8 
   }
 
   dns {
