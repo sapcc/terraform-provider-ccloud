@@ -3,6 +3,7 @@ package ccloud
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/sapcc/gophercloud-limes/limes/v1/projects"
@@ -92,7 +93,7 @@ func resourceCCloudQuota() *schema.Resource {
 			}
 		}
 
-		quotaResource.Schema[service] = &schema.Schema{
+		quotaResource.Schema[sanitize(service)] = &schema.Schema{
 			Type:     schema.TypeList,
 			Optional: true,
 			Elem:     elem,
@@ -123,7 +124,7 @@ func resourceCCloudQuotaRead(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(projectID)
 	for service, resources := range SERVICES {
 		for resource, _ := range resources {
-			key := fmt.Sprintf("%s.%s", service, resource)
+			key := fmt.Sprintf("%s.%s", sanitize(service), resource)
 			if quota.Services[service] == nil || quota.Services[service].Resources[resource] == nil {
 				continue
 			}
@@ -150,7 +151,8 @@ func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error creating OpenStack limes client: %s", err)
 	}
 
-	for service, resources := range SERVICES {
+	for _service, resources := range SERVICES {
+		service := sanitize(_service)
 		if _, ok := d.GetOk(service); ok && d.HasChange(service) {
 			log.Printf("[QUOTA] Service Changed: %s", service)
 
@@ -164,7 +166,7 @@ func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{})
 					log.Printf("[QUOTA] %s.%s: %s", service, resource, quota[resource].String())
 				}
 			}
-			services[service] = quota
+			services[_service] = quota
 		}
 	}
 
@@ -179,7 +181,7 @@ func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{})
 	d.SetId(projectID)
 	for service, resources := range SERVICES {
 		for resource, _ := range resources {
-			key := fmt.Sprintf("%s.%s", service, resource)
+			key := fmt.Sprintf("%s.%s", sanitize(service), resource)
 			if quota.Services[service] == nil || quota.Services[service].Resources[resource] == nil {
 				continue
 			}
@@ -201,4 +203,8 @@ func resourceCCloudQuotaDelete(d *schema.ResourceData, meta interface{}) error {
 
 func toString(r *reports.ProjectResource) string {
 	return limes.ValueWithUnit{r.Quota, r.Unit}.String()
+}
+
+func sanitize(s string) string {
+	return strings.Replace(s, "-", "", -1)
 }
