@@ -30,6 +30,7 @@ It provides resources that allow to use Terraform for Converged Cloud's
 additional services:
 
   * Limes for Quota Management
+  * Kubernikus (Kubernetes as a Service)
 
 The provider needs to be configured with the proper OpenStack credentials
 before it can be used. For details see the OpenStack provider.
@@ -46,8 +47,8 @@ provider "ccloud" {
   domain_name      = "${var.domain_name}"
 }
 
-data "openstack_identity_project_v3" "project" {
-  name = "demo"
+data "openstack_identity_project_v3" "demo" {
+  name = "${var.tenant_name}"
 }
 
 resource "ccloud_quota" "quota" {
@@ -98,6 +99,18 @@ resource "ccloud_quota" "quota" {
     capacity = 1073741824
   }
 }
+
+resource "ccloud_kubernetes" "demo" {
+  provider       = "ccloud.demo"
+  name           = "demo"
+  ssh_public_key = "ssh-rsa AAAABHTmDMP6w=="
+
+  node_pools = [
+    { name = "payload0", flavor = "m1.xlarge_cpu", size = 2 },
+    { name = "payload1", flavor = "m1.xlarge_cpu", size = 1 }
+  ]
+}
+
 ```
 
 Building The Provider
