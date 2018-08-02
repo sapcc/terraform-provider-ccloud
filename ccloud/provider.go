@@ -218,6 +218,10 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 
+		DataSourcesMap: map[string]*schema.Resource{
+			"ccloud_identity_group_v3": dataSourceIdentityGroupV3(),
+		},
+
 		ResourcesMap: map[string]*schema.Resource{
 			"ccloud_quota":      resourceCCloudQuota(),
 			"ccloud_kubernetes": resourceCCloudKubernetes(),

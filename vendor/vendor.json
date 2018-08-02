@@ -445,6 +445,12 @@
 			"revisionTime": "2018-07-04T01:55:14Z"
 		},
 		{
+			"checksumSHA1": "b7g9TcU1OmW7e2UySYeOAmcfHpY=",
+			"path": "github.com/gophercloud/gophercloud/internal",
+			"revision": "a27e54c3801dfe3970de492059cd088aef65064c",
+			"revisionTime": "2018-08-02T04:17:03Z"
+		},
+		{
 			"checksumSHA1": "iJrMrwTdTqzvEHNwRAZgHPVemo0=",
 			"path": "github.com/gophercloud/gophercloud/openstack",
 			"revision": "8cf44bf1749da68b76be9eb59a37b45641b8fd63",
@@ -461,6 +467,12 @@
 			"path": "github.com/gophercloud/gophercloud/openstack/identity/v2/tokens",
 			"revision": "8cf44bf1749da68b76be9eb59a37b45641b8fd63",
 			"revisionTime": "2018-07-04T01:55:14Z"
+		},
+		{
+			"checksumSHA1": "obpfSV89ht0YMt3WYLFmQj1rWLE=",
+			"path": "github.com/gophercloud/gophercloud/openstack/identity/v3/groups",
+			"revision": "a27e54c3801dfe3970de492059cd088aef65064c",
+			"revisionTime": "2018-08-02T04:17:03Z"
 		},
 		{
 			"checksumSHA1": "2PYxD2MOrbp4JCWy5794sEtDYD4=",

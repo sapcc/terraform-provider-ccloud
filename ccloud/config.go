@@ -226,6 +226,13 @@ func (c *Config) kubernikusV1Client(region string) (*Kubernikus, error) {
 	})
 }
 
+func (c *Config) identityV3Client(region string) (*gophercloud.ServiceClient, error) {
+	return openstack.NewIdentityV3(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) Debug() {
 	log.Printf("[CCLOUD] cacert_file:         %s", c.CACertFile)
 	log.Printf("[CCLOUD] cert:                %s", c.ClientCertFile)
