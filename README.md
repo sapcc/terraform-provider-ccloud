@@ -101,7 +101,6 @@ resource "ccloud_quota" "quota" {
 }
 
 resource "ccloud_kubernetes" "demo" {
-  provider       = "ccloud.demo"
   name           = "demo"
   ssh_public_key = "ssh-rsa AAAABHTmDMP6w=="
 
@@ -116,17 +115,17 @@ resource "ccloud_kubernetes" "demo" {
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-template`
+Clone repository to: `$GOPATH/src/github.com/sapcc/terraform-ccloud-provider`
 
 ```sh
 $ mkdir -p $GOPATH/src/github.com/sapcc; cd $GOPATH/src/github.com/sapcc
-$ git clone git@github.com:sapccs/terraform-provider-ccloud
+$ git clone git@github.com:sapcc/terraform-ccloud-provider
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/sapccs/terraform-provider-ccloud
+$ cd $GOPATH/src/github.com/sapcc/terraform-ccloud-provider
 $ make build
 ```
 
