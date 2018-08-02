@@ -43,6 +43,9 @@ type Config struct {
 }
 
 func (c *Config) LoadAndValidate() error {
+	log.Printf("[CCLOUD] LoadAndValidate")
+	c.Debug()
+
 	// Make sure at least one of auth_url or cloud was specified.
 	if c.IdentityEndpoint == "" && c.Cloud == "" {
 		return fmt.Errorf("One of 'auth_url' or 'cloud' must be specified")
@@ -206,8 +209,43 @@ func (c *Config) getEndpointType() gophercloud.Availability {
 }
 
 func (c *Config) limesV1Client(region string) (*gophercloud.ServiceClient, error) {
+	c.Debug()
+
 	return limes.NewLimesV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
 	})
+}
+
+func (c *Config) kubernikusV1Client(region string) (*Kubernikus, error) {
+	c.Debug()
+
+	return NewKubernikusV1(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: gophercloud.AvailabilityPublic,
+	})
+}
+
+func (c *Config) Debug() {
+	log.Printf("[CCLOUD] cacert_file:         %s", c.CACertFile)
+	log.Printf("[CCLOUD] cert:                %s", c.ClientCertFile)
+	log.Printf("[CCLOUD] key:                 %s", c.ClientKeyFile)
+	log.Printf("[CCLOUD] cloud:               %s", c.Cloud)
+	log.Printf("[CCLOUD] domain_id:           %s", c.DomainID)
+	log.Printf("[CCLOUD] domain_name:         %s", c.DomainName)
+	log.Printf("[CCLOUD] endpoint_type:       %s", c.EndpointType)
+	log.Printf("[CCLOUD] auth_url:            %s", c.IdentityEndpoint)
+	log.Printf("[CCLOUD] password:            %s", c.Password)
+	log.Printf("[CCLOUD] project_domain_id:   %s", c.ProjectDomainID)
+	log.Printf("[CCLOUD] project_domain_name: %s", c.ProjectDomainName)
+	log.Printf("[CCLOUD] region:              %s", c.Region)
+	log.Printf("[CCLOUD] swauth:              %s", c.Swauth)
+	log.Printf("[CCLOUD] token:               %s", c.Token)
+	log.Printf("[CCLOUD] tenant_id:           %s", c.TenantID)
+	log.Printf("[CCLOUD] tenant_name:         %s", c.TenantName)
+	log.Printf("[CCLOUD] user_domain_id:      %s", c.UserDomainID)
+	log.Printf("[CCLOUD] user_domain_name:    %s", c.UserDomainName)
+	log.Printf("[CCLOUD] user_name:           %s", c.Username)
+	log.Printf("[CCLOUD] user_id:             %s", c.UserID)
+	log.Printf("[CCLOUD] use_octavia:         %s", c.useOctavia)
 }

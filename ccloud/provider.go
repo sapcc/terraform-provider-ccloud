@@ -1,6 +1,8 @@
 package ccloud
 
 import (
+	"log"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -35,6 +37,8 @@ var descriptions = map[string]string{
 }
 
 func Provider() terraform.ResourceProvider {
+	log.Printf("[CCLOUD] CCloud Provider Init")
+
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"auth_url": &schema.Schema{
@@ -215,11 +219,13 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"ccloud_quota": resourceCCloudQuota(),
+			"ccloud_quota":      resourceCCloudQuota(),
+			"ccloud_kubernetes": resourceCCloudKubernetes(),
 		},
 
 		ConfigureFunc: configureProvider,
 	}
+
 }
 
 func configureProvider(d *schema.ResourceData) (interface{}, error) {
@@ -246,6 +252,8 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		UserID:            d.Get("user_id").(string),
 		useOctavia:        d.Get("use_octavia").(bool),
 	}
+
+	log.Printf("[CCLOUD] %v", config)
 
 	v, ok := d.GetOk("insecure")
 	if ok {
