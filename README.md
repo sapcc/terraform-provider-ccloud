@@ -25,7 +25,7 @@ Usage
 
 
 The CCloudEE provider is an extension to the [OpenStack Terraform
-Provider](https://github.com/terraform-providers/terraform-provider-openstac).
+Provider](https://github.com/terraform-providers/terraform-provider-openstack).
 It provides resources that allow to use Terraform for Converged Cloud's
 additional services:
 
