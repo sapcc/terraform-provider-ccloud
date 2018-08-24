@@ -25,9 +25,10 @@ import (
 	"sort"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/sapcc/go-bits/logg"
 	"github.com/sapcc/limes/pkg/db"
 	"github.com/sapcc/limes/pkg/limes"
-	"github.com/sapcc/limes/pkg/util"
 )
 
 var scanInterval = 15 * time.Minute
@@ -44,7 +45,7 @@ func (c *Collector) ScanCapacity() {
 	time.Sleep(scanInitialDelay)
 
 	for {
-		util.LogDebug("scanning capacity")
+		logg.Debug("scanning capacity")
 		c.scanCapacity()
 
 		time.Sleep(scanInterval)
@@ -56,9 +57,18 @@ func (c *Collector) scanCapacity() {
 	scrapedAt := c.TimeNow()
 
 	for capacitorID, plugin := range c.Cluster.CapacityPlugins {
+		labels := prometheus.Labels{
+			"os_cluster": c.Cluster.ID,
+			"capacitor":  capacitorID,
+		}
+		//always report the counter
+		clusterCapacitorSuccessCounter.With(labels).Add(0)
+		clusterCapacitorFailedCounter.With(labels).Add(0)
+
 		capacities, err := plugin.Scrape(c.Cluster.ProviderClient(), c.Cluster.ID)
 		if err != nil {
 			c.LogError("scan capacity with capacitor %s failed: %s", capacitorID, err.Error())
+			clusterCapacitorFailedCounter.With(labels).Inc()
 			continue
 		}
 
@@ -71,12 +81,14 @@ func (c *Collector) scanCapacity() {
 				values[serviceType][resourceName] = value
 			}
 		}
+
+		clusterCapacitorSuccessCounter.With(labels).Inc()
 	}
 
 	//skip values for services not enabled for this cluster
 	for serviceType := range values {
 		if !c.Cluster.HasService(serviceType) {
-			util.LogInfo("discarding capacity values for unknown service type: %s", serviceType)
+			logg.Info("discarding capacity values for unknown service type: %s", serviceType)
 			delete(values, serviceType)
 		}
 	}
@@ -95,7 +107,7 @@ func (c *Collector) scanCapacity() {
 			delete(names, res.Name)
 		}
 		for name := range names {
-			util.LogInfo("discarding capacity value for unknown resource: %s/%s", serviceType, name)
+			logg.Info("discarding capacity value for unknown resource: %s/%s", serviceType, name)
 			delete(subvalues, name)
 		}
 	}

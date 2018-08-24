@@ -17,53 +17,60 @@
 *
 *******************************************************************************/
 
-package util
+package logg
 
 import (
 	"bytes"
 	"net"
 	"net/http"
+	"regexp"
 )
 
-type logMiddleware struct {
-	handler           http.Handler
-	exceptStatusCodes []int
+//Middleware is a HTTP middleware that adds logging of requests and error
+//responses to HTTP handlers.
+type Middleware struct {
+	//Responses with one of these status codes will not be logged.
+	ExceptStatusCodes []int
+	//If not nil, responses to requests with a path matching this regex will not
+	//be logged.
+	ExceptURLPath *regexp.Regexp
 }
 
-//AddLogMiddleware adds logging of requests and error responses to a
-//`http.Handler`.
-func AddLogMiddleware(exceptStatusCodes []int, h http.Handler) http.Handler {
-	return logMiddleware{h, exceptStatusCodes}
-}
+//Wrap wraps the given handler with this middleware.
+func (m Middleware) Wrap(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//setup interception of response metadata
+		writer := responseWriter{original: w}
 
-//ServeHTTP implements the http.Handler interface.
-func (l logMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	//setup interception of response metadata
-	writer := responseWriter{original: w}
+		//forward request to actual handler
+		h.ServeHTTP(&writer, r)
 
-	//forward request to actual handler
-	l.handler.ServeHTTP(&writer, r)
-
-	//write log line (the format is similar to nginx's "combined" log format, but
-	//the timestamp is at the front to ensure consistency with the rest of the
-	//log)
-	if !containsInt(l.exceptStatusCodes, writer.statusCode) {
-		doLog(
-			`REQUEST: %s - - "%s %s %s" %03d %d "%s" "%s"`,
-			[]interface{}{
+		//write log line (the format is similar to nginx's "combined" log format, but
+		//the timestamp is at the front to ensure consistency with the rest of the
+		//log)
+		if !m.isExcluded(r, writer.statusCode) {
+			Other(
+				"REQUEST", `%s - - "%s %s %s" %03d %d "%s" "%s"`,
 				tryStripPort(r.RemoteAddr),
 				r.Method, r.URL.String(), r.Proto,
 				writer.statusCode, writer.bytesWritten,
 				stringOrDefault("-", r.Header.Get("Referer")),
 				stringOrDefault("-", r.Header.Get("User-Agent")),
-			},
-		)
+			)
+		}
+		if writer.errorMessageBuf.Len() > 0 {
+			Error(`during "%s %s": %s`,
+				r.Method, r.URL.String(), writer.errorMessageBuf.String(),
+			)
+		}
+	})
+}
+
+func (m Middleware) isExcluded(r *http.Request, statusCode int) bool {
+	if m.ExceptURLPath != nil && m.ExceptURLPath.MatchString(r.URL.Path) {
+		return true
 	}
-	if writer.errorMessageBuf.Len() > 0 {
-		LogError(`during "%s %s": %s`,
-			r.Method, r.URL.String(), writer.errorMessageBuf.String(),
-		)
-	}
+	return containsInt(m.ExceptStatusCodes, statusCode)
 }
 
 func containsInt(list []int, value int) bool {

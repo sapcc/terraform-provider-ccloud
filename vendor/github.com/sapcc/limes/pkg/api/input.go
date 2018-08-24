@@ -21,6 +21,7 @@ package api
 
 import (
 	"encoding/json"
+	"sort"
 
 	"github.com/sapcc/limes/pkg/limes"
 )
@@ -34,6 +35,50 @@ type ServiceQuotas map[string]ResourceQuotas
 //service. The map key is the resource name. This type is used to unserialize
 //JSON request bodies in PUT requests.
 type ResourceQuotas map[string]limes.ValueWithUnit
+
+//MarshalJSON implements the json.Marshaler interface.
+func (sq ServiceQuotas) MarshalJSON() ([]byte, error) {
+	type resourceQuota struct {
+		Name  string     `json:"name"`
+		Quota uint64     `json:"quota"`
+		Unit  limes.Unit `json:"unit"`
+	}
+
+	type serviceQuotas struct {
+		Type      string          `json:"type"`
+		Resources []resourceQuota `json:"resources"`
+	}
+
+	list := []serviceQuotas{}
+	for t, rqs := range sq {
+		sqs := serviceQuotas{
+			Type:      t,
+			Resources: []resourceQuota{},
+		}
+
+		for n, r := range rqs {
+			sqs.Resources = append(sqs.Resources, resourceQuota{
+				Name:  n,
+				Quota: r.Value,
+				Unit:  r.Unit,
+			})
+		}
+
+		//ensure test reproducability
+		sort.Slice(sqs.Resources, func(i, j int) bool {
+			return sqs.Resources[i].Name < sqs.Resources[j].Name
+		})
+
+		list = append(list, sqs)
+	}
+
+	//ensure test reproducability
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Type < list[j].Type
+	})
+
+	return json.Marshal(list)
+}
 
 //UnmarshalJSON implements the json.Unmarshaler interface.
 func (sq *ServiceQuotas) UnmarshalJSON(input []byte) error {

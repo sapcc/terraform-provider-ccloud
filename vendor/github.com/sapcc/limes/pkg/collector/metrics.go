@@ -23,9 +23,9 @@ import (
 	"database/sql"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/sapcc/go-bits/logg"
 	"github.com/sapcc/limes/pkg/db"
 	"github.com/sapcc/limes/pkg/limes"
-	"github.com/sapcc/limes/pkg/util"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,6 +79,22 @@ var domainDiscoveryFailedCounter = prometheus.NewCounterVec(
 	[]string{"os_cluster"},
 )
 
+var clusterCapacitorSuccessCounter = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "limes_successful_capacity_scrapes",
+		Help: "Counter for successful cluster capacity scrapes.",
+	},
+	[]string{"os_cluster", "capacitor"},
+)
+
+var clusterCapacitorFailedCounter = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "limes_failed_capacity_scrapes",
+		Help: "Counter for failed cluster capacity scrapes.",
+	},
+	[]string{"os_cluster", "capacitor"},
+)
+
 func init() {
 	prometheus.MustRegister(scrapeSuccessCounter)
 	prometheus.MustRegister(scrapeFailedCounter)
@@ -86,6 +102,8 @@ func init() {
 	prometheus.MustRegister(projectDiscoveryFailedCounter)
 	prometheus.MustRegister(domainDiscoverySuccessCounter)
 	prometheus.MustRegister(domainDiscoveryFailedCounter)
+	prometheus.MustRegister(clusterCapacitorSuccessCounter)
+	prometheus.MustRegister(clusterCapacitorFailedCounter)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -236,7 +254,7 @@ func (c *DataMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		return nil
 	})
 	if err != nil {
-		util.LogError("collect cluster metrics failed: " + err.Error())
+		logg.Error("collect cluster metrics failed: " + err.Error())
 	}
 
 	//fetch values for domain level
@@ -260,7 +278,7 @@ func (c *DataMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		return nil
 	})
 	if err != nil {
-		util.LogError("collect domain metrics failed: " + err.Error())
+		logg.Error("collect domain metrics failed: " + err.Error())
 	}
 
 	//fetch values for project level
@@ -299,7 +317,7 @@ func (c *DataMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		return nil
 	})
 	if err != nil {
-		util.LogError("collect project metrics failed: " + err.Error())
+		logg.Error("collect project metrics failed: " + err.Error())
 	}
 
 	//fetch metadata for services/resources

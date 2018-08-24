@@ -23,10 +23,13 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	gorp "gopkg.in/gorp.v2"
 
 	"github.com/gorilla/mux"
+	"github.com/sapcc/go-bits/respondwith"
+	"github.com/sapcc/limes/pkg/audit"
 	"github.com/sapcc/limes/pkg/collector"
 	"github.com/sapcc/limes/pkg/db"
 	"github.com/sapcc/limes/pkg/limes"
@@ -51,11 +54,11 @@ func (p *v1Provider) ListProjects(w http.ResponseWriter, r *http.Request) {
 
 	_, withSubresources := r.URL.Query()["detail"]
 	projects, err := reports.GetProjects(cluster, dbDomain.ID, nil, db.DB, reports.ReadFilter(r), withSubresources)
-	if ReturnError(w, err) {
+	if respondwith.ErrorText(w, err) {
 		return
 	}
 
-	ReturnJSON(w, 200, map[string]interface{}{"projects": projects})
+	respondwith.JSON(w, 200, map[string]interface{}{"projects": projects})
 }
 
 //GetProject handles GET /v1/domains/:domain_id/projects/:project_id.
@@ -79,7 +82,7 @@ func (p *v1Provider) GetProject(w http.ResponseWriter, r *http.Request) {
 
 	_, withSubresources := r.URL.Query()["detail"]
 	projects, err := reports.GetProjects(cluster, dbDomain.ID, &dbProject.ID, db.DB, reports.ReadFilter(r), withSubresources)
-	if ReturnError(w, err) {
+	if respondwith.ErrorText(w, err) {
 		return
 	}
 	if len(projects) == 0 {
@@ -87,7 +90,7 @@ func (p *v1Provider) GetProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ReturnJSON(w, 200, map[string]interface{}{"project": projects[0]})
+	respondwith.JSON(w, 200, map[string]interface{}{"project": projects[0]})
 }
 
 //DiscoverProjects handles POST /v1/domains/:domain_id/projects/discover.
@@ -106,7 +109,7 @@ func (p *v1Provider) DiscoverProjects(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newProjectUUIDs, err := collector.ScanProjects(cluster, dbDomain)
-	if ReturnError(w, err) {
+	if respondwith.ErrorText(w, err) {
 		return
 	}
 
@@ -114,7 +117,7 @@ func (p *v1Provider) DiscoverProjects(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(204)
 		return
 	}
-	ReturnJSON(w, 202, map[string]interface{}{"new_projects": util.IDsToJSON(newProjectUUIDs)})
+	respondwith.JSON(w, 202, map[string]interface{}{"new_projects": util.IDsToJSON(newProjectUUIDs)})
 }
 
 //SyncProject handles POST /v1/domains/:domain_id/projects/sync.
@@ -139,7 +142,7 @@ func (p *v1Provider) SyncProject(w http.ResponseWriter, r *http.Request) {
 	//check if project needs to be discovered
 	if dbProject == nil {
 		newProjectUUIDs, err := collector.ScanProjects(cluster, dbDomain)
-		if ReturnError(w, err) {
+		if respondwith.ErrorText(w, err) {
 			return
 		}
 		projectUUID := mux.Vars(r)["project_id"]
@@ -164,7 +167,7 @@ func (p *v1Provider) SyncProject(w http.ResponseWriter, r *http.Request) {
 
 	//mark all project services as stale to force limes-collect to sync ASAP
 	_, err := db.DB.Exec(`UPDATE project_services SET stale = '1' WHERE project_id = $1`, dbProject.ID)
-	if ReturnError(w, err) {
+	if respondwith.ErrorText(w, err) {
 		return
 	}
 
@@ -173,6 +176,8 @@ func (p *v1Provider) SyncProject(w http.ResponseWriter, r *http.Request) {
 
 //PutProject handles PUT /v1/domains/:domain_id/projects/:project_id.
 func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
+	requestTime := time.Now().Format("2006-01-02T15:04:05.999999+00:00")
+	var auditTrail audit.Trail
 	token := p.CheckToken(r)
 	canRaise := token.Check("project:raise")
 	canLower := token.Check("project:lower")
@@ -208,14 +213,14 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 
 	//start a transaction for the quota updates
 	tx, err := db.DB.Begin()
-	if ReturnError(w, err) {
+	if respondwith.ErrorText(w, err) {
 		return
 	}
 	defer db.RollbackUnlessCommitted(tx)
 
 	//gather a report on the domain's quotas to decide whether a quota update is legal
 	domainReports, err := reports.GetDomains(cluster, &dbDomain.ID, db.DB, reports.Filter{})
-	if ReturnError(w, err) {
+	if respondwith.ErrorText(w, err) {
 		return
 	}
 	if len(domainReports) == 0 {
@@ -233,7 +238,7 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 	var services []db.ProjectService
 	_, err = tx.Select(&services,
 		`SELECT * FROM project_services WHERE project_id = $1 ORDER BY type`, dbProject.ID)
-	if ReturnError(w, err) {
+	if respondwith.ErrorText(w, err) {
 		return
 	}
 	var resourcesToUpdate []db.ProjectResource
@@ -241,7 +246,6 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 	servicesToUpdate := make(map[string]bool)
 	var errors []string
 
-	var auditTrail util.AuditTrail
 	for _, srv := range services {
 		resourceQuotas, exists := serviceQuotas[srv.Type]
 		if !exists {
@@ -252,7 +256,7 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 		var resources []db.ProjectResource
 		_, err = tx.Select(&resources,
 			`SELECT * FROM project_resources WHERE service_id = $1 ORDER BY name`, srv.ID)
-		if ReturnError(w, err) {
+		if respondwith.ErrorText(w, err) {
 			return
 		}
 		for _, res := range resources {
@@ -273,7 +277,24 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 			constraint := constraints[srv.Type][res.Name]
 			err = checkProjectQuotaUpdate(srv, res, resInfo.Unit, domainReport, constraint, newQuota, canRaise, canLower)
 			if err != nil {
-				errors = append(errors, err.Error())
+				auditTrail.Add(audit.EventParams{
+					Token:        token,
+					Request:      r,
+					ReasonCode:   http.StatusUnprocessableEntity,
+					Time:         requestTime,
+					DomainID:     dbDomain.UUID,
+					ProjectID:    dbProject.UUID,
+					ServiceType:  srv.Type,
+					ResourceName: res.Name,
+					OldQuota:     res.Quota,
+					NewQuota:     newQuota,
+					QuotaUnit:    resInfo.Unit,
+					RejectReason: err.Error(),
+				})
+
+				errors = append(errors, fmt.Sprintf(
+					"cannot change %s/%s quota: %s", srv.Type, res.Name, err.Error()),
+				)
 				continue
 			}
 
@@ -281,10 +302,21 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 			//we didn't take a copy manually, the resourcesToUpdateAsUntyped list
 			//would contain only identical pointers)
 			res := res
-			auditTrail.Add("set quota %s.%s = %d -> %d for project %s by user %s (%s)",
-				srv.Type, res.Name, res.Quota, newQuota,
-				dbProject.UUID, token.UserUUID, token.UserName,
-			)
+
+			auditTrail.Add(audit.EventParams{
+				Token:        token,
+				Request:      r,
+				ReasonCode:   http.StatusOK,
+				Time:         requestTime,
+				DomainID:     dbDomain.UUID,
+				ProjectID:    dbProject.UUID,
+				ServiceType:  srv.Type,
+				ResourceName: res.Name,
+				OldQuota:     res.Quota,
+				NewQuota:     newQuota,
+				QuotaUnit:    resInfo.Unit,
+			})
+
 			res.Quota = newQuota
 			resourcesToUpdate = append(resourcesToUpdate, res)
 			resourcesToUpdateAsUntyped = append(resourcesToUpdateAsUntyped, &res)
@@ -294,6 +326,7 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 
 	//if not legal, report errors to the user
 	if len(errors) > 0 {
+		auditTrail.Commit(cluster.ID, cluster.Config.CADF)
 		http.Error(w, strings.Join(errors, "\n"), 422)
 		return
 	}
@@ -303,14 +336,14 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 		return c.ColumnName == "quota"
 	}
 	_, err = tx.UpdateColumns(onlyQuota, resourcesToUpdateAsUntyped...)
-	if ReturnError(w, err) {
+	if respondwith.ErrorText(w, err) {
 		return
 	}
 	err = tx.Commit()
-	if ReturnError(w, err) {
+	if respondwith.ErrorText(w, err) {
 		return
 	}
-	auditTrail.Commit()
+	auditTrail.Commit(cluster.ID, cluster.Config.CADF)
 
 	//attempt to write the quotas into the backend
 	//
@@ -337,7 +370,7 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 		var resources []db.ProjectResource
 		_, err = db.DB.Select(&resources,
 			`SELECT * FROM project_resources WHERE service_id = $1`, srv.ID)
-		if ReturnError(w, err) {
+		if respondwith.ErrorText(w, err) {
 			return
 		}
 		for _, res := range resources {
@@ -356,7 +389,7 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 		_, err = db.DB.Exec(
 			`UPDATE project_resources SET backend_quota = quota WHERE service_id = $1`,
 			srv.ID)
-		if ReturnError(w, err) {
+		if respondwith.ErrorText(w, err) {
 			return
 		}
 	}
@@ -370,7 +403,7 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 
 	//otherwise, report success
 	projects, err := reports.GetProjects(cluster, dbDomain.ID, &dbProject.ID, db.DB, reports.Filter{}, false)
-	if ReturnError(w, err) {
+	if respondwith.ErrorText(w, err) {
 		return
 	}
 	if len(projects) == 0 {
@@ -378,13 +411,13 @@ func (p *v1Provider) PutProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ReturnJSON(w, 200, map[string]interface{}{"project": projects[0]})
+	respondwith.JSON(w, 200, map[string]interface{}{"project": projects[0]})
 }
 
 func checkProjectQuotaUpdate(srv db.ProjectService, res db.ProjectResource, unit limes.Unit, domain *reports.Domain, constraint limes.QuotaConstraint, newQuota uint64, canRaise, canLower bool) error {
 	if !constraint.Allows(newQuota) {
-		return fmt.Errorf("cannot change %s/%s quota: requested value %q contradicts constraint %q for this project and resource",
-			srv.Type, res.Name, limes.ValueWithUnit{Value: newQuota, Unit: unit}, constraint.ToString(unit))
+		return fmt.Errorf("requested value %q contradicts constraint %q for this project and resource",
+			limes.ValueWithUnit{Value: newQuota, Unit: unit}, constraint.ToString(unit))
 	}
 
 	//if quota is being reduced, permission is required and usage must fit into quota
@@ -392,17 +425,17 @@ func checkProjectQuotaUpdate(srv db.ProjectService, res db.ProjectResource, unit
 	//cover the case of infinite quotas)
 	if res.Quota > newQuota {
 		if !canLower {
-			return fmt.Errorf("cannot change %s/%s quota: user is not allowed to lower quotas in this project", srv.Type, res.Name)
+			return fmt.Errorf("user is not allowed to lower quotas in this project")
 		}
 		if res.Usage > newQuota {
-			return fmt.Errorf("cannot change %s/%s quota: quota may not be lower than current usage", srv.Type, res.Name)
+			return fmt.Errorf("quota may not be lower than current usage")
 		}
 		return nil
 	}
 
 	//if quota is being raised, permission is required and also the domain quota may not be exceeded
 	if !canRaise {
-		return fmt.Errorf("cannot change %s/%s quota: user is not allowed to raise quotas in this project", srv.Type, res.Name)
+		return fmt.Errorf("user is not allowed to raise quotas in this project")
 	}
 	domainQuota := uint64(0)
 	projectsQuota := uint64(0)
@@ -424,8 +457,7 @@ func checkProjectQuotaUpdate(srv db.ProjectService, res db.ProjectResource, unit
 		if domainQuota < projectsQuota-res.Quota {
 			maxQuota = 0
 		}
-		return fmt.Errorf("cannot change %s/%s quota: domain quota exceeded (maximum acceptable project quota is %s)",
-			srv.Type, res.Name,
+		return fmt.Errorf("domain quota exceeded (maximum acceptable project quota is %s)",
 			limes.ValueWithUnit{Value: maxQuota, Unit: unit},
 		)
 	}

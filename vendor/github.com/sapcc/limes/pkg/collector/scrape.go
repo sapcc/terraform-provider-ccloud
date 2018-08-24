@@ -27,9 +27,9 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/sapcc/go-bits/logg"
 	"github.com/sapcc/limes/pkg/db"
 	"github.com/sapcc/limes/pkg/limes"
-	"github.com/sapcc/limes/pkg/util"
 )
 
 //how long to sleep after a scraping error, or when nothing needed scraping
@@ -102,7 +102,7 @@ func (c *Collector) Scrape() {
 			continue
 		}
 
-		util.LogDebug("scraping %s for %s/%s", serviceType, domainName, projectName)
+		logg.Debug("scraping %s for %s/%s", serviceType, domainName, projectName)
 		resourceData, err := c.Plugin.Scrape(
 			c.Cluster.ProviderClientForService(serviceType),
 			c.Cluster.ID, domainUUID, projectUUID,
@@ -184,7 +184,7 @@ func (c *Collector) writeScrapeResult(domainName, domainUUID, projectName, proje
 		if !constraint.Allows(res.Quota) {
 			resInfo := c.Cluster.InfoForResource(serviceType, res.Name)
 			newQuota := constraint.ApplyTo(res.Quota)
-			util.LogInfo("changing %s/%s quota for project %s/%s from %s to %s to satisfy constraint %q",
+			logg.Info("changing %s/%s quota for project %s/%s from %s to %s to satisfy constraint %q",
 				serviceType, res.Name, domainName, projectName,
 				limes.ValueWithUnit{Value: res.Quota, Unit: resInfo.Unit},
 				limes.ValueWithUnit{Value: newQuota, Unit: resInfo.Unit},
@@ -202,7 +202,7 @@ func (c *Collector) writeScrapeResult(domainName, domainUUID, projectName, proje
 		} else {
 			//warn when the backend is inconsistent with itself
 			if uint64(len(data.Subresources)) != res.Usage {
-				util.LogInfo("resource quantity mismatch in project %s, resource %s/%s: usage = %d, but found %d subresources",
+				logg.Info("resource quantity mismatch in project %s, resource %s/%s: usage = %d, but found %d subresources",
 					projectUUID, serviceType, res.Name,
 					res.Usage, len(data.Subresources),
 				)
@@ -225,7 +225,6 @@ func (c *Collector) writeScrapeResult(domainName, domainUUID, projectName, proje
 	}
 
 	//insert missing project_resources entries
-	var auditTrail util.AuditTrail
 	for _, resMetadata := range c.Plugin.Resources() {
 		if _, exists := quotaValues[resMetadata.Name]; exists {
 			continue
@@ -242,15 +241,17 @@ func (c *Collector) writeScrapeResult(domainName, domainUUID, projectName, proje
 
 		if res.Quota == 0 && data.Quota > 0 && uint64(data.Quota) == resMetadata.AutoApproveInitialQuota {
 			res.Quota = resMetadata.AutoApproveInitialQuota
-			auditTrail.Add("set quota %s.%s = 0 -> %d for project %s through auto-approval",
-				serviceType, resMetadata.Name, res.Quota, projectUUID,
+
+			//temp workaround until CADF audit trail is implemented
+			logg.Other("AUDIT", fmt.Sprintf("set quota %s.%s = 0 -> %d for project %s through auto-approval",
+				serviceType, resMetadata.Name, res.Quota, projectUUID),
 			)
 		}
 
 		if len(data.Subresources) != 0 {
 			//warn when the backend is inconsistent with itself
 			if uint64(len(data.Subresources)) != data.Usage {
-				util.LogInfo("resource quantity mismatch in project %s, resource %s/%s: usage = %d, but found %d subresources",
+				logg.Info("resource quantity mismatch in project %s, resource %s/%s: usage = %d, but found %d subresources",
 					projectUUID, serviceType, res.Name,
 					data.Usage, len(data.Subresources),
 				)
@@ -286,7 +287,6 @@ func (c *Collector) writeScrapeResult(domainName, domainUUID, projectName, proje
 	if err != nil {
 		return err
 	}
-	auditTrail.Commit()
 
 	//feature gate for automatic quota alignment
 	if !c.Cluster.Authoritative {
@@ -304,7 +304,7 @@ func (c *Collector) writeScrapeResult(domainName, domainUUID, projectName, proje
 		)
 		if err != nil {
 			serviceType := c.Plugin.ServiceInfo().Type
-			util.LogError("could not rectify frontend/backend quota mismatch for service %s in project %s: %s",
+			logg.Error("could not rectify frontend/backend quota mismatch for service %s in project %s: %s",
 				serviceType, projectUUID, err.Error(),
 			)
 		} else {
