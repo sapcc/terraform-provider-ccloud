@@ -26,6 +26,12 @@ func resourceCCloudKubernetes() *schema.Resource {
 		Delete: resourceCCloudKubernetesDelete,
 
 		Schema: map[string]*schema.Schema{
+			"is_admin": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -147,7 +153,7 @@ func resourceCCloudKubernetesRead(d *schema.ResourceData, meta interface{}) erro
 	config := meta.(*Config)
 	log.Printf("[KUBERNETES] Reading Kubernikus Kluster in project %s", config.TenantID)
 
-	kubernikus, err := config.kubernikusV1Client(GetRegion(d, config))
+	kubernikus, err := config.kubernikusV1Client(GetRegion(d, config), d.Get("is_admin").(bool))
 	if err != nil {
 		return fmt.Errorf("Error creating Kubernikus client: %s", err)
 	}
@@ -176,7 +182,7 @@ func resourceCCloudKubernetesCreate(d *schema.ResourceData, meta interface{}) er
 	config := meta.(*Config)
 	log.Printf("[KUBERNETES] Creating Kubernikus Kluster in project %s", config.TenantID)
 
-	kubernikus, err := config.kubernikusV1Client(GetRegion(d, config))
+	kubernikus, err := config.kubernikusV1Client(GetRegion(d, config), d.Get("is_admin").(bool))
 	if err != nil {
 		return fmt.Errorf("Error creating Kubernikus client: %s", err)
 	}
@@ -276,7 +282,7 @@ func resourceCCloudKubernetesUpdate(d *schema.ResourceData, meta interface{}) er
 	config := meta.(*Config)
 	log.Printf("[KUBERNETES] Updating Kubernikus Kluster in project %s", config.TenantID)
 
-	kubernikus, err := config.kubernikusV1Client(GetRegion(d, config))
+	kubernikus, err := config.kubernikusV1Client(GetRegion(d, config), d.Get("is_admin").(bool))
 	if err != nil {
 		return fmt.Errorf("Error creating Kubernikus client: %s", err)
 	}
@@ -339,7 +345,7 @@ func resourceCCloudKubernetesDelete(d *schema.ResourceData, meta interface{}) er
 	config := meta.(*Config)
 	log.Printf("[KUBERNETES] Deleting Kubernikus Kluster in project %s", config.TenantID)
 
-	kubernikus, err := config.kubernikusV1Client(GetRegion(d, config))
+	kubernikus, err := config.kubernikusV1Client(GetRegion(d, config), d.Get("is_admin").(bool))
 	if err != nil {
 		return fmt.Errorf("Error creating Kubernikus client: %s", err)
 	}
