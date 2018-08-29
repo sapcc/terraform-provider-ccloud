@@ -217,10 +217,16 @@ func (c *Config) limesV1Client(region string) (*gophercloud.ServiceClient, error
 	})
 }
 
-func (c *Config) kubernikusV1Client(region string) (*Kubernikus, error) {
+func (c *Config) kubernikusV1Client(region string, isAdmin bool) (*Kubernikus, error) {
 	c.Debug()
 
+	serviceType := "kubernikus"
+	if isAdmin {
+		serviceType = "kubernikus-kubernikus"
+	}
+
 	return NewKubernikusV1(c.OsClient, gophercloud.EndpointOpts{
+		Type:         serviceType,
 		Region:       c.determineRegion(region),
 		Availability: gophercloud.AvailabilityPublic,
 	})
