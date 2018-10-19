@@ -333,7 +333,7 @@ func resourceCCloudKubernetesUpdate(d *schema.ResourceData, meta interface{}) er
 		cluster.Spec.Openstack.SecurityGroupName = security_group_name.(string)
 	}
 
-	result, err := kubernikus.UpdateCluster(operations.NewUpdateClusterParams().WithBody(cluster), kubernikus.authFunc())
+	result, err := kubernikus.UpdateCluster(operations.NewUpdateClusterParams().WithName(d.Get("name").(string)).WithBody(cluster), kubernikus.authFunc())
 	switch err.(type) {
 	case *operations.UpdateClusterDefault:
 		result := err.(*operations.UpdateClusterDefault)
