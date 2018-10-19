@@ -150,6 +150,10 @@ func resourceCCloudKubernetes() *schema.Resource {
 }
 
 func resourceCCloudKubernetesRead(d *schema.ResourceData, meta interface{}) error {
+	return get(d, meta, true)
+}
+
+func get(d *schema.ResourceData, meta interface{}, updateState bool) error {
 	config := meta.(*Config)
 	log.Printf("[KUBERNETES] Reading Kubernikus Kluster in project %s", config.TenantID)
 
@@ -173,7 +177,9 @@ func resourceCCloudKubernetesRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error reading Kubernikus cluster: %s", err)
 	}
 
-	updateStateFromAPIResponse(d, result.Payload)
+	if updateState {
+		updateStateFromAPIResponse(d, result.Payload)
+	}
 
 	return nil
 }
@@ -274,7 +280,7 @@ func resourceCCloudKubernetesCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceCCloudKubernetesUpdate(d *schema.ResourceData, meta interface{}) error {
-	err := resourceCCloudKubernetesRead(d, meta)
+	err := get(d, meta, false)
 	if err != nil {
 		return err
 	}
