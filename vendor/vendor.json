@@ -1286,10 +1286,10 @@
 			"revisionTime": "2018-08-24T11:01:59Z"
 		},
 		{
-			"checksumSHA1": "hwQ/15rKa3rvKoU0KtDYvp4QF8o=",
+			"checksumSHA1": "dlt3k7Wa3GCQRgBMD8umRMFPc+E=",
 			"path": "github.com/sapcc/gophercloud-limes",
-			"revision": "e81533289e7d5fd45f61ead7331dda15abbef706",
-			"revisionTime": "2018-07-04T20:32:41Z"
+			"revision": "254a23de65770de8b9a9a4dbca9a3ebc1cd812bd",
+			"revisionTime": "2018-10-19T08:08:35Z"
 		},
 		{
 			"checksumSHA1": "Sqsl6sK4e7JtY0sHhi7kW78Lqbo=",
@@ -1302,6 +1302,18 @@
 			"path": "github.com/sapcc/gophercloud-limes/limes/v1/projects",
 			"revision": "e81533289e7d5fd45f61ead7331dda15abbef706",
 			"revisionTime": "2018-07-04T20:32:41Z"
+		},
+		{
+			"checksumSHA1": "N+/ZYWl5oN2cukbHmmMokVRIQlA=",
+			"path": "github.com/sapcc/gophercloud-limes/resources",
+			"revision": "254a23de65770de8b9a9a4dbca9a3ebc1cd812bd",
+			"revisionTime": "2018-10-19T08:08:35Z"
+		},
+		{
+			"checksumSHA1": "qBETPRchnOw7TMFz4huL1PZo7VY=",
+			"path": "github.com/sapcc/gophercloud-limes/resources/v1/projects",
+			"revision": "254a23de65770de8b9a9a4dbca9a3ebc1cd812bd",
+			"revisionTime": "2018-10-19T08:08:35Z"
 		},
 		{
 			"checksumSHA1": "PY4LXUGxaKfGcW/1+brK0ZdZhVA=",

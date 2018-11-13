@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/sapcc/gophercloud-limes/limes/v1/projects"
+	"github.com/sapcc/gophercloud-limes/resources/v1/projects"
 	"github.com/sapcc/limes/pkg/api"
 	"github.com/sapcc/limes/pkg/limes"
 	"github.com/sapcc/limes/pkg/reports"
@@ -143,8 +143,6 @@ func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{})
 
 	log.Printf("[QUOTA] Updating Quota for: %s/%s", domainID, projectID)
 
-	d.Partial(true)
-
 	config := meta.(*Config)
 	client, err := config.limesV1Client(GetRegion(d, config))
 	if err != nil {
@@ -171,7 +169,7 @@ func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	opts := projects.UpdateOpts{Services: services}
-	quota, err := projects.Update(client, domainID, projectID, opts).Extract()
+	_, err = projects.Update(client, domainID, projectID, opts)
 	if err != nil {
 		return fmt.Errorf("Error updating Limes project: %s", err)
 	}
@@ -179,19 +177,7 @@ func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{})
 	log.Printf("[QUOTA] Resulting Quota for: %s/%s", domainID, projectID)
 
 	d.SetId(projectID)
-	for service, resources := range SERVICES {
-		for resource, _ := range resources {
-			key := fmt.Sprintf("%s.%s", sanitize(service), resource)
-			if quota.Services[service] == nil || quota.Services[service].Resources[resource] == nil {
-				continue
-			}
-			d.Set(key, quota.Services[service].Resources[resource].Quota)
-			d.SetPartial(key)
-			log.Printf("[QUOTA] %s.%s: %s", service, resource, toString(quota.Services[service].Resources[resource]))
-		}
-	}
-
-	d.Partial(false)
+	resourceCCloudQuotaRead(d, meta)
 
 	return nil
 }

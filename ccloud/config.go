@@ -12,7 +12,7 @@ import (
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/sapcc/gophercloud-limes/limes"
+	"github.com/sapcc/gophercloud-limes/resources"
 )
 
 type Config struct {
@@ -211,7 +211,7 @@ func (c *Config) getEndpointType() gophercloud.Availability {
 func (c *Config) limesV1Client(region string) (*gophercloud.ServiceClient, error) {
 	c.Debug()
 
-	return limes.NewLimesV1(c.OsClient, gophercloud.EndpointOpts{
+	return resources.NewLimesV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
 	})
