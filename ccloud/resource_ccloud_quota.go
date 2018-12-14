@@ -7,9 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/sapcc/gophercloud-limes/resources/v1/projects"
-	"github.com/sapcc/limes/pkg/api"
-	"github.com/sapcc/limes/pkg/limes"
-	"github.com/sapcc/limes/pkg/reports"
+	"github.com/sapcc/limes"
 )
 
 var (
@@ -85,7 +83,7 @@ func resourceCCloudQuota() *schema.Resource {
 			Schema: make(map[string]*schema.Schema, len(resources)),
 		}
 
-		for resource, _ := range resources {
+		for resource := range resources {
 			elem.Schema[resource] = &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: false,
@@ -123,7 +121,7 @@ func resourceCCloudQuotaRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(projectID)
 	for service, resources := range SERVICES {
-		for resource, _ := range resources {
+		for resource := range resources {
 			key := fmt.Sprintf("%s.%s", sanitize(service), resource)
 			if quota.Services[service] == nil || quota.Services[service].Resources[resource] == nil {
 				continue
@@ -139,7 +137,7 @@ func resourceCCloudQuotaRead(d *schema.ResourceData, meta interface{}) error {
 func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
-	services := api.ServiceQuotas{}
+	services := limes.QuotaRequest{}
 
 	log.Printf("[QUOTA] Updating Quota for: %s/%s", domainID, projectID)
 
@@ -154,7 +152,7 @@ func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{})
 		if _, ok := d.GetOk(service); ok && d.HasChange(service) {
 			log.Printf("[QUOTA] Service Changed: %s", service)
 
-			quota := api.ResourceQuotas{}
+			quota := limes.ServiceQuotaRequest{}
 			for resource, unit := range resources {
 				key := fmt.Sprintf("%s.0.%s", service, resource)
 
@@ -187,7 +185,7 @@ func resourceCCloudQuotaDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func toString(r *reports.ProjectResource) string {
+func toString(r *limes.ProjectResourceReport) string {
 	return limes.ValueWithUnit{r.Quota, r.Unit}.String()
 }
 

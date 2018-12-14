@@ -999,12 +999,6 @@
 			"revisionTime": "2016-08-03T19:07:31Z"
 		},
 		{
-			"checksumSHA1": "AQQ4l6FWB8t3KeGoGC3JgNnBbFY=",
-			"path": "github.com/jpillora/longestcommon",
-			"revision": "adb9d91ee629dd8304c9f9d7c91977b9d7e61a35",
-			"revisionTime": "2016-12-27T23:56:12Z"
-		},
-		{
 			"checksumSHA1": "s6eyIXpJ7VAU06FM27GcEBM/5lo=",
 			"path": "github.com/lib/pq",
 			"revision": "90697d60dd844d5ef6ff15135d0203f65d2f53b8",
@@ -1033,60 +1027,6 @@
 			"path": "github.com/mailru/easyjson/jwriter",
 			"revision": "d5012789d6659eeed305f54c1b1542e7b65829e6",
 			"revisionTime": "2018-07-23T22:18:31Z"
-		},
-		{
-			"checksumSHA1": "d3T5qjReEuhezgMhuEl8DF/x4v8=",
-			"path": "github.com/majewsky/schwift",
-			"revision": "56e3d1b71945877f116b87e7462fa96f427b0ecd",
-			"revisionTime": "2018-07-26T12:34:15Z"
-		},
-		{
-			"checksumSHA1": "VnHIhg6QICvy08lUpD/aPBzSX0w=",
-			"path": "github.com/majewsky/schwift/capabilities",
-			"revision": "56e3d1b71945877f116b87e7462fa96f427b0ecd",
-			"revisionTime": "2018-07-26T12:34:15Z"
-		},
-		{
-			"checksumSHA1": "/ssPNfbkcGDjvvvDCqiRDx1//4U=",
-			"path": "github.com/majewsky/schwift/gopherschwift",
-			"revision": "56e3d1b71945877f116b87e7462fa96f427b0ecd",
-			"revisionTime": "2018-07-26T12:34:15Z"
-		},
-		{
-			"checksumSHA1": "UbyWJpFnDlKGjfdmVoLCBeZfZQA=",
-			"path": "github.com/majewsky/sqlproxy",
-			"revision": "66c34829b29db560c3ef23289cc61f688426822a",
-			"revisionTime": "2017-04-13T17:24:13Z"
-		},
-		{
-			"checksumSHA1": "yoOLGAeRYCG0/x8bw2i8OtdMP/M=",
-			"path": "github.com/mattes/migrate",
-			"revision": "4768a648fbd9e04389a73a21139d14a4ccb1a61a",
-			"revisionTime": "2018-05-08T04:16:24Z"
-		},
-		{
-			"checksumSHA1": "6QePtWUFN9x9U/Y6OzcENUUudmM=",
-			"path": "github.com/mattes/migrate/database",
-			"revision": "4768a648fbd9e04389a73a21139d14a4ccb1a61a",
-			"revisionTime": "2018-05-08T04:16:24Z"
-		},
-		{
-			"checksumSHA1": "Q9IScpP6lp1CaPqYoFGVrJjmZcE=",
-			"path": "github.com/mattes/migrate/database/postgres",
-			"revision": "4768a648fbd9e04389a73a21139d14a4ccb1a61a",
-			"revisionTime": "2018-05-08T04:16:24Z"
-		},
-		{
-			"checksumSHA1": "kIHQkF+Nm0LBPppYbchll3njidY=",
-			"path": "github.com/mattes/migrate/source",
-			"revision": "4768a648fbd9e04389a73a21139d14a4ccb1a61a",
-			"revisionTime": "2018-05-08T04:16:24Z"
-		},
-		{
-			"checksumSHA1": "yk6CYCkHnJRvEqYwfvDdbfC77JI=",
-			"path": "github.com/mattes/migrate/source/go-bindata",
-			"revision": "4768a648fbd9e04389a73a21139d14a4ccb1a61a",
-			"revisionTime": "2018-05-08T04:16:24Z"
 		},
 		{
 			"checksumSHA1": "iRRp6PUlGXJgudZ3FD5jySI0Ukk=",
@@ -1262,58 +1202,16 @@
 			"revisionTime": "2017-04-07T04:09:43Z"
 		},
 		{
-			"checksumSHA1": "REYUEXDGocuizgH9eNtF2kwvLWc=",
-			"path": "github.com/sapcc/go-bits/gopherpolicy",
-			"revision": "eb9d180601804bceaa97489a95e83074e7be7ddc",
-			"revisionTime": "2018-08-24T11:01:59Z"
-		},
-		{
-			"checksumSHA1": "IFbKm3qhrSuMnSQKvbRu/I5QqBI=",
-			"path": "github.com/sapcc/go-bits/logg",
-			"revision": "eb9d180601804bceaa97489a95e83074e7be7ddc",
-			"revisionTime": "2018-08-24T11:01:59Z"
-		},
-		{
-			"checksumSHA1": "MQGBTDY9SAvYgGt2DDpklGilo8w=",
-			"path": "github.com/sapcc/go-bits/respondwith",
-			"revision": "eb9d180601804bceaa97489a95e83074e7be7ddc",
-			"revisionTime": "2018-08-24T11:01:59Z"
-		},
-		{
-			"checksumSHA1": "g7tXyPvvy6nMIp+TGgW29dtB+CY=",
-			"path": "github.com/sapcc/go-bits/retry",
-			"revision": "eb9d180601804bceaa97489a95e83074e7be7ddc",
-			"revisionTime": "2018-08-24T11:01:59Z"
-		},
-		{
-			"checksumSHA1": "dlt3k7Wa3GCQRgBMD8umRMFPc+E=",
-			"path": "github.com/sapcc/gophercloud-limes",
-			"revision": "254a23de65770de8b9a9a4dbca9a3ebc1cd812bd",
-			"revisionTime": "2018-10-19T08:08:35Z"
-		},
-		{
-			"checksumSHA1": "Sqsl6sK4e7JtY0sHhi7kW78Lqbo=",
-			"path": "github.com/sapcc/gophercloud-limes/limes",
-			"revision": "e81533289e7d5fd45f61ead7331dda15abbef706",
-			"revisionTime": "2018-07-04T20:32:41Z"
-		},
-		{
-			"checksumSHA1": "lSAQxJxXnlCvgQDW2nrSOOJ9Sfs=",
-			"path": "github.com/sapcc/gophercloud-limes/limes/v1/projects",
-			"revision": "e81533289e7d5fd45f61ead7331dda15abbef706",
-			"revisionTime": "2018-07-04T20:32:41Z"
-		},
-		{
 			"checksumSHA1": "N+/ZYWl5oN2cukbHmmMokVRIQlA=",
 			"path": "github.com/sapcc/gophercloud-limes/resources",
-			"revision": "254a23de65770de8b9a9a4dbca9a3ebc1cd812bd",
-			"revisionTime": "2018-10-19T08:08:35Z"
+			"revision": "10c7457ba5008b51a15a3429d07a723ef587de17",
+			"revisionTime": "2018-12-14T13:40:40Z"
 		},
 		{
-			"checksumSHA1": "qBETPRchnOw7TMFz4huL1PZo7VY=",
+			"checksumSHA1": "1KKLC+rFqhMb7XaVAkPrdQ5fw4c=",
 			"path": "github.com/sapcc/gophercloud-limes/resources/v1/projects",
-			"revision": "254a23de65770de8b9a9a4dbca9a3ebc1cd812bd",
-			"revisionTime": "2018-10-19T08:08:35Z"
+			"revision": "10c7457ba5008b51a15a3429d07a723ef587de17",
+			"revisionTime": "2018-12-14T13:40:40Z"
 		},
 		{
 			"checksumSHA1": "PY4LXUGxaKfGcW/1+brK0ZdZhVA=",
@@ -1340,70 +1238,10 @@
 			"revisionTime": "2018-07-10T12:58:17Z"
 		},
 		{
-			"checksumSHA1": "CV7g37RuU1EbP5D9v7wAUUlUUdw=",
+			"checksumSHA1": "UgMgEjdk4/dG9Z2DItIbQRDeX+0=",
 			"path": "github.com/sapcc/limes",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
-		},
-		{
-			"checksumSHA1": "+Bs1C4Fzvv242wyVqmDVn1T58kM=",
-			"path": "github.com/sapcc/limes/pkg/api",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
-		},
-		{
-			"checksumSHA1": "lMrTglry8fSVF0tXJMm66uMdpHs=",
-			"path": "github.com/sapcc/limes/pkg/audit",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
-		},
-		{
-			"checksumSHA1": "ZfnN+33oUWAlwLVlA7QVD26au04=",
-			"path": "github.com/sapcc/limes/pkg/collector",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
-		},
-		{
-			"checksumSHA1": "6FAPBTY1LcvT5UU7xqZcM9cnCDo=",
-			"path": "github.com/sapcc/limes/pkg/datamodel",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
-		},
-		{
-			"checksumSHA1": "bugW0h1MzcAOQhIfeEOGd85B4Tc=",
-			"path": "github.com/sapcc/limes/pkg/db",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
-		},
-		{
-			"checksumSHA1": "cERuhaRRfLYCnuMZPX2S8wRGrx0=",
-			"path": "github.com/sapcc/limes/pkg/dbdata",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
-		},
-		{
-			"checksumSHA1": "t3PnOgZJNJGH9JtWrDgR6j3C2KQ=",
-			"path": "github.com/sapcc/limes/pkg/limes",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
-		},
-		{
-			"checksumSHA1": "Yp9kXMOXw8u/Ib74Bv/RPjbHA0I=",
-			"path": "github.com/sapcc/limes/pkg/plugins",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
-		},
-		{
-			"checksumSHA1": "qjIUeUO0chFGOuD7pJIoLfBRqRE=",
-			"path": "github.com/sapcc/limes/pkg/reports",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
-		},
-		{
-			"checksumSHA1": "DyvaW3QAIlyCMDLHJOBfSZSvcAc=",
-			"path": "github.com/sapcc/limes/pkg/util",
-			"revision": "393904328009d0d55127dae0566dd5d398c00925",
-			"revisionTime": "2018-08-23T14:04:25Z"
+			"revision": "ef5da93b7831f2b837f68595bfbea363aa279599",
+			"revisionTime": "2018-12-14T13:11:10Z"
 		},
 		{
 			"checksumSHA1": "eDQ6f1EsNf+frcRO/9XukSEchm8=",
