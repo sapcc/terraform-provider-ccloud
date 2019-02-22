@@ -1214,34 +1214,34 @@
 			"revisionTime": "2018-12-14T13:40:40Z"
 		},
 		{
-			"checksumSHA1": "PY4LXUGxaKfGcW/1+brK0ZdZhVA=",
+			"checksumSHA1": "YebKPDLjtHdZttiMsFpCSYGlnb8=",
 			"path": "github.com/sapcc/kubernikus/pkg/api/client",
-			"revision": "8dedde567077197ad35f5deca2c2545c9ad9b163",
-			"revisionTime": "2018-07-10T12:58:17Z"
+			"revision": "3431f21848ddc136c4e31b6d84d16fb0a759564e",
+			"revisionTime": "2019-02-20T12:04:13Z"
 		},
 		{
-			"checksumSHA1": "5ya8bnCirPTJ4za0w90lfL3KczM=",
+			"checksumSHA1": "jXhui5DDP7PXDWJVIfm7JjmSimI=",
 			"path": "github.com/sapcc/kubernikus/pkg/api/client/operations",
-			"revision": "8dedde567077197ad35f5deca2c2545c9ad9b163",
-			"revisionTime": "2018-07-10T12:58:17Z"
+			"revision": "3431f21848ddc136c4e31b6d84d16fb0a759564e",
+			"revisionTime": "2019-02-20T12:04:13Z"
 		},
 		{
-			"checksumSHA1": "r4QdqxIWPLwU+MtJPxzHo0PnynI=",
+			"checksumSHA1": "ihSquNDVin6y/7quLpqRUzIGAHE=",
 			"path": "github.com/sapcc/kubernikus/pkg/api/models",
-			"revision": "8dedde567077197ad35f5deca2c2545c9ad9b163",
-			"revisionTime": "2018-07-10T12:58:17Z"
+			"revision": "3431f21848ddc136c4e31b6d84d16fb0a759564e",
+			"revisionTime": "2019-02-20T12:04:13Z"
 		},
 		{
 			"checksumSHA1": "KkdUVccId4Z5BkoSmfV1cL1HC20=",
 			"path": "github.com/sapcc/kubernikus/pkg/cmd/printers",
-			"revision": "8dedde567077197ad35f5deca2c2545c9ad9b163",
-			"revisionTime": "2018-07-10T12:58:17Z"
+			"revision": "3431f21848ddc136c4e31b6d84d16fb0a759564e",
+			"revisionTime": "2019-02-20T12:04:13Z"
 		},
 		{
-			"checksumSHA1": "UgMgEjdk4/dG9Z2DItIbQRDeX+0=",
+			"checksumSHA1": "mqvgDMhRNA+D0UtU9FrKrftFiUg=",
 			"path": "github.com/sapcc/limes",
-			"revision": "ef5da93b7831f2b837f68595bfbea363aa279599",
-			"revisionTime": "2018-12-14T13:11:10Z"
+			"revision": "e22c25b5fc69137d6aa6788c3e2fbe0c56e63870",
+			"revisionTime": "2019-02-08T06:07:53Z"
 		},
 		{
 			"checksumSHA1": "eDQ6f1EsNf+frcRO/9XukSEchm8=",

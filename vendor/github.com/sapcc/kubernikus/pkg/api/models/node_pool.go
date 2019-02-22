@@ -17,6 +17,9 @@ import (
 // swagger:model NodePool
 type NodePool struct {
 
+	// availability zone
+	AvailabilityZone string `json:"availabilityZone,omitempty"`
+
 	// config
 	Config NodePoolConfig `json:"config,omitempty"`
 
@@ -29,7 +32,8 @@ type NodePool struct {
 
 	// name
 	// Required: true
-	// Pattern: ^[a-z]([a-z0-9]*)?$
+	// Max Length: 20
+	// Pattern: ^[a-z0-9]([-\.a-z0-9]*)?$
 	Name string `json:"name"`
 
 	// size
@@ -43,22 +47,18 @@ func (m *NodePool) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConfig(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFlavor(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSize(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -99,7 +99,11 @@ func (m *NodePool) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(m.Name), `^[a-z]([a-z0-9]*)?$`); err != nil {
+	if err := validate.MaxLength("name", "body", string(m.Name), 20); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(m.Name), `^[a-z0-9]([-\.a-z0-9]*)?$`); err != nil {
 		return err
 	}
 
