@@ -108,6 +108,11 @@ func resourceCCloudKubernetes() *schema.Resource {
 							Default:      0,
 							ValidateFunc: validation.IntAtMost(127),
 						},
+						"availability_zone": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
 					},
 				},
 			},
@@ -239,7 +244,9 @@ func resourceCCloudKubernetesCreate(d *schema.ResourceData, meta interface{}) er
 			if size, ok := d.GetOk(fmt.Sprintf("node_pools.%d.size", i)); ok {
 				newPool.Size = int64(size.(int))
 			}
-
+			if avz, ok := d.GetOk(fmt.Sprintf("node_pools.%d.availability_zone", i)); ok {
+				newPool.AvailabilityZone = avz.(string)
+			}
 			cluster.Spec.NodePools = append(cluster.Spec.NodePools, newPool)
 		}
 	}
@@ -324,7 +331,9 @@ func resourceCCloudKubernetesUpdate(d *schema.ResourceData, meta interface{}) er
 			if size, ok := d.GetOk(fmt.Sprintf("node_pools.%d.size", i)); ok {
 				newPool.Size = int64(size.(int))
 			}
-
+			if avz, ok := d.GetOk(fmt.Sprintf("node_pools.%d.availability_zone", i)); ok {
+				newPool.AvailabilityZone = avz.(string)
+			}
 			cluster.Spec.NodePools = append(cluster.Spec.NodePools, newPool)
 		}
 	}
@@ -412,10 +421,11 @@ func updateStateFromAPIResponse(d *schema.ResourceData, kluster *models.Kluster)
 	nodePools := make([]map[string]interface{}, 0, 1)
 	for _, p := range kluster.Spec.NodePools {
 		nodePools = append(nodePools, map[string]interface{}{
-			"flavor": p.Flavor,
-			"image":  p.Image,
-			"name":   p.Name,
-			"size":   p.Size,
+			"availabilityZone": p.AvailabilityZone,
+			"flavor":           p.Flavor,
+			"image":            p.Image,
+			"name":             p.Name,
+			"size":             p.Size,
 		})
 	}
 

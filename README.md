@@ -105,8 +105,8 @@ resource "ccloud_kubernetes" "demo" {
   ssh_public_key = "ssh-rsa AAAABHTmDMP6w=="
 
   node_pools = [
-    { name = "payload0", flavor = "m1.xlarge_cpu", size = 2 },
-    { name = "payload1", flavor = "m1.xlarge_cpu", size = 1 }
+    { name = "payload0", flavor = "m1.xlarge_cpu", size = 2, availability_zone = "eu-de-1d"},
+    { name = "payload1", flavor = "m1.xlarge_cpu", size = 1, availability_zone = "eu-de-1b"}
   ]
 }
 
