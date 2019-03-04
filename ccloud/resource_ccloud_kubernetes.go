@@ -229,7 +229,7 @@ func resourceCCloudKubernetesCreate(d *schema.ResourceData, meta interface{}) er
 
 	if v, ok := d.GetOk("node_pools"); ok {
 		nodePools := v.([]interface{})
-		for i, _ := range nodePools {
+		for i := range nodePools {
 			newPool := models.NodePool{}
 
 			if name, ok := d.GetOk(fmt.Sprintf("node_pools.%d.name", i)); ok {
@@ -316,7 +316,7 @@ func resourceCCloudKubernetesUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if v, ok := d.GetOk("node_pools"); ok {
 		nodePools := v.([]interface{})
-		for i, _ := range nodePools {
+		for i := range nodePools {
 			newPool := models.NodePool{}
 
 			if name, ok := d.GetOk(fmt.Sprintf("node_pools.%d.name", i)); ok {

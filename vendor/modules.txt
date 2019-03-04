@@ -81,17 +81,15 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/gophercloud/gophercloud v0.0.0-20190303224450-f83aee3da90f
+# github.com/gophercloud/gophercloud v0.0.0-20190212181753-892256c46858
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/openstack
-github.com/gophercloud/gophercloud/openstack/identity/v3/groups
 github.com/gophercloud/gophercloud/openstack/identity/v2/tokens
 github.com/gophercloud/gophercloud/openstack/identity/v3/tokens
 github.com/gophercloud/gophercloud/openstack/utils
-github.com/gophercloud/gophercloud/internal
-github.com/gophercloud/gophercloud/pagination
 github.com/gophercloud/gophercloud/openstack/identity/v2/tenants
-# github.com/gophercloud/utils v0.0.0-20180702171524-a4a9aeb470b8
+github.com/gophercloud/gophercloud/pagination
+# github.com/gophercloud/utils v0.0.0-20190303224639-576a1fcaba9d
 github.com/gophercloud/utils/openstack/clientconfig
 # github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
 github.com/hashicorp/errwrap
@@ -108,7 +106,7 @@ github.com/hashicorp/go-multierror
 github.com/hashicorp/go-plugin
 # github.com/hashicorp/go-safetemp v0.0.0-20180326211150-b1a1dbde6fdc
 github.com/hashicorp/go-safetemp
-# github.com/hashicorp/go-uuid v0.0.0-20160120003506-36289988d83c
+# github.com/hashicorp/go-uuid v1.0.1
 github.com/hashicorp/go-uuid
 # github.com/hashicorp/go-version v0.0.0-20161031182605-e96d38404026
 github.com/hashicorp/go-version
@@ -176,7 +174,7 @@ github.com/mattn/go-isatty
 github.com/mitchellh/cli
 # github.com/mitchellh/copystructure v0.0.0-20161013195342-5af94aef99f5
 github.com/mitchellh/copystructure
-# github.com/mitchellh/go-homedir v0.0.0-20161203194507-b8bc1bf76747
+# github.com/mitchellh/go-homedir v1.1.0
 github.com/mitchellh/go-homedir
 # github.com/mitchellh/go-testing-interface v0.0.0-20171004221916-a61a99592b77
 github.com/mitchellh/go-testing-interface

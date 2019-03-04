@@ -28,8 +28,8 @@ require (
 	github.com/go-test/deep v1.0.1 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/protobuf v0.0.0-20180720233116-427e165155e0 // indirect
-	github.com/gophercloud/gophercloud v0.0.0-20190303224450-f83aee3da90f
-	github.com/gophercloud/utils v0.0.0-20180702171524-a4a9aeb470b8
+	github.com/gophercloud/gophercloud v0.0.0-20190212181753-892256c46858
+	github.com/gophercloud/utils v0.0.0-20190303224639-576a1fcaba9d
 	github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce // indirect
 	github.com/hashicorp/go-cleanhttp v0.0.0-20170211013415-3573b8b52aa7 // indirect
 	github.com/hashicorp/go-getter v0.0.0-20180709183828-a33f09ce9fee // indirect
@@ -37,7 +37,6 @@ require (
 	github.com/hashicorp/go-multierror v0.0.0-20150916205742-d30f09973e19 // indirect
 	github.com/hashicorp/go-plugin v0.0.0-20180331002553-e8d22c780116 // indirect
 	github.com/hashicorp/go-safetemp v0.0.0-20180326211150-b1a1dbde6fdc // indirect
-	github.com/hashicorp/go-uuid v0.0.0-20160120003506-36289988d83c // indirect
 	github.com/hashicorp/go-version v0.0.0-20161031182605-e96d38404026 // indirect
 	github.com/hashicorp/hcl v0.0.0-20170504190234-a4b07c25de5f // indirect
 	github.com/hashicorp/hcl2 v0.0.0-20180718224135-41cff854d815 // indirect
@@ -52,7 +51,6 @@ require (
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mitchellh/cli v0.0.0-20180414170447-c48282d14eba // indirect
 	github.com/mitchellh/copystructure v0.0.0-20161013195342-5af94aef99f5 // indirect
-	github.com/mitchellh/go-homedir v0.0.0-20161203194507-b8bc1bf76747 // indirect
 	github.com/mitchellh/go-testing-interface v0.0.0-20171004221916-a61a99592b77 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/mitchellh/hashstructure v0.0.0-20160209213820-6b17d669fac5 // indirect
