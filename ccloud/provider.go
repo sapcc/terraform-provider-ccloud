@@ -218,11 +218,22 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 
-		DataSourcesMap: map[string]*schema.Resource{},
+		DataSourcesMap: map[string]*schema.Resource{
+			"ccloud_arc_agent_v1":     dataSourceCCloudArcAgentV1(),
+			"ccloud_arc_agent_ids_v1": dataSourceCCloudArcAgentIDsV1(),
+			"ccloud_arc_job_v1":       dataSourceCCloudArcJobV1(),
+			"ccloud_arc_job_ids_v1":   dataSourceCCloudArcJobIDsV1(),
+			"ccloud_automation_v1":    dataSourceCCloudAutomationV1(),
+		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"ccloud_quota":      resourceCCloudQuota(),
-			"ccloud_kubernetes": resourceCCloudKubernetes(),
+			"ccloud_arc_agent_bootstrap_v1": resourceCCloudArcAgentBootstrapV1(),
+			"ccloud_arc_agent_v1":           resourceCCloudArcAgentV1(),
+			"ccloud_arc_job_v1":             resourceCCloudArcJobV1(),
+			"ccloud_automation_v1":          resourceCCloudAutomationV1(),
+			"ccloud_automation_run_v1":      resourceCCloudAutomationRunV1(),
+			"ccloud_quota":                  resourceCCloudQuota(),
+			"ccloud_kubernetes":             resourceCCloudKubernetes(),
 		},
 
 		ConfigureFunc: configureProvider,

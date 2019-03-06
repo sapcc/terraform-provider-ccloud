@@ -1,13 +1,28 @@
 package ccloud
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/structure"
 )
+
+// CheckDeleted checks the error to see if it's a 404 (Not Found) and, if so,
+// sets the resource ID to the empty string instead of throwing an error.
+func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
+	if _, ok := err.(gophercloud.ErrDefault404); ok {
+		d.SetId("")
+		return nil
+	}
+
+	return fmt.Errorf("%s %s: %s", msg, d.Id(), err)
+}
 
 func GetRegion(d *schema.ResourceData, config *Config) string {
 	if v, ok := d.GetOk("region"); ok {
@@ -62,7 +77,83 @@ func expandToMapStringString(v map[string]interface{}) map[string]string {
 		if strVal, ok := val.(string); ok {
 			m[key] = strVal
 		}
+		if strVal, ok := val.(bool); ok {
+			m[key] = fmt.Sprintf("%t", strVal)
+		}
 	}
 
 	return m
+}
+
+func expandToStringSlice(v []interface{}) []string {
+	s := make([]string, len(v))
+	for i, val := range v {
+		if strVal, ok := val.(string); ok {
+			s[i] = strVal
+		}
+	}
+
+	return s
+}
+
+func normalizeJsonString(v interface{}) string {
+	json, _ := structure.NormalizeJsonString(v)
+	return json
+}
+
+func validateURL(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	_, err := url.ParseRequestURI(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q URL is not valid: %s", k, err))
+	}
+	return
+}
+
+func validateJsonObject(v interface{}, k string) ([]string, []error) {
+	if v == nil || v.(string) == "" {
+		return nil, []error{fmt.Errorf("%q value must not be empty", k)}
+	}
+
+	var j map[string]interface{}
+	s := v.(string)
+
+	err := json.Unmarshal([]byte(s), &j)
+	if err != nil {
+		return nil, []error{fmt.Errorf("%q must be a JSON object: %s", k, err)}
+	}
+
+	return nil, nil
+}
+
+func validateJsonArray(v interface{}, k string) ([]string, []error) {
+	if v == nil || v.(string) == "" {
+		return nil, []error{fmt.Errorf("%q value must not be empty", k)}
+	}
+
+	var j []interface{}
+	s := v.(string)
+
+	err := json.Unmarshal([]byte(s), &j)
+	if err != nil {
+		return nil, []error{fmt.Errorf("%q must be a JSON array: %s", k, err)}
+	}
+
+	return nil, nil
+}
+
+func diffSuppressJsonObject(k, old, new string, d *schema.ResourceData) bool {
+	if strSliceContains([]string{"{}", "null", ""}, old) &&
+		strSliceContains([]string{"{}", "null", ""}, new) {
+		return true
+	}
+	return false
+}
+
+func diffSuppressJsonArray(k, old, new string, d *schema.ResourceData) bool {
+	if strSliceContains([]string{"[]", "null", ""}, old) &&
+		strSliceContains([]string{"[]", "null", ""}, new) {
+		return true
+	}
+	return false
 }

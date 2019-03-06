@@ -13,6 +13,8 @@ import (
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/kayrus/gophercloud-arc/arc"
+	"github.com/kayrus/gophercloud-lyra/automation"
 	"github.com/sapcc/gophercloud-limes/resources"
 )
 
@@ -217,6 +219,24 @@ func (c *Config) LoadAndValidate() error {
 	return nil
 }
 
+// determineEndpoint is a helper method to determine if the user wants to
+// override an endpoint returned from the catalog.
+func (c *Config) determineEndpoint(client *gophercloud.ServiceClient, service string) *gophercloud.ServiceClient {
+	finalEndpoint := client.ResourceBaseURL()
+
+	if v, ok := c.EndpointOverrides[service]; ok {
+		if endpoint, ok := v.(string); ok && endpoint != "" {
+			finalEndpoint = endpoint
+			client.Endpoint = endpoint
+			client.ResourceBase = ""
+		}
+	}
+
+	log.Printf("[DEBUG] OpenStack Endpoint for %s: %s", service, finalEndpoint)
+
+	return client
+}
+
 func (c *Config) determineRegion(region string) string {
 	// If a resource-level region was not specified, and a provider-level region was set,
 	// use the provider-level region.
@@ -260,6 +280,38 @@ func (c *Config) kubernikusV1Client(region string, isAdmin bool) (*Kubernikus, e
 		Region:       c.determineRegion(region),
 		Availability: gophercloud.AvailabilityPublic,
 	})
+}
+
+func (c *Config) arcV1Client(region string) (*gophercloud.ServiceClient, error) {
+	client, err := arc.NewArcV1(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+
+	if err != nil {
+		return client, err
+	}
+
+	// Check if an endpoint override was specified for the image service.
+	client = c.determineEndpoint(client, "arc")
+
+	return client, nil
+}
+
+func (c *Config) automationV1Client(region string) (*gophercloud.ServiceClient, error) {
+	client, err := automation.NewAutomationV1(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+
+	if err != nil {
+		return client, err
+	}
+
+	// Check if an endpoint override was specified for the image service.
+	client = c.determineEndpoint(client, "automation")
+
+	return client, nil
 }
 
 func (c *Config) Debug() {
