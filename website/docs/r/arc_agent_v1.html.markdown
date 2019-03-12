@@ -26,7 +26,10 @@ The default create timeout is 10 minutes.
 
 Once the Terraform manage the Arc Agent resource, Terraform can manage an agent
 tags, and the `terraform destroy` command will destroy the remote Arc Agent
-resource.
+resource. However, if the Arc Agent is still running inside the compute
+instance, it will recreate itself, but without the `hostname` as an Arc Agent
+name. This will allow you to spawn a new compute instance with the same hostname
+and Arc Agent initialize procedure won't conflict with an old Arc Agent.
 
 ## Example Usage
 
