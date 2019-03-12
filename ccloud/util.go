@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -137,6 +138,19 @@ func validateJsonArray(v interface{}, k string) ([]string, []error) {
 	err := json.Unmarshal([]byte(s), &j)
 	if err != nil {
 		return nil, []error{fmt.Errorf("%q must be a JSON array: %s", k, err)}
+	}
+
+	return nil, nil
+}
+
+func validateTimeout(v interface{}, k string) ([]string, []error) {
+	if v == nil || v.(string) == "" {
+		return nil, []error{fmt.Errorf("%q value must not be empty", k)}
+	}
+
+	_, err := time.ParseDuration(v.(string))
+	if err != nil {
+		return nil, []error{fmt.Errorf("%q: %s", k, err)}
 	}
 
 	return nil, nil

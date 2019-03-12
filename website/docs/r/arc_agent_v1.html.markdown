@@ -18,10 +18,11 @@ inside the OpenStack compute instance.
 
 Nevertheless this Terraform resource allows to bring the Arc Agent under
 Terraform management during the `create` stage, when it tries to find the
-existing resource guided by the `filter` argument. It can even wait for an Arc
-Agent to be available (the Arc Agent bootstrap takes time due to VM boot time
-and cloud-init execution delay) within the `timeouts`
+existing resource guided by the `filter` argument. It will wait for an Arc Agent
+to be available (the Arc Agent bootstrap takes time due to compute instance boot
+time and cloud-init execution delay) within the `timeouts`
 [nested](/docs/configuration/resources.html#operation-timeouts) block argument.
+The default create timeout is 10 minutes.
 
 Once the Terraform manage the Arc Agent resource, Terraform can manage an agent
 tags, and the `terraform destroy` command will destroy the remote Arc Agent
@@ -37,6 +38,7 @@ satisfying the specified filter.
 ```hcl
 resource "ccloud_arc_agent_v1" "agent_1" {
   filter  = "@metadata_name = 'hostname'"
+
   timeouts = {
     create = "10m"
   }
@@ -65,6 +67,7 @@ resource "openstack_compute_instance_v2" "node" {
 
 resource "ccloud_arc_agent_v1" "agent_1" {
   filter  = "@metadata_uuid = '${openstack_compute_instance_v2.node.id}'"
+
   timeouts = {
     create = "10m"
   }
@@ -77,7 +80,7 @@ resource "ccloud_arc_agent_v1" "agent_1" {
   omitted, the `region` argument of the provider is used. Changing this forces
   a new resource to be created.
 
-* `filter` - (Required) The filter, used to filter the desired Arc agent.
+* `filter` - (Required) The filter, used to filter the desired Arc Agent.
   Changing this forces a new resource to be created.
 
 * `tags` - (Optional) The tags map to be appended to the Arc Agent. If an agent

@@ -29,7 +29,10 @@ satisfying the specified filter.
 ```hcl
 data "ccloud_arc_agent_v1" "agent_1" {
   filter  = "@metadata_name = 'hostname'"
-  timeout = 600
+
+  timeouts = {
+    read = "10m"
+  }
 }
 ```
 
@@ -42,8 +45,8 @@ data "ccloud_arc_agent_v1" "agent_1" {
 
 * `filter` - (Optional) The filter, used to filter the desired Arc agent.
 
-* `timeout` - (Optional) The timeout in seconds to wait until the desired Arc
-   agent is found. Default value is 0, which means don't wait.
+* `timeouts` - (Optional) The read timeout duration to wait until the desired Arc
+   agent is found. Default value is 0, what means don't wait.
 
 ## Attributes Reference
 

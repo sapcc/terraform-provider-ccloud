@@ -10,7 +10,6 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/kayrus/gophercloud-arc/arc/v1/agents"
-	"github.com/kayrus/gophercloud-arc/arc/v1/jobs"
 )
 
 func arcCCloudArcAgentV1ReadAgent(d *schema.ResourceData, arcClient *gophercloud.ServiceClient, agent *agents.Agent, region string) {
@@ -91,16 +90,6 @@ func arcCCloudArcAgentV1GetAgent(arcClient *gophercloud.ServiceClient, agentID, 
 	}
 }
 
-func flattenArcJobUserV1(user jobs.User) []interface{} {
-	return []interface{}{map[string]interface{}{
-		"id":          user.ID,
-		"name":        user.Name,
-		"domain_id":   user.DomainID,
-		"domain_name": user.DomainName,
-		"roles":       user.Roles,
-	}}
-}
-
 func updateArcAgentTagsV1(arcClient *gophercloud.ServiceClient, agentID string, oldTagsRaw, newTagsRaw interface{}) error {
 	var tagsToDelete []string
 	oldTags, _ := oldTagsRaw.(map[string]interface{})
@@ -142,30 +131,16 @@ func updateArcAgentTagsV1(arcClient *gophercloud.ServiceClient, agentID string, 
 	return nil
 }
 
-func waitForArcJobV1(arcClient *gophercloud.ServiceClient, id string, target []string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for %s job to become %s.", id, target)
-
-	stateConf := &resource.StateChangeConf{
-		Target:     target,
-		Pending:    pending,
-		Refresh:    arcJobV1GetStatus(arcClient, id),
-		Timeout:    timeout,
-		Delay:      1 * time.Second,
-		MinTimeout: 1 * time.Second,
-	}
-
-	_, err := stateConf.WaitForState()
-
-	return err
-}
-
-func arcJobV1GetStatus(arcClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		job, err := jobs.Get(arcClient, id).Extract()
-		if err != nil {
-			return nil, "", fmt.Errorf("Unable to retrieve %s ccloud_arc_job_v1: %s", id, err)
+func arcAgentV1ParseTimeout(raw interface{}) (time.Duration, error) {
+	if list, ok := raw.([]interface{}); ok {
+		for _, t := range list {
+			if timeout, ok := t.(map[string]interface{}); ok {
+				if v, ok := timeout["read"]; ok {
+					return time.ParseDuration(v.(string))
+				}
+			}
 		}
-
-		return job, job.Status, nil
 	}
+
+	return time.Duration(0), nil
 }

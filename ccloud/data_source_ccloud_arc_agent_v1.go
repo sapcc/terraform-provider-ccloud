@@ -15,6 +15,12 @@ func dataSourceCCloudArcAgentV1() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceCCloudArcAgentV1Read,
 
+		// Terraform timeouts don't work in data sources.
+		// However "Timeouts" has to be specified, otherwise "timeouts" argument below won't work.
+		Timeouts: &schema.ResourceTimeout{
+			Read: schema.DefaultTimeout(0),
+		},
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -40,11 +46,21 @@ func dataSourceCCloudArcAgentV1() *schema.Resource {
 				ValidateFunc:  validation.NoZeroValues,
 			},
 
-			// Terraform lifecycle timeouts don't work in data sources
-			"timeout": {
-				Type:     schema.TypeInt,
+			// Terraform timeouts don't work in data sources.
+			// This is a workaround.
+			"timeouts": {
+				Type:     schema.TypeList,
 				Optional: true,
-				Default:  0,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"read": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validateTimeout,
+						},
+					},
+				},
 			},
 
 			// computed attributes
@@ -112,14 +128,18 @@ func dataSourceCCloudArcAgentV1Read(d *schema.ResourceData, meta interface{}) er
 	var msg string
 	agentID := d.Get("agent_id").(string)
 	filter := d.Get("filter").(string)
-	timeout := d.Get("timeout").(int)
+
+	timeout, err := arcAgentV1ParseTimeout(d.Get("timeouts"))
+	if err != nil {
+		return fmt.Errorf("Error parsing the read timeout for ccloud_arc_job_v1: %s", err)
+	}
 
 	if timeout > 0 {
 		// Retryable case, when timeout is set
 		waitForAgent := &resource.StateChangeConf{
 			Target:     []string{"active"},
 			Refresh:    arcCCloudArcAgentV1GetAgent(arcClient, agentID, filter),
-			Timeout:    time.Duration(timeout) * time.Second,
+			Timeout:    timeout,
 			Delay:      1 * time.Second,
 			MinTimeout: 1 * time.Second,
 		}

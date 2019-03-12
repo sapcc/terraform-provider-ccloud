@@ -62,8 +62,7 @@ resource "ccloud_automation_v1" "script_automation_1" {
   recipes that are run in the exact order.
 
 * `chef_attributes` - (Optional for the Chef type) A map of Chef cookbook
-  attributes. Must be a valid JSON object. Changing this forces a new resource
-  to be created.
+  attributes. Must be a valid JSON object.
 
 * `debug` - (Optional for the Chef type) An enabled debug mode will not delete
   the temporary working directory on the instance when the automation job
