@@ -61,15 +61,10 @@ func arcCCloudArcJobV1ParseTarball(v interface{}) string {
 			tarball.Path = val.(string)
 		}
 		if val, ok := tmp["arguments"]; ok {
-			for _, argument := range val.([]interface{}) {
-				tarball.Arguments = append(tarball.Arguments, argument.(string))
-			}
+			tarball.Arguments = expandToStringSlice(val.([]interface{}))
 		}
 		if val, ok := tmp["environment"]; ok {
-			tarball.Environment = make(map[string]string)
-			for k, j := range val.(map[string]interface{}) {
-				tarball.Environment[k] = j.(string)
-			}
+			tarball.Environment = expandToMapStringString(val.(map[string]interface{}))
 		}
 
 		bytes, _ := json.Marshal(tarball)
@@ -87,9 +82,7 @@ func arcCCloudArcJobV1BuildChefPayload(v []interface{}) string {
 		var chefZero chefZeroPayload
 
 		if val, ok := chef["run_list"]; ok {
-			for _, run := range val.([]interface{}) {
-				chefZero.RunList = append(chefZero.RunList, run.(string))
-			}
+			chefZero.RunList = expandToStringSlice(val.([]interface{}))
 		}
 		if val, ok := chef["recipe_url"]; ok {
 			chefZero.RecipeURL = val.(string)
