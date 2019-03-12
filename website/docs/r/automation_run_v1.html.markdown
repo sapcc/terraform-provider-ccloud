@@ -23,7 +23,10 @@ data "ccloud_automation_v1" "automation_1" {
 
 data "ccloud_arc_agent_v1" "agent_1" {
   filter  = "@metadata_name = 'hostname'"
-  timeout = 600
+
+  timeouts = {
+    read = "10m"
+  }
 }
 
 resource "ccloud_automation_run_v1" "run_1" {

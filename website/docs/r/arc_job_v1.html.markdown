@@ -21,7 +21,10 @@ the remote Arc Job object.
 ```hcl
 data "ccloud_arc_agent_v1" "agent_1" {
   filter  = "@metadata_name = 'hostname'"
-  timeout = 600
+
+  timeouts = {
+    read = "10m"
+  }
 }
 
 resource "ccloud_arc_job_v1" "job_1" {
@@ -49,7 +52,10 @@ output "job_status" {
 ```hcl
 data "ccloud_arc_agent_v1" "agent_1" {
   filter  = "@metadata_name = 'hostname'"
-  timeout = 600
+
+  timeouts = {
+    read = "10m"
+  }
 }
 
 resource "ccloud_arc_job_v1" "job_1" {
