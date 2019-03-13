@@ -59,6 +59,9 @@ output "job_log" {
 * `selector` - (Required) The Arc Agent selector to run the Lyra automation.
   Changing this forces a new resource to be created.
 
+* `triggers` - (Optional) A map of arbitrary strings that, when changed, will
+  force the Lyra Automation to re-execute.
+
 ## Attributes Reference
 
 * `id` - The ID of the Lyra Automation Run.

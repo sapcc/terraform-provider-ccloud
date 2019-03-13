@@ -43,9 +43,10 @@ func resourceCCloudAutomationV1() *schema.Resource {
 			},
 
 			"repository_revision": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "master",
+				ValidateFunc: validation.NoZeroValues,
 			},
 
 			"timeout": {

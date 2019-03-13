@@ -54,7 +54,8 @@ resource "ccloud_automation_v1" "script_automation_1" {
 * `type` - (Required) The type of the Lyra automation. Can either be `Script`
   or `Chef`. Changing this forces a new resource to be created.
 
-* `repository_revision` - (Optional) The repository revision.
+* `repository_revision` - (Optional) The repository revision. Defaults to
+  `master`.
 
 * `timeout` - (Optional) The automation timeout in seconds.
 

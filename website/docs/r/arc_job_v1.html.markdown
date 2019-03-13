@@ -98,6 +98,9 @@ output "job_status" {
   object structure is documented below. Conflicts with `execute`. Changing this
   forces a new resource to be created.
 
+* `triggers` - (Optional) A map of arbitrary strings that, when changed, will
+  force the Arc Job to re-execute.
+
 The `execute` block supports:
 
 * `script` - (Required) The `script` payload. Conflicts with `tarball`. Changing

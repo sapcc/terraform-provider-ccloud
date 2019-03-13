@@ -29,6 +29,12 @@ func resourceCCloudArcJobV1() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"triggers": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"to": {
 				Type:     schema.TypeString,
 				Required: true,

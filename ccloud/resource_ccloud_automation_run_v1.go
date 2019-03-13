@@ -32,6 +32,12 @@ func resourceCCloudAutomationRunV1() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"triggers": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"automation_id": {
 				Type:     schema.TypeString,
 				Required: true,
