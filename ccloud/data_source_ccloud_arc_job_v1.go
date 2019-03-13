@@ -59,7 +59,7 @@ func dataSourceCCloudArcJobV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"script", "zero", "tarball",
+					"script", "zero", "tarball", "enable",
 				}, false),
 				ConflictsWith: []string{"job_id"},
 			},
@@ -121,52 +121,78 @@ func dataSourceCCloudArcJobV1() *schema.Resource {
 				},
 			},
 
-			"chef_zero": {
+			"chef": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"run_list": {
+						"enable": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"omnitruck_url": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+
+									"chef_version": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
 						},
 
-						"recipe_url": {
-							Type:     schema.TypeString,
+						"zero": {
+							Type:     schema.TypeList,
 							Computed: true,
-						},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"run_list": {
+										Type:     schema.TypeList,
+										Computed: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
 
-						"attributes": {
-							Type:      schema.TypeString,
-							Computed:  true,
-							StateFunc: normalizeJsonString,
-						},
+									"recipe_url": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 
-						"debug": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
+									"attributes": {
+										Type:      schema.TypeString,
+										Computed:  true,
+										StateFunc: normalizeJsonString,
+									},
 
-						"nodes": {
-							Type:      schema.TypeString,
-							Computed:  true,
-							StateFunc: normalizeJsonString,
-						},
+									"debug": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
 
-						"node_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
+									"nodes": {
+										Type:      schema.TypeString,
+										Computed:  true,
+										StateFunc: normalizeJsonString,
+									},
 
-						"omnitruck_url": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
+									"node_name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 
-						"chef_version": {
-							Type:     schema.TypeString,
-							Computed: true,
+									"omnitruck_url": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+
+									"chef_version": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -276,20 +302,13 @@ func dataSourceCCloudArcJobV1Read(d *schema.ResourceData, meta interface{}) erro
 		job = jobs[0]
 	}
 
-	res := jobs.GetLog(arcClient, job.RequestID)
-	if res.Err != nil {
-		return fmt.Errorf("Error retrieving logs for %s ccloud_arc_job_v1: %s", job.RequestID, res.Err)
-	}
-	log, err := res.ExtractContent()
-	if err != nil {
-		return fmt.Errorf("Error extracting logs for %s ccloud_arc_job_v1: %s", job.RequestID, err)
-	}
+	log := arcJobV1GetLog(arcClient, job.RequestID)
 
 	execute, err := arcCCloudArcJobV1FlattenExecute(&job)
 	if err != nil {
 		return fmt.Errorf("Error extracting execute payload for %s ccloud_arc_job_v1: %s", job.RequestID, err)
 	}
-	chefZero, err := arcCCloudArcJobV1FlattenChef(&job)
+	chef, err := arcCCloudArcJobV1FlattenChef(&job)
 	if err != nil {
 		return fmt.Errorf("Error extracting chef payload for %s ccloud_arc_job_v1: %s", job.RequestID, err)
 	}
@@ -305,7 +324,7 @@ func dataSourceCCloudArcJobV1Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("action", job.Action)
 	d.Set("payload", job.Payload)
 	d.Set("execute", execute)
-	d.Set("chef_zero", chefZero)
+	d.Set("chef", chef)
 	d.Set("status", job.Status)
 	d.Set("created_at", job.CreatedAt.Format(time.RFC3339))
 	d.Set("updated_at", job.UpdatedAt.Format(time.RFC3339))

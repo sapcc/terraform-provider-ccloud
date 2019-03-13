@@ -53,7 +53,7 @@ func resourceCCloudArcJobV1() *schema.Resource {
 				Type:          schema.TypeList,
 				Optional:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"chef_zero"},
+				ConflictsWith: []string{"chef"},
 				MaxItems:      1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -106,7 +106,7 @@ func resourceCCloudArcJobV1() *schema.Resource {
 				},
 			},
 
-			"chef_zero": {
+			"chef": {
 				Type:          schema.TypeList,
 				Optional:      true,
 				ForceNew:      true,
@@ -114,61 +114,99 @@ func resourceCCloudArcJobV1() *schema.Resource {
 				MaxItems:      1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"run_list": {
-							Type:     schema.TypeList,
-							Required: true,
-							ForceNew: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+						"enable": {
+							Type:          schema.TypeList,
+							Optional:      true,
+							ForceNew:      true,
+							ConflictsWith: []string{"chef.0.zero"},
+							MaxItems:      1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"omnitruck_url": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ForceNew:     true,
+										ValidateFunc: validateURL,
+									},
+
+									"chef_version": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ForceNew:     true,
+										Default:      "latest",
+										ValidateFunc: validation.NoZeroValues,
+									},
+								},
+							},
 						},
 
-						"recipe_url": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ForceNew:     true,
-							ValidateFunc: validateURL,
-						},
+						"zero": {
+							Type:          schema.TypeList,
+							Optional:      true,
+							ForceNew:      true,
+							ConflictsWith: []string{"chef.0.enable"},
+							MaxItems:      1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"run_list": {
+										Type:     schema.TypeList,
+										Required: true,
+										ForceNew: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
 
-						"attributes": {
-							Type:             schema.TypeString,
-							Optional:         true,
-							ForceNew:         true,
-							ValidateFunc:     validateJsonObject,
-							DiffSuppressFunc: diffSuppressJsonObject,
-							StateFunc:        normalizeJsonString,
-						},
+									"recipe_url": {
+										Type:         schema.TypeString,
+										Required:     true,
+										ForceNew:     true,
+										ValidateFunc: validateURL,
+									},
 
-						"debug": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							ForceNew: true,
-						},
+									"attributes": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										ForceNew:         true,
+										ValidateFunc:     validateJsonObject,
+										DiffSuppressFunc: diffSuppressJsonObject,
+										StateFunc:        normalizeJsonString,
+									},
 
-						"nodes": {
-							Type:             schema.TypeString,
-							Optional:         true,
-							ForceNew:         true,
-							ValidateFunc:     validateJsonArray,
-							DiffSuppressFunc: diffSuppressJsonArray,
-							StateFunc:        normalizeJsonString,
-						},
+									"debug": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										ForceNew: true,
+									},
 
-						"node_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-						},
+									"nodes": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										ForceNew:         true,
+										ValidateFunc:     validateJsonArray,
+										DiffSuppressFunc: diffSuppressJsonArray,
+										StateFunc:        normalizeJsonString,
+									},
 
-						"omnitruck_url": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ForceNew:     true,
-							ValidateFunc: validateURL,
-						},
+									"node_name": {
+										Type:     schema.TypeString,
+										Optional: true,
+										ForceNew: true,
+									},
 
-						"chef_version": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
+									"omnitruck_url": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ForceNew:     true,
+										ValidateFunc: validateURL,
+									},
+
+									"chef_version": {
+										Type:     schema.TypeString,
+										Optional: true,
+										ForceNew: true,
+										Default:  "latest",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -279,22 +317,15 @@ func resourceCCloudArcJobV1Create(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
-	var agent string
-	var action string
-	var payload string
+	var agent, action, payload string
 
 	if v, ok := d.GetOkExists("execute"); ok {
 		agent = "execute"
-		action, payload = arcCCloudArcJobV1BuildExecutePayload(v.([]interface{}))
-		if len(action) == 0 {
-			return fmt.Errorf("Failed to detect an execute action")
-		}
+		action, payload = arcCCloudArcJobV1BuildPayload(v.([]interface{}))
 	}
-
-	if v, ok := d.GetOkExists("chef_zero"); ok {
+	if v, ok := d.GetOkExists("chef"); ok {
 		agent = "chef"
-		action = "zero"
-		payload = arcCCloudArcJobV1BuildChefPayload(v.([]interface{}))
+		action, payload = arcCCloudArcJobV1BuildPayload(v.([]interface{}))
 	}
 
 	if len(agent) == 0 {
@@ -302,7 +333,7 @@ func resourceCCloudArcJobV1Create(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if len(action) == 0 {
-		return fmt.Errorf("Failed to detect an execute action")
+		return fmt.Errorf("Failed to detect a %s action", agent)
 	}
 
 	if len(payload) == 0 {
@@ -349,20 +380,13 @@ func resourceCCloudArcJobV1Read(d *schema.ResourceData, meta interface{}) error 
 		return CheckDeleted(d, err, "Unable to retrieve ccloud_arc_job_v1")
 	}
 
-	res := jobs.GetLog(arcClient, job.RequestID)
-	if res.Err != nil {
-		return fmt.Errorf("Error retrieving logs for %s ccloud_arc_job_v1: %s", job.RequestID, res.Err)
-	}
-	log, err := res.ExtractContent()
-	if err != nil {
-		return fmt.Errorf("Error extracting logs for %s ccloud_arc_job_v1: %s", job.RequestID, err)
-	}
+	log := arcJobV1GetLog(arcClient, job.RequestID)
 
 	execute, err := arcCCloudArcJobV1FlattenExecute(job)
 	if err != nil {
 		return fmt.Errorf("Error extracting execute payload for %s ccloud_arc_job_v1: %s", job.RequestID, err)
 	}
-	chefZero, err := arcCCloudArcJobV1FlattenChef(job)
+	chef, err := arcCCloudArcJobV1FlattenChef(job)
 	if err != nil {
 		return fmt.Errorf("Error extracting chef payload for %s ccloud_arc_job_v1: %s", job.RequestID, err)
 	}
@@ -376,7 +400,7 @@ func resourceCCloudArcJobV1Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("action", job.Action)
 	d.Set("payload", job.Payload)
 	d.Set("execute", execute)
-	d.Set("chef_zero", chefZero)
+	d.Set("chef", chef)
 	d.Set("status", job.Status)
 	d.Set("created_at", job.CreatedAt.Format(time.RFC3339))
 	d.Set("updated_at", job.UpdatedAt.Format(time.RFC3339))

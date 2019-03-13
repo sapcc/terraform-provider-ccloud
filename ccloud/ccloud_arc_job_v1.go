@@ -14,100 +14,145 @@ import (
 )
 
 type chefZeroPayload struct {
-	OmnitruckUrl string                   `json:"omnitruck_url"`
-	ChefVersion  string                   `json:"chef_version"`
-	RunList      []string                 `json:"run_list"`
-	RecipeURL    string                   `json:"recipe_url"`
-	Attributes   map[string]interface{}   `json:"attributes"`
-	Debug        bool                     `json:"debug"`
-	Nodes        []map[string]interface{} `json:"nodes"`
-	NodeName     string                   `json:"name"`
+	RunList    []string                 `json:"run_list"`
+	RecipeURL  string                   `json:"recipe_url"`
+	Attributes map[string]interface{}   `json:"attributes,omitempty"`
+	Debug      bool                     `json:"debug,omitempty"`
+	Nodes      []map[string]interface{} `json:"nodes,omitempty"`
+	NodeName   string                   `json:"name,omitempty"`
+}
+
+type chefEnableOptions struct {
+	OmnitruckUrl string `json:"omnitruck_url,omitempty"`
+	ChefVersion  string `json:"chef_version"`
 }
 
 type tarballPayload struct {
 	URL         string            `json:"url"`
 	Path        string            `json:"path"`
-	Arguments   []string          `json:"arguments"`
-	Environment map[string]string `json:"environment"`
+	Arguments   []string          `json:"arguments,omitempty"`
+	Environment map[string]string `json:"environment,omitempty"`
 }
 
-func arcCCloudArcJobV1BuildExecutePayload(v []interface{}) (action string, payload string) {
-	for _, e := range v {
-		execute := e.(map[string]interface{})
+func arcCCloudArcJobV1BuildPayload(v []interface{}) (string, string) {
+	var payload string
 
-		if v, ok := execute["script"]; ok && len(v.(string)) > 0 {
-			return "script", v.(string)
-		}
+	for _, a := range v {
+		if a != nil {
+			action := a.(map[string]interface{})
 
-		if v, ok := execute["tarball"]; ok {
-			return "tarball", arcCCloudArcJobV1ParseTarball(v)
+			if v, ok := action["script"]; ok && len(v.(string)) > 0 {
+				return "script", v.(string)
+			}
+
+			if v, ok := action["tarball"]; ok && len(v.([]interface{})) > 0 {
+				return "tarball", arcCCloudArcJobV1ParseTarball(v.([]interface{}))
+			}
+
+			if v, ok := action["enable"]; ok && len(v.([]interface{})) > 0 {
+				return "enable", arcCCloudArcJobV1ParseChefEnable(v.([]interface{}))
+			}
+
+			if v, ok := action["zero"]; ok && len(v.([]interface{})) > 0 {
+				return "zero", arcCCloudArcJobV1ParseChefZero(v.([]interface{}))
+			}
 		}
 	}
 
-	return
+	return "", payload
 }
 
-func arcCCloudArcJobV1ParseTarball(v interface{}) string {
+func arcCCloudArcJobV1ParseTarball(v []interface{}) string {
 	var payload string
 
-	for _, t := range v.([]interface{}) {
-		var tarball tarballPayload
-		tmp := t.(map[string]interface{})
+	for _, t := range v {
+		if t != nil {
+			var tarball tarballPayload
+			tmp := t.(map[string]interface{})
 
-		if val, ok := tmp["url"]; ok {
-			tarball.URL = val.(string)
-		}
-		if val, ok := tmp["path"]; ok {
-			tarball.Path = val.(string)
-		}
-		if val, ok := tmp["arguments"]; ok {
-			tarball.Arguments = expandToStringSlice(val.([]interface{}))
-		}
-		if val, ok := tmp["environment"]; ok {
-			tarball.Environment = expandToMapStringString(val.(map[string]interface{}))
-		}
+			if val, ok := tmp["url"]; ok {
+				tarball.URL = val.(string)
+			}
+			if val, ok := tmp["path"]; ok {
+				tarball.Path = val.(string)
+			}
+			if val, ok := tmp["arguments"]; ok {
+				tarball.Arguments = expandToStringSlice(val.([]interface{}))
+			}
+			if val, ok := tmp["environment"]; ok {
+				tarball.Environment = expandToMapStringString(val.(map[string]interface{}))
+			}
 
-		bytes, _ := json.Marshal(tarball)
-		payload = string(bytes[:])
+			bytes, _ := json.Marshal(tarball)
+			payload = string(bytes[:])
+		}
 	}
 
 	return payload
 }
 
-func arcCCloudArcJobV1BuildChefPayload(v []interface{}) string {
+func arcCCloudArcJobV1ParseChefEnable(v []interface{}) string {
 	var payload string
 
 	for _, c := range v {
-		chef := c.(map[string]interface{})
-		var chefZero chefZeroPayload
+		if c != nil {
+			var chefEnable chefEnableOptions
+			chef := c.(map[string]interface{})
 
-		if val, ok := chef["run_list"]; ok {
-			chefZero.RunList = expandToStringSlice(val.([]interface{}))
-		}
-		if val, ok := chef["recipe_url"]; ok {
-			chefZero.RecipeURL = val.(string)
-		}
-		if val, ok := chef["attributes"]; ok {
-			json.Unmarshal([]byte(val.(string)), &chefZero.Attributes)
-		}
-		if val, ok := chef["debug"]; ok {
-			chefZero.Debug = val.(bool)
-		}
-		if val, ok := chef["nodes"]; ok {
-			json.Unmarshal([]byte(val.(string)), &chefZero.Nodes)
-		}
-		if val, ok := chef["node_name"]; ok {
-			chefZero.NodeName = val.(string)
-		}
-		if val, ok := chef["omnitruck_url"]; ok {
-			chefZero.OmnitruckUrl = val.(string)
-		}
-		if val, ok := chef["chef_version"]; ok {
-			chefZero.ChefVersion = val.(string)
-		}
+			if val, ok := chef["omnitruck_url"]; ok {
+				chefEnable.OmnitruckUrl = val.(string)
+			}
+			if val, ok := chef["chef_version"]; ok {
+				chefEnable.ChefVersion = val.(string)
+			}
 
-		bytes, _ := json.Marshal(chefZero)
-		payload = string(bytes[:])
+			bytes, _ := json.Marshal(chefEnable)
+			payload = string(bytes[:])
+		}
+	}
+
+	return payload
+}
+
+func arcCCloudArcJobV1ParseChefZero(v []interface{}) string {
+	var payload string
+
+	for _, c := range v {
+		if c != nil {
+			var chefZero struct {
+				chefZeroPayload
+				chefEnableOptions
+			}
+			chef := c.(map[string]interface{})
+
+			if val, ok := chef["run_list"]; ok {
+				chefZero.RunList = expandToStringSlice(val.([]interface{}))
+			}
+			if val, ok := chef["recipe_url"]; ok {
+				chefZero.RecipeURL = val.(string)
+			}
+			if val, ok := chef["attributes"]; ok {
+				json.Unmarshal([]byte(val.(string)), &chefZero.Attributes)
+			}
+			if val, ok := chef["debug"]; ok {
+				chefZero.Debug = val.(bool)
+			}
+			if val, ok := chef["nodes"]; ok {
+				json.Unmarshal([]byte(val.(string)), &chefZero.Nodes)
+			}
+			if val, ok := chef["node_name"]; ok {
+				chefZero.NodeName = val.(string)
+			}
+			if val, ok := chef["omnitruck_url"]; ok {
+				chefZero.OmnitruckUrl = val.(string)
+			}
+			if val, ok := chef["chef_version"]; ok {
+				chefZero.ChefVersion = val.(string)
+			}
+
+			bytes, _ := json.Marshal(chefZero)
+			payload = string(bytes[:])
+		}
 	}
 
 	return payload
@@ -126,9 +171,10 @@ func arcCCloudArcJobV1FlattenExecute(job *jobs.Job) ([]map[string]interface{}, e
 	}
 
 	var tarball tarballPayload
+
 	err := json.Unmarshal([]byte(job.Payload), &tarball)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal tarball payload: %s", err)
+		return nil, fmt.Errorf("failed to unmarshal execute %s payload: %s", job.Action, err)
 	}
 
 	return []map[string]interface{}{{
@@ -143,29 +189,45 @@ func arcCCloudArcJobV1FlattenExecute(job *jobs.Job) ([]map[string]interface{}, e
 }
 
 func arcCCloudArcJobV1FlattenChef(job *jobs.Job) ([]map[string]interface{}, error) {
-	if job.Action != "zero" {
+	if !strSliceContains([]string{"zero", "enable"}, job.Action) {
 		return []map[string]interface{}{}, nil
 	}
 
-	var chef chefZeroPayload
+	var chef struct {
+		chefZeroPayload
+		chefEnableOptions
+	}
 
 	err := json.Unmarshal([]byte(job.Payload), &chef)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal chef zero payload: %s", err)
+		return nil, fmt.Errorf("failed to unmarshal chef %s payload: %s", job.Action, err)
+	}
+
+	if job.Action == "enable" {
+		return []map[string]interface{}{{
+			"enable": []map[string]interface{}{{
+				"omnitruck_url": chef.OmnitruckUrl,
+				"chef_version":  chef.ChefVersion,
+			}},
+			"zero": []map[string]interface{}{},
+		}}, nil
 	}
 
 	attributes, _ := json.Marshal(chef.Attributes)
 	nodes, _ := json.Marshal(chef.Nodes)
 
 	return []map[string]interface{}{{
-		"run_list":      chef.RunList,
-		"recipe_url":    chef.RecipeURL,
-		"attributes":    string(attributes[:]),
-		"debug":         chef.Debug,
-		"nodes":         string(nodes[:]),
-		"node_name":     chef.NodeName,
-		"omnitruck_url": chef.OmnitruckUrl,
-		"chef_version":  chef.ChefVersion,
+		"enable": []map[string]interface{}{},
+		"zero": []map[string]interface{}{{
+			"run_list":      chef.RunList,
+			"recipe_url":    chef.RecipeURL,
+			"attributes":    string(attributes[:]),
+			"debug":         chef.Debug,
+			"nodes":         string(nodes[:]),
+			"node_name":     chef.NodeName,
+			"omnitruck_url": chef.OmnitruckUrl,
+			"chef_version":  chef.ChefVersion,
+		}},
 	}}, nil
 }
 
@@ -250,4 +312,20 @@ func arcJobV1GetStatus(arcClient *gophercloud.ServiceClient, id string) resource
 
 		return job, job.Status, nil
 	}
+}
+
+func arcJobV1GetLog(arcClient *gophercloud.ServiceClient, id string) []byte {
+	var err error
+	var l []byte = []byte("Log not available")
+
+	res := jobs.GetLog(arcClient, id)
+	if res.Err != nil {
+		log.Printf("[DEBUG] Error retrieving logs for %s ccloud_arc_job_v1: %s", id, res.Err)
+	} else {
+		l, err = res.ExtractContent()
+		if err != nil {
+			log.Printf("[DEBUG] Error extracting logs for %s ccloud_arc_job_v1: %s", id, err)
+		}
+	}
+	return l
 }

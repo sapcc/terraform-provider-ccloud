@@ -37,8 +37,8 @@ data "ccloud_arc_job_ids_v1" "job_ids_1" {
 * `agent` - (Optional) The agent type, which executed the Arc job. Can either
   be `chef` or `execute`.
 
-* `action` - (Optional) The Arc job action type. Can either be `script`, `zero`
-  or `tarball`.
+* `action` - (Optional) The Arc job action type. Can either be `script`, `zero`,
+  `tarball` or `enable`.
 
 * `status` - (Optional) The Arc job status. Can either be `queued`,
   `executing`, `failed`, `complete`.

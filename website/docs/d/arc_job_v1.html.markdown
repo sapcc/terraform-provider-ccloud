@@ -58,8 +58,8 @@ data "ccloud_arc_job_v1" "job_1" {
 * `agent` - (Optional) The agent type, which executed the Arc job. Can either
   be `chef` or `execute`. Conflicts with `job_id`.
 
-* `action` - (Optional) The Arc job action type. Can either be `script`, `zero`
-  or `tarball`. Conflicts with `job_id`.
+* `action` - (Optional) The Arc job action type. Can either be `script`, `zero`,
+  `tarball` or `enable`. Conflicts with `job_id`.
 
 * `status` - (Optional) The Arc job status. Can either be `queued`,
   `executing`, `failed`, `complete`. Conflicts with `job_id`.
@@ -75,7 +75,7 @@ are exported:
 * `timeout` - See Argument Reference above.
 * `execute` - See Argument Reference in the `ccloud_arc_job_v1` resource
   documentation.
-* `chef_zero` - See Argument Reference in the `ccloud_arc_job_v1` resource
+* `chef` - See Argument Reference in the `ccloud_arc_job_v1` resource
   documentation.
 * `agent` - See Argument Reference above.
 * `action` - See Argument Reference above.

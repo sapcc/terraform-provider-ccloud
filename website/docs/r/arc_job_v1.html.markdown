@@ -47,6 +47,30 @@ output "job_status" {
 }
 ```
 
+### Enable Chef agent
+
+```hcl
+data "ccloud_arc_agent_v1" "agent_1" {
+  filter  = "@metadata_name = 'hostname'"
+
+  timeouts = {
+    read = "10m"
+  }
+}
+
+resource "ccloud_arc_job_v1" "job_1" {
+  to = "${ccloud_arc_agent_v1.agent_1.id}"
+
+  chef = {
+    enable = {}
+  }
+}
+
+output "job_status" {
+  value = "${ccloud_arc_job_v1.job_1.status}"
+}
+```
+
 ### Execute Chef Zero
 
 ```hcl
@@ -61,14 +85,16 @@ data "ccloud_arc_agent_v1" "agent_1" {
 resource "ccloud_arc_job_v1" "job_1" {
   to = "${ccloud_arc_agent_v1.agent_1.id}"
 
-  chef_zero = {
-    run_list   = ["recipe[repo::default]"]
-    recipe_url = "https://example.com/path/to/chef-zero-recipe.tgz"
-    debug      = true
+  chef = {
+    zero = {
+      run_list   = ["recipe[repo::default]"]
+      recipe_url = "https://example.com/path/to/chef-zero-recipe.tgz"
+      debug      = true
 
-    attributes = <<EOF
+      attributes = <<EOF
 {"foo": "bar"}
 EOF
+    }
   }
 }
 
@@ -92,11 +118,11 @@ output "job_status" {
 
 * `execute` - (Required) Execute a regular script or a binary from the remote
   tar archive. The `execute` object structure is documented below. Conflicts
-  with `chef_zero`. Changing this forces a new resource to be created.
+  with `chef`. Changing this forces a new resource to be created.
 
-* `chef_zero` - (Required) Execute a Chef Zero automation. The `chef_zero`
-  object structure is documented below. Conflicts with `execute`. Changing this
-  forces a new resource to be created.
+* `chef` - (Required) Execute a Chef Zero automation. The `chef` object
+  structure is documented below. Conflicts with `execute`. Changing this forces
+  a new resource to be created.
 
 * `triggers` - (Optional) A map of arbitrary strings that, when changed, will
   force the Arc Job to re-execute.
@@ -126,7 +152,27 @@ The `tarball` block supports:
   executing the binary, specified in the `path` argument. Changing this forces a
   new resource to be created.
 
-The `chef_zero` block supports (you can find more documentation on the Chef
+The `chef` block supports:
+
+* `enable` - (Required) Generates the payload, which enables the Chef Agent on
+  the Arc Agent. Conflicts with `enable`. Changing this forces a new resource to
+  be created.
+
+* `zero` - (Required) The Chef Zero payload. The `zero` object structure is
+  documented below. Conflicts with `enable`. Changing this forces a new resource
+  to be created.
+
+The `enable` block supports:
+
+* `omnitruck_url` - (Optional) The Chef repository URL containing the Chef
+  binaries to download. Defaults to `https://www.chef.io/chef/metadata`. Read
+  more on the Chef Docs [website](https://docs.chef.io/api_omnitruck.html).
+  Changing this forces a new resource to be created.
+
+* `chef_version` - (Optional) The Chef version to run the cookbook. Defaults to
+  `latest`. Changing this forces a new resource to be created.
+
+The `zero` block supports (you can find more documentation on the Chef
 Docs [website](https://docs.chef.io)):
 
 * `run_list` - (Required) An ordered list of Chef roles and/or recipes that are
@@ -166,11 +212,11 @@ Docs [website](https://docs.chef.io)):
 * `to` - See Argument Reference above.
 * `timeout` - See Argument Reference above.
 * `execute` - See Argument Reference above.
-* `chef_zero` - See Argument Reference above.
+* `chef` - See Argument Reference above.
 * `agent` - The agent type, which executed the Arc job. Can either be `chef` or
   `execute`.
-* `action` - The Arc job action type. Can either be `script`, `zero` or
-  `tarball`.
+* `action` - The Arc job action type. Can either be `script`, `zero`, `tarball`
+  or `enable`.
 * `payload` - The Arc job JSON payload.
 * `agent_id` - A read-only alias to the `to` argument.
 * `version` - The Arc job version.
