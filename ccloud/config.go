@@ -314,6 +314,22 @@ func (c *Config) automationV1Client(region string) (*gophercloud.ServiceClient, 
 	return client, nil
 }
 
+func (c *Config) computeV2Client(region string) (*gophercloud.ServiceClient, error) {
+	client, err := openstack.NewComputeV2(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+
+	if err != nil {
+		return client, err
+	}
+
+	// Check if an endpoint override was specified for the compute service.
+	client = c.determineEndpoint(client, "compute")
+
+	return client, nil
+}
+
 func (c *Config) Debug() {
 	var insecure bool
 	if c.Insecure == nil {

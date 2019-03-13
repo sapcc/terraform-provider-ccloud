@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/kayrus/gophercloud-arc/arc/v1/agents"
 )
 
@@ -43,7 +44,40 @@ func arcCCloudArcAgentV1ReadAgent(d *schema.ResourceData, arcClient *gophercloud
 	d.Set("region", region)
 }
 
-func arcCCloudArcAgentV1GetAgent(arcClient *gophercloud.ServiceClient, agentID, filter string) resource.StateRefreshFunc {
+func arcCCloudArcAgentV1WaitForAgent(arcClient *gophercloud.ServiceClient, agentID, filter string, timeout time.Duration) (*agents.Agent, error) {
+	var agent interface{}
+	var msg string
+	var err error
+
+	// This condition is required, otherwise zero timeout will always raise:
+	// "timeout while waiting for state to become 'active'"
+	if timeout > 0 {
+		// Retryable case, when timeout is set
+		waitForAgent := &resource.StateChangeConf{
+			Target:     []string{"active"},
+			Refresh:    arcCCloudArcAgentV1GetAgent(arcClient, agentID, filter, timeout),
+			Timeout:    timeout,
+			Delay:      1 * time.Second,
+			MinTimeout: 1 * time.Second,
+		}
+		agent, err = waitForAgent.WaitForState()
+	} else {
+		// When timeout is not set, just get the agent
+		agent, msg, err = arcCCloudArcAgentV1GetAgent(arcClient, agentID, filter, timeout)()
+	}
+
+	if len(msg) > 0 && msg != "active" {
+		return nil, fmt.Errorf(msg)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return agent.(*agents.Agent), nil
+}
+
+func arcCCloudArcAgentV1GetAgent(arcClient *gophercloud.ServiceClient, agentID, filter string, timeout time.Duration) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		var agent *agents.Agent
 		var err error
@@ -55,6 +89,10 @@ func arcCCloudArcAgentV1GetAgent(arcClient *gophercloud.ServiceClient, agentID, 
 		if len(agentID) > 0 {
 			agent, err = agents.Get(arcClient, agentID).Extract()
 			if err != nil {
+				if _, ok := err.(gophercloud.ErrDefault404); ok && timeout > 0 {
+					// Retryable case, when timeout is set
+					return nil, fmt.Sprintf("Unable to retrieve %s ccloud_arc_agent_v1: %s", agentID, err), nil
+				}
 				return nil, "", fmt.Errorf("Unable to retrieve %s ccloud_arc_agent_v1: %s", agentID, err)
 			}
 		} else {
@@ -143,4 +181,18 @@ func arcAgentV1ParseTimeout(raw interface{}) (time.Duration, error) {
 	}
 
 	return time.Duration(0), nil
+}
+
+func ServerV2StateRefreshFunc(client *gophercloud.ServiceClient, instanceID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		s, err := servers.Get(client, instanceID).Extract()
+		if err != nil {
+			if _, ok := err.(gophercloud.ErrDefault404); ok {
+				return s, "DELETED", nil
+			}
+			return nil, "", err
+		}
+
+		return s, s.Status, nil
+	}
 }

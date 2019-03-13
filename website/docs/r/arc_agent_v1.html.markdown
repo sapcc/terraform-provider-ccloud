@@ -24,12 +24,13 @@ time and cloud-init execution delay) within the `timeouts`
 [nested](/docs/configuration/resources.html#operation-timeouts) block argument.
 The default create timeout is 10 minutes.
 
-Once the Terraform manage the Arc Agent resource, Terraform can manage an agent
-tags, and the `terraform destroy` command will destroy the remote Arc Agent
-resource. However, if the Arc Agent is still running inside the compute
-instance, it will recreate itself, but without the `hostname` as an Arc Agent
-name. This will allow you to spawn a new compute instance with the same hostname
-and Arc Agent initialize procedure won't conflict with an old Arc Agent.
+The `terraform destroy` command will wait for the compute instance, associated
+with the Arc Agent, to be deleted, then it will destroy the Arc Agent resource.
+Make sure to use implicit arguments without referring the depending component.
+Prefer using the hostname filter based on the variable (see example below).
+Don't use `agent_id = "${openstack_compute_instance_v2.node.id}"`, otherwise
+the destroy command will end in a deadlock. Use `force_delete` flag to ignore
+the compute instance state dependency.
 
 ## Example Usage
 
@@ -40,7 +41,7 @@ satisfying the specified filter.
 
 ```hcl
 resource "ccloud_arc_agent_v1" "agent_1" {
-  filter  = "@metadata_name = 'hostname'"
+  filter = "@metadata_name = 'hostname'"
 
   timeouts = {
     create = "10m"
@@ -51,14 +52,18 @@ resource "ccloud_arc_agent_v1" "agent_1" {
 ### Manage an Arc Agent found with a filter and a compute instance dependency
 
 The example below will be completed once it finds the exact one agent
-satisfying the specified filter with an `openstack_compute_instance_v2` ID as a
-dependency.
+satisfying the specified filter with a `openstack_compute_instance_v2` hostname
+as an implicit dependency.
 
 ```hcl
+locals {
+  hostname = "linux-vm"
+}
+
 resource "ccloud_arc_agent_bootstrap_v1" "agent_1" {}
 
 resource "openstack_compute_instance_v2" "node" {
-  name        = "linux-vm"
+  name        = "${local.hostname}"
   image_name  = "ubuntu-16.04-amd64"
   flavor_name = "m1.small"
   user_data   = "${ccloud_arc_agent_bootstrap_v1.agent_1.user_data}"
@@ -69,10 +74,12 @@ resource "openstack_compute_instance_v2" "node" {
 }
 
 resource "ccloud_arc_agent_v1" "agent_1" {
-  filter  = "@metadata_uuid = '${openstack_compute_instance_v2.node.id}'"
+  # implicit dependency to avoid the deadlock during the destroy
+  filter = "@metadata_name = '${local.hostname}'"
 
   timeouts = {
     create = "10m"
+    delete = "10m"
   }
 }
 ```
@@ -83,12 +90,20 @@ resource "ccloud_arc_agent_v1" "agent_1" {
   omitted, the `region` argument of the provider is used. Changing this forces
   a new resource to be created.
 
-* `filter` - (Required) The filter, used to filter the desired Arc Agent.
-  Changing this forces a new resource to be created.
+* `agent_id` - (Optional) The ID of the known Arc agent. Conflicts with
+  `filter`.
+
+* `filter` - (Optional) The filter, used to filter the desired Arc Agent.
+  Changing this forces a new resource to be created. Conflicts with `agent_id`.
 
 * `tags` - (Optional) The tags map to be appended to the Arc Agent. If an agent
   already has the tag key, specified as an argument, the key value will be
   overwritten to the value, defined in the resource.
+
+* `force_delete` - (Optional) Allows deleting the Arc Agent without waiting for
+  an associated compute instance to terminate. Otherwise, if the Arc Agent is
+  still active inside the running compute instance, it will recreate itself.
+  Defaults to `false`.
 
 ## Attributes Reference
 
@@ -96,8 +111,10 @@ resource "ccloud_arc_agent_v1" "agent_1" {
 are exported:
 
 * `region` - See Argument Reference above.
+* `agent_id` - See Argument Reference above.
 * `filter` - See Argument Reference above.
 * `tags` - See Argument Reference above.
+* `force_delete` - See Argument Reference above.
 * `display_name` - The Arc agent display name.
 * `project` - The Arc agent parent OpenStack project ID.
 * `organization` - The Arc agent parent OpenStack domain ID.

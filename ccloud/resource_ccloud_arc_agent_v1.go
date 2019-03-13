@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/kayrus/gophercloud-arc/arc/v1/agents"
 )
@@ -22,7 +23,8 @@ func resourceCCloudArcAgentV1() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Minute),
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -33,10 +35,21 @@ func resourceCCloudArcAgentV1() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"agent_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"filter"},
+				ValidateFunc:  validation.NoZeroValues,
+			},
+
 			"filter": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"agent_id"},
+				ValidateFunc:  validation.NoZeroValues,
 			},
 
 			"tags": {
@@ -44,13 +57,13 @@ func resourceCCloudArcAgentV1() *schema.Resource {
 				Optional: true,
 			},
 
-			// Computed attributes
-			"agent_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-				ForceNew: true,
+			"force_delete": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 
+			// Computed attributes
 			"display_name": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -111,24 +124,14 @@ func resourceCCloudArcAgentV1Create(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
-	var tmp interface{}
+	agentID := d.Get("agent_id").(string)
 	filter := d.Get("filter").(string)
 	timeout := d.Timeout(schema.TimeoutCreate)
 
-	waitForAgent := &resource.StateChangeConf{
-		Target:     []string{"active"},
-		Refresh:    arcCCloudArcAgentV1GetAgent(arcClient, "", filter),
-		Timeout:    timeout,
-		Delay:      1 * time.Second,
-		MinTimeout: 1 * time.Second,
-	}
-
-	tmp, err = waitForAgent.WaitForState()
+	agent, err := arcCCloudArcAgentV1WaitForAgent(arcClient, agentID, filter, timeout)
 	if err != nil {
 		return err
 	}
-
-	agent := tmp.(*agents.Agent)
 
 	d.SetId(agent.AgentID)
 
@@ -178,6 +181,30 @@ func resourceCCloudArcAgentV1Delete(d *schema.ResourceData, meta interface{}) er
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+	}
+
+	if !d.Get("force_delete").(bool) {
+		// Wait for the instance to delete before moving on.
+		log.Printf("[DEBUG] Waiting for compute instance (%s) to delete", d.Id())
+
+		computeClient, err := config.computeV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		}
+
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"ACTIVE", "SHUTOFF"},
+			Target:     []string{"DELETED", "SOFT_DELETED"},
+			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutDelete),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("Error waiting for compute instance (%s) to delete: %s", d.Id(), err)
+		}
 	}
 
 	log.Printf("[DEBUG] Deleting ccloud_arc_agent_v1: %s", d.Id())

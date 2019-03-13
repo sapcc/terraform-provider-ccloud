@@ -2,13 +2,9 @@ package ccloud
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-
-	"github.com/kayrus/gophercloud-arc/arc/v1/agents"
 )
 
 func dataSourceCCloudArcAgentV1() *schema.Resource {
@@ -124,8 +120,6 @@ func dataSourceCCloudArcAgentV1Read(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
-	var tmp interface{}
-	var msg string
 	agentID := d.Get("agent_id").(string)
 	filter := d.Get("filter").(string)
 
@@ -134,30 +128,10 @@ func dataSourceCCloudArcAgentV1Read(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error parsing the read timeout for ccloud_arc_job_v1: %s", err)
 	}
 
-	if timeout > 0 {
-		// Retryable case, when timeout is set
-		waitForAgent := &resource.StateChangeConf{
-			Target:     []string{"active"},
-			Refresh:    arcCCloudArcAgentV1GetAgent(arcClient, agentID, filter),
-			Timeout:    timeout,
-			Delay:      1 * time.Second,
-			MinTimeout: 1 * time.Second,
-		}
-		tmp, err = waitForAgent.WaitForState()
-	} else {
-		// When timeout is not set, just get the agent
-		tmp, msg, err = arcCCloudArcAgentV1GetAgent(arcClient, agentID, filter)()
-	}
-
-	if len(msg) > 0 && msg != "active" {
-		return fmt.Errorf(msg)
-	}
-
+	agent, err := arcCCloudArcAgentV1WaitForAgent(arcClient, agentID, filter, timeout)
 	if err != nil {
 		return err
 	}
-
-	agent := tmp.(*agents.Agent)
 
 	d.SetId(agent.AgentID)
 

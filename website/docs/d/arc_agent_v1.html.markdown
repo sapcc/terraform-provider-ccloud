@@ -11,6 +11,12 @@ description: |-
 Use this data source to get the ID and other attributes of an available Arc
 Agent.
 
+The resource can wait for an Arc Agent to be available (the Arc Agent bootstrap
+takes time due to compute instance boot time and cloud-init execution delay)
+within the `timeouts`
+[nested](/docs/configuration/resources.html#operation-timeouts) block argument.
+The default read timeout is 0, what means don't wait.
+
 ## Example Usage
 
 ### Get an Arc Agent by an agent ID
@@ -41,12 +47,11 @@ data "ccloud_arc_agent_v1" "agent_1" {
 * `region` - (Optional) The region in which to obtain the Arc client. If
    omitted, the `region` argument of the provider is used.
 
-* `agent_id` - (Optional) The ID of the known Arc agent.
+* `agent_id` - (Optional) The ID of the known Arc agent. Conflicts with
+  `filter`.
 
 * `filter` - (Optional) The filter, used to filter the desired Arc agent.
-
-* `timeouts` - (Optional) The read timeout duration to wait until the desired Arc
-   agent is found. Default value is 0, what means don't wait.
+   Conflicts with `agent_id`.
 
 ## Attributes Reference
 
