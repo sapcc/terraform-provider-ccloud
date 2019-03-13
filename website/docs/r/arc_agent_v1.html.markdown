@@ -22,7 +22,7 @@ existing resource guided by the `filter` argument. It will wait for an Arc Agent
 to be available (the Arc Agent bootstrap takes time due to compute instance boot
 time and cloud-init execution delay) within the `timeouts`
 [nested](/docs/configuration/resources.html#operation-timeouts) block argument.
-The default create timeout is 10 minutes.
+The default create timeout is 30 minutes.
 
 The `terraform destroy` command will wait for the compute instance, associated
 with the Arc Agent, to be deleted, then it will destroy the Arc Agent resource.
