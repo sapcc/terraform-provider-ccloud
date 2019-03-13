@@ -21,17 +21,9 @@ data "ccloud_automation_v1" "automation_1" {
   name = "chef-automation"
 }
 
-data "ccloud_arc_agent_v1" "agent_1" {
-  filter  = "@metadata_name = 'hostname'"
-
-  timeouts = {
-    read = "10m"
-  }
-}
-
 resource "ccloud_automation_run_v1" "run_1" {
   automation_id = "${data.ccloud_automation_v1.automation_1.id}"
-  selector      = "@identity = '${data.ccloud_arc_agent_v1.agent_1.id}'"
+  selector      = "@metadata_name = 'hostname'"
 }
 
 data "ccloud_arc_job_v1" "job" {
@@ -74,7 +66,8 @@ output "job_log" {
 * `state` - The Automation Run state. Can either be `preparing`, `executing`,
   `failed` or `completed`.
 * `log` - The Automation Run log.
-* `jobs` - The list of the Arc Jobs ID, created by the Automation Run.
+* `jobs` - The list of the Arc Jobs ID, created by the Automation Run. An empty
+  list will be returned, if the Automation Run has failed status.
 * `project_id` - The parent Openstack project ID.
 * `created_at` - The date the Lyra automation was created.
 * `updated_at` - The date the Lyra automation was last updated.
