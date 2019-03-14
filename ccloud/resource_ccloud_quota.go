@@ -65,12 +65,12 @@ func resourceCCloudQuota() *schema.Resource {
 		Delete: resourceCCloudQuotaDelete,
 
 		Schema: map[string]*schema.Schema{
-			"domain_id": &schema.Schema{
+			"domain_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
