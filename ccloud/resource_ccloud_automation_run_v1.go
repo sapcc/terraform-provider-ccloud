@@ -171,7 +171,7 @@ func resourceCCloudAutomationRunV1Read(d *schema.ResourceData, meta interface{})
 	config := meta.(*Config)
 	automationClient, err := config.automationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return fmt.Errorf("Error creating OpenStack Automation client: %s", err)
 	}
 
 	run, err := runs.Get(automationClient, d.Id()).Extract()
@@ -213,7 +213,7 @@ func flattenAutomationiOwnerV1(owner runs.Owner) []interface{} {
 }
 
 func waitForAutomationRunV1(automationClient *gophercloud.ServiceClient, id string, target []string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for %s run to become %s.", id, target)
+	log.Printf("[DEBUG] Waiting for %s run to become %v.", id, target)
 
 	stateConf := &resource.StateChangeConf{
 		Target:     target,

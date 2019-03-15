@@ -132,7 +132,7 @@ func dataSourceCCloudAutomationV1Read(d *schema.ResourceData, meta interface{}) 
 	config := meta.(*Config)
 	automationClient, err := config.automationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return fmt.Errorf("Error creating OpenStack Automation client: %s", err)
 	}
 
 	allPages, err := automations.List(automationClient, automations.ListOpts{}).AllPages()

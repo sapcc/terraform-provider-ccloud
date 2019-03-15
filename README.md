@@ -31,6 +31,8 @@ additional services:
 
   * Limes for Quota Management
   * Kubernikus (Kubernetes as a Service)
+  * Arc for Arc resources management
+  * Lyra for Automation management
 
 The provider needs to be configured with the proper OpenStack credentials
 before it can be used. For details see the OpenStack provider.
