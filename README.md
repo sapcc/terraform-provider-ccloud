@@ -102,7 +102,7 @@ resource "ccloud_quota_v1" "quota" {
   }
 }
 
-resource "ccloud_kubernetes" "demo" {
+resource "ccloud_kubernetes_v1" "demo" {
   name           = "demo"
   ssh_public_key = "ssh-rsa AAAABHTmDMP6w=="
 
