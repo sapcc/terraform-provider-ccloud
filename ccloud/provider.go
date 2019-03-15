@@ -232,8 +232,10 @@ func Provider() terraform.ResourceProvider {
 			"ccloud_arc_job_v1":             resourceCCloudArcJobV1(),
 			"ccloud_automation_v1":          resourceCCloudAutomationV1(),
 			"ccloud_automation_run_v1":      resourceCCloudAutomationRunV1(),
-			"ccloud_quota":                  resourceCCloudQuota(),
-			"ccloud_kubernetes":             resourceCCloudKubernetes(),
+			"ccloud_quota":                  resourceCCloudQuotaV1(),
+			"ccloud_quota_v1":               resourceCCloudQuotaV1(),
+			"ccloud_kubernetes":             resourceCCloudKubernetesV1(),
+			"ccloud_kubernetes_v1":          resourceCCloudKubernetesV1(),
 		},
 
 		ConfigureFunc: configureProvider,

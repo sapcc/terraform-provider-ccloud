@@ -53,7 +53,7 @@ data "openstack_identity_project_v3" "demo" {
   name = "${var.tenant_name}"
 }
 
-resource "ccloud_quota" "quota" {
+resource "ccloud_quota_v1" "quota" {
   domain_id  = "${openstack_identity_project_v3.demo.domain_id}"
   project_id = "${openstack_identity_project_v3.demo.id}"
 
@@ -97,7 +97,7 @@ resource "ccloud_quota" "quota" {
     share_snapshots   = 8
   }
 
-  object-store {
+  objectstore {
     capacity = 1073741824
   }
 }

@@ -55,16 +55,25 @@ var (
 	}
 )
 
-func resourceCCloudQuota() *schema.Resource {
+func resourceCCloudQuotaV1() *schema.Resource {
 	quotaResource := &schema.Resource{
 		SchemaVersion: 1,
 
-		Read:   resourceCCloudQuotaRead,
-		Update: resourceCCloudQuotaCreateOrUpdate,
-		Create: resourceCCloudQuotaCreateOrUpdate,
-		Delete: resourceCCloudQuotaDelete,
+		Read:   resourceCCloudQuotaV1Read,
+		Update: resourceCCloudQuotaV1CreateOrUpdate,
+		Create: resourceCCloudQuotaV1CreateOrUpdate,
+		Delete: resourceCCloudQuotaV1Delete,
+		Importer: &schema.ResourceImporter{
+			State: resourceCCloudQuotaV1Import,
+		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"domain_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -85,15 +94,17 @@ func resourceCCloudQuota() *schema.Resource {
 
 		for resource := range resources {
 			elem.Schema[resource] = &schema.Schema{
-				Type:     schema.TypeInt,
+				Type:     schema.TypeFloat,
 				Required: false,
 				Optional: true,
+				Computed: true,
 			}
 		}
 
 		quotaResource.Schema[sanitize(service)] = &schema.Schema{
 			Type:     schema.TypeList,
 			Optional: true,
+			Computed: true,
 			Elem:     elem,
 			MaxItems: 1,
 		}
@@ -102,7 +113,7 @@ func resourceCCloudQuota() *schema.Resource {
 	return quotaResource
 }
 
-func resourceCCloudQuotaRead(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudQuotaV1Read(d *schema.ResourceData, meta interface{}) error {
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
 
@@ -119,22 +130,24 @@ func resourceCCloudQuotaRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error getting Limes project: %s", err)
 	}
 
-	d.SetId(projectID)
 	for service, resources := range SERVICES {
+		res := make(map[string]float64)
 		for resource := range resources {
-			key := fmt.Sprintf("%s.%s", sanitize(service), resource)
 			if quota.Services[service] == nil || quota.Services[service].Resources[resource] == nil {
 				continue
 			}
-			d.Set(key, quota.Services[service].Resources[resource].Quota)
+			res[resource] = float64(quota.Services[service].Resources[resource].Quota)
 			log.Printf("[QUOTA] %s.%s: %s", service, resource, toString(quota.Services[service].Resources[resource]))
 		}
+		d.Set(sanitize(service), []map[string]float64{res})
 	}
+
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }
 
-func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudQuotaV1CreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
 	services := limes.QuotaRequest{}
@@ -158,7 +171,7 @@ func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{})
 
 				if v, ok := d.GetOk(key); ok && d.HasChange(key) {
 					log.Printf("[QUOTA] Resource Changed: %s", key)
-					quota[resource] = limes.ValueWithUnit{uint64(v.(int)), unit}
+					quota[resource] = limes.ValueWithUnit{uint64(v.(float64)), unit}
 					log.Printf("[QUOTA] %s.%s: %s", service, resource, quota[resource].String())
 				}
 			}
@@ -175,12 +188,11 @@ func resourceCCloudQuotaCreateOrUpdate(d *schema.ResourceData, meta interface{})
 	log.Printf("[QUOTA] Resulting Quota for: %s/%s", domainID, projectID)
 
 	d.SetId(projectID)
-	resourceCCloudQuotaRead(d, meta)
 
-	return nil
+	return resourceCCloudQuotaV1Read(d, meta)
 }
 
-func resourceCCloudQuotaDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudQuotaV1Delete(d *schema.ResourceData, meta interface{}) error {
 	d.SetId("")
 	return nil
 }
@@ -191,4 +203,18 @@ func toString(r *limes.ProjectResourceReport) string {
 
 func sanitize(s string) string {
 	return strings.Replace(s, "-", "", -1)
+}
+
+func resourceCCloudQuotaV1Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 2)
+	if len(parts) != 2 {
+		err := fmt.Errorf("Invalid format specified for Quota. Format must be <domain id>/<project id>")
+		return nil, err
+	}
+
+	d.SetId(parts[1])
+	d.Set("domain_id", parts[0])
+	d.Set("project_id", parts[1])
+
+	return []*schema.ResourceData{d}, nil
 }
