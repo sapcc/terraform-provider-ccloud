@@ -54,6 +54,11 @@ $ cd $GOPATH/src/github.com/sapcc/terraform-ccloud-provider
 $ make build
 ```
 
+Installing the provider
+-----------------------
+
+You can follow the official Terraform documentation to know how to [install third-party providers](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).
+
 Using the provider
 ----------------------
 You can browse the documentation within this repo [here](https://github.com/sapcc/terraform-provider-ccloud/tree/master/website/docs).
