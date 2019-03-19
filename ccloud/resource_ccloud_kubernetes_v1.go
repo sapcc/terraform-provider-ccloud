@@ -49,18 +49,18 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: kubernikusValidateClusterName,
+			},
+
 			"is_admin": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
 				Default:  false,
-			},
-
-			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validateKlusterName,
 			},
 
 			"advertise_address": {
@@ -115,7 +115,7 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 						"name": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validatePoolName,
+							ValidateFunc: kubernikusValidatePoolName,
 						},
 						"flavor": {
 							Type:         schema.TypeString,
@@ -383,7 +383,7 @@ func resourceCCloudKubernetesV1Delete(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func validateKlusterName(v interface{}, k string) (ws []string, errors []error) {
+func kubernikusValidateClusterName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	if !regexp.MustCompile(KlusterNameRegex).MatchString(value) {
@@ -393,7 +393,7 @@ func validateKlusterName(v interface{}, k string) (ws []string, errors []error) 
 	return
 }
 
-func validatePoolName(v interface{}, k string) (ws []string, errors []error) {
+func kubernikusValidatePoolName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	if !regexp.MustCompile(PoolNameRegex).MatchString(value) {
