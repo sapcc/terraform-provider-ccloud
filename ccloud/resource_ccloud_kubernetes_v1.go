@@ -596,7 +596,6 @@ func kubernikusKlusterV1GetNodePoolState(klient *Kubernikus, name string) resour
 				if a.Name == s.Name {
 					// sometimes status size doesn't reflect the actual size, therefore we use "a.Size"
 					if a.Size != s.Healthy {
-
 						// check, whether there are error events
 						events, err := klient.GetClusterEvents(operations.NewGetClusterEventsParams().WithName(name), klient.authFunc())
 						if err != nil {
@@ -646,7 +645,7 @@ func kubernikusUpdateNodePoolsV1(klient *Kubernikus, cluster *models.Kluster, ol
 				if np.AvailabilityZone == "" {
 					tmp.AvailabilityZone = op.AvailabilityZone
 				}
-				poolsToKeep = append(poolsToKeep, np)
+				poolsToKeep = append(poolsToKeep, tmp)
 				found = true
 			}
 		}
@@ -723,11 +722,13 @@ func kubernikusUpdateAndWait(klient *Kubernikus, cluster *models.Kluster, timeou
 
 func resourceCCloudKubernetesV1Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
-
-	config := meta.(*Config)
-	log.Printf("[KUBERNETES] Reading Kubernikus Kluster in project %s", config.TenantID)
-
 	name := parts[0]
+
+	if len(name) == 0 {
+		err := fmt.Errorf("Invalid format specified for Kubernetes. Format must be <name>[/<is_admin>]")
+		return nil, err
+	}
+
 	var isAdmin bool
 	var err error
 	if len(parts) == 2 {
@@ -735,16 +736,6 @@ func resourceCCloudKubernetesV1Import(d *schema.ResourceData, meta interface{}) 
 		if err != nil {
 			return nil, fmt.Errorf("Failed to parse is_admin field: %s", err)
 		}
-	}
-
-	klient, err := config.kubernikusV1Client(GetRegion(d, config), isAdmin)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating Kubernikus client: %s", err)
-	}
-
-	_, err = klient.ShowCluster(operations.NewShowClusterParams().WithName(name), klient.authFunc())
-	if err != nil {
-		return nil, kubernikusHandleErrorV1("Error reading Kubernikus cluster", err)
 	}
 
 	d.SetId(name)
