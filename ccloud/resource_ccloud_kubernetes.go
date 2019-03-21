@@ -113,6 +113,16 @@ func resourceCCloudKubernetes() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 						},
+						"taints": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"labels": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
 					},
 				},
 			},
@@ -247,6 +257,12 @@ func resourceCCloudKubernetesCreate(d *schema.ResourceData, meta interface{}) er
 			if avz, ok := d.GetOk(fmt.Sprintf("node_pools.%d.availability_zone", i)); ok {
 				newPool.AvailabilityZone = avz.(string)
 			}
+			if taints, ok := d.GetOk(fmt.Sprintf("node_pools.%d.taints", i)); ok {
+				newPool.Taints = taints.([]string)
+			}
+			if labels, ok := d.GetOk(fmt.Sprintf("node_pools.%d.labels", i)); ok {
+				newPool.Labels = labels.([]string)
+			}
 			cluster.Spec.NodePools = append(cluster.Spec.NodePools, newPool)
 		}
 	}
@@ -333,6 +349,12 @@ func resourceCCloudKubernetesUpdate(d *schema.ResourceData, meta interface{}) er
 			}
 			if avz, ok := d.GetOk(fmt.Sprintf("node_pools.%d.availability_zone", i)); ok {
 				newPool.AvailabilityZone = avz.(string)
+			}
+			if taints, ok := d.GetOk(fmt.Sprintf("node_pools.%d.taints", i)); ok {
+				newPool.Taints = taints.([]string)
+			}
+			if labels, ok := d.GetOk(fmt.Sprintf("node_pools.%d.labels", i)); ok {
+				newPool.Labels = labels.([]string)
 			}
 			cluster.Spec.NodePools = append(cluster.Spec.NodePools, newPool)
 		}
@@ -426,6 +448,8 @@ func updateStateFromAPIResponse(d *schema.ResourceData, kluster *models.Kluster)
 			"image":            p.Image,
 			"name":             p.Name,
 			"size":             p.Size,
+			"taints":           p.Taints,
+			"labels":           p.Labels,
 		})
 	}
 

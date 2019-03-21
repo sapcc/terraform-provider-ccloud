@@ -244,7 +244,7 @@ github.com/posener/complete/match
 # github.com/sapcc/gophercloud-limes v0.0.0-20190305085625-07ecaa77e653
 github.com/sapcc/gophercloud-limes/resources
 github.com/sapcc/gophercloud-limes/resources/v1/projects
-# github.com/sapcc/kubernikus v0.0.0-20190307154513-4cc8106fb5bd
+# github.com/sapcc/kubernikus v0.0.0-20190315142052-6f464117b368
 github.com/sapcc/kubernikus/pkg/api/client/operations
 github.com/sapcc/kubernikus/pkg/api/models
 github.com/sapcc/kubernikus/pkg/cmd/printers
