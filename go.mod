@@ -22,7 +22,7 @@ require (
 	github.com/mitchellh/hashstructure v1.0.0 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/sapcc/gophercloud-limes v0.0.0-20190305085625-07ecaa77e653
-	github.com/sapcc/kubernikus v0.0.0-20190307154513-4cc8106fb5bd
+	github.com/sapcc/kubernikus v0.0.0-20190315142052-6f464117b368
 	github.com/sapcc/limes v0.0.0-20190306133048-88a66de094d2
 	github.com/zclconf/go-cty v0.0.0-20190212192503-19dda139b164 // indirect
 )
