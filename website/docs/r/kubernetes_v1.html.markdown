@@ -21,24 +21,23 @@ resource "ccloud_kubernetes_v1" "demo" {
   name           = "demo"
   ssh_public_key = "ssh-rsa AAAABHTmDMP6w=="
 
-  node_pools = [
-    {
-      name              = "payload0"
-      flavor            = "m1.xlarge_cpu"
-      size              = 2
-      availability_zone = "eu-de-1d"
-      taints            = ["key=value:NoSchedule"]
-      labels            = ["label=value"]
-    },
-    {
-      name              = "payload1"
-      flavor            = "m1.xlarge_cpu"
-      size              = 1
-      availability_zone = "eu-de-1b"
-      taints            = ["key=value:NoSchedule"]
-      labels            = ["label=value"]
-    },
-  ]
+  node_pools {
+    name              = "payload0"
+    flavor            = "m1.xlarge_cpu"
+    size              = 2
+    availability_zone = "eu-de-1d"
+    taints            = ["key=value:NoSchedule"]
+    labels            = ["label=value"]
+  }
+
+  node_pools {
+    name              = "payload1"
+    flavor            = "m1.xlarge_cpu"
+    size              = 1
+    availability_zone = "eu-de-1b"
+    taints            = ["key=value:NoSchedule"]
+    labels            = ["label=value"]
+  }
 }
 ```
 
