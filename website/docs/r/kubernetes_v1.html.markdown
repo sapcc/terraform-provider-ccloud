@@ -22,8 +22,22 @@ resource "ccloud_kubernetes_v1" "demo" {
   ssh_public_key = "ssh-rsa AAAABHTmDMP6w=="
 
   node_pools = [
-    { name = "payload0", flavor = "m1.xlarge_cpu", size = 2, availability_zone = "eu-de-1d"},
-    { name = "payload1", flavor = "m1.xlarge_cpu", size = 1, availability_zone = "eu-de-1b"}
+    {
+      name              = "payload0"
+      flavor            = "m1.xlarge_cpu"
+      size              = 2
+      availability_zone = "eu-de-1d"
+      taints            = ["key=value:NoSchedule"]
+      labels            = ["label=value"]
+    },
+    {
+      name              = "payload1"
+      flavor            = "m1.xlarge_cpu"
+      size              = 1
+      availability_zone = "eu-de-1b"
+      taints            = ["key=value:NoSchedule"]
+      labels            = ["label=value"]
+    },
   ]
 }
 ```
@@ -58,6 +72,10 @@ The following arguments are supported:
   specified, generated automatically. Changing this forces a new resource to be
   created.
 
+* `dns_domain` - (Optional) The DNS domain, served by the `kube-dns` service.
+  Defaults to `cluster.local`. Changing this forces a new resource to be
+  created.
+
 * `ssh_public_key` - (Optional) The SSH public key, which should be used to
   authenticate the default SSH user (`core` for CoreOS images).
 
@@ -86,6 +104,12 @@ The `node_pools` block supports:
 * `availability_zone` - (Optional) The availability zone in which to create the
   the node pool. If not specified, detected automatically. Changing this forces
   a new node pool to be created.
+
+* `taints` - (Optional) The list of Kubernetes node taints to be assigned on the
+  node pool compute instance.
+
+* `labels` - (Optional) The list of Kubernetes node labels to be assigned on the
+  node pool compute instance.
 
 The `openstack` block supports:
 
@@ -125,6 +149,7 @@ In addition to all arguments above, the following attributes are exported:
 * `cluster_cidr` - See Argument Reference above.
 * `service_cidr` - See Argument Reference above.
 * `dns_address` - See Argument Reference above.
+* `dns_domain` - See Argument Reference above.
 * `ssh_public_key` - See Argument Reference above.
 * `node_pools` - See Argument Reference above.
 * `openstack` - See Argument Reference above.
