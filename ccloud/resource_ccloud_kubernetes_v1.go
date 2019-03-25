@@ -140,6 +140,16 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 							Computed:     true,
 							ValidateFunc: validation.NoZeroValues,
 						},
+						"taints": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"labels": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
 					},
 				},
 			},
@@ -429,6 +439,8 @@ func kubernikusFlattenNodePoolsV1(nodePools []models.NodePool) []map[string]inte
 			"image":             p.Image,
 			"name":              p.Name,
 			"size":              p.Size,
+			"taints":            p.Taints,
+			"labels":            p.Labels,
 		})
 	}
 	return res
@@ -498,6 +510,12 @@ func kubernikusExpandNodePoolsV1(raw interface{}) ([]models.NodePool, error) {
 					}
 					if v, ok := v["availability_zone"]; ok {
 						p.AvailabilityZone = v.(string)
+					}
+					if v, ok := v["taints"]; ok {
+						p.Taints = expandToStringSlice(v.([]interface{}))
+					}
+					if v, ok := v["labels"]; ok {
+						p.Labels = expandToStringSlice(v.([]interface{}))
 					}
 
 					res = append(res, p)
