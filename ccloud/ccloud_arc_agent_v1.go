@@ -54,11 +54,12 @@ func arcCCloudArcAgentV1WaitForAgent(arcClient *gophercloud.ServiceClient, agent
 	if timeout > 0 {
 		// Retryable case, when timeout is set
 		waitForAgent := &resource.StateChangeConf{
-			Target:     []string{"active"},
-			Refresh:    arcCCloudArcAgentV1GetAgent(arcClient, agentID, filter, timeout),
-			Timeout:    timeout,
-			Delay:      1 * time.Second,
-			MinTimeout: 1 * time.Second,
+			Target:         []string{"active"},
+			Refresh:        arcCCloudArcAgentV1GetAgent(arcClient, agentID, filter, timeout),
+			Timeout:        timeout,
+			Delay:          1 * time.Second,
+			MinTimeout:     1 * time.Second,
+			NotFoundChecks: 1000, // workaround for default 20 retries, when the resource is nil
 		}
 		agent, err = waitForAgent.WaitForState()
 	} else {
