@@ -45,7 +45,7 @@ func NewKubernikusV1(provider *gophercloud.ProviderClient, eo gophercloud.Endpoi
 func (k *Kubernikus) authFunc() runtime.ClientAuthInfoWriterFunc {
 	return runtime.ClientAuthInfoWriterFunc(
 		func(req runtime.ClientRequest, reg strfmt.Registry) error {
-			log.Printf("[KUBERNETES] Kubernikus Auth %s", k.provider.Token())
+			log.Printf("[KUBERNETES] Kubernikus Auth ***")
 			req.SetHeaderParam("X-AUTH-TOKEN", k.provider.Token())
 			return nil
 		})

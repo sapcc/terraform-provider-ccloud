@@ -31,6 +31,8 @@ additional services:
 
   * Limes for Quota Management
   * Kubernikus (Kubernetes as a Service)
+  * Arc for Arc resources management
+  * Lyra for Automation management
 
 The provider needs to be configured with the proper OpenStack credentials
 before it can be used. For details see the OpenStack provider.
@@ -51,7 +53,7 @@ data "openstack_identity_project_v3" "demo" {
   name = "${var.tenant_name}"
 }
 
-resource "ccloud_quota" "quota" {
+resource "ccloud_quota_v1" "quota" {
   domain_id  = "${openstack_identity_project_v3.demo.domain_id}"
   project_id = "${openstack_identity_project_v3.demo.id}"
 
@@ -95,12 +97,12 @@ resource "ccloud_quota" "quota" {
     share_snapshots   = 8
   }
 
-  object-store {
+  objectstore {
     capacity = 1073741824
   }
 }
 
-resource "ccloud_kubernetes" "demo" {
+resource "ccloud_kubernetes_v1" "demo" {
   name           = "demo"
   ssh_public_key = "ssh-rsa AAAABHTmDMP6w=="
 

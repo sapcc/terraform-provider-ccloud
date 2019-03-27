@@ -287,7 +287,7 @@ func flattenArcJobUserV1(user jobs.User) []interface{} {
 }
 
 func waitForArcJobV1(arcClient *gophercloud.ServiceClient, id string, target []string, pending []string, timeout time.Duration) error {
-	log.Printf("[DEBUG] Waiting for %s job to become %s.", id, target)
+	log.Printf("[DEBUG] Waiting for %s job to become %v.", id, target)
 
 	stateConf := &resource.StateChangeConf{
 		Target:     target,
