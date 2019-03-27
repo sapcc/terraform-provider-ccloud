@@ -37,83 +37,6 @@ additional services:
 The provider needs to be configured with the proper OpenStack credentials
 before it can be used. For details see the OpenStack provider.
 
-
-```
-provider "ccloud" {
-  auth_url         = "${var.auth_url}"
-  region           = "${var.region}"
-  user_name        = "${var.user_name}"
-  user_domain_name = "${var.user_domain_name}"
-  password         = "${var.password}"
-  tenant_name      = "${var.tenant_name}"
-  domain_name      = "${var.domain_name}"
-}
-
-data "openstack_identity_project_v3" "demo" {
-  name = "${var.tenant_name}"
-}
-
-resource "ccloud_quota_v1" "quota" {
-  domain_id  = "${openstack_identity_project_v3.demo.domain_id}"
-  project_id = "${openstack_identity_project_v3.demo.id}"
-
-  compute {
-    instances = 8
-    cores     = 32
-    ram       = 81920 
-  }
-
-  volumev2 {
-    capacity  = 1024
-    snapshots = 0
-    volumes   = 128
-  }
-
-  network {
-    floating_ips         = 4
-    networks             = 1
-    ports                = 512
-    routers              = 2
-    security_group_rules = 64
-    security_groups      = 4
-    subnets              = 1
-    healthmonitors       = 10
-    l7policies           = 8 
-    listeners            = 16
-    loadbalancers        = 8  
-    pools                = 8 
-  }
-
-  dns {
-    zones      = 1
-    recordsets = 16
-  }
-
-  sharev2 {
-    share_networks    = 1
-    share_capacity    = 1024
-    shares            = 16
-    snapshot_capacity = 512
-    share_snapshots   = 8
-  }
-
-  objectstore {
-    capacity = 1073741824
-  }
-}
-
-resource "ccloud_kubernetes_v1" "demo" {
-  name           = "demo"
-  ssh_public_key = "ssh-rsa AAAABHTmDMP6w=="
-
-  node_pools = [
-    { name = "payload0", flavor = "m1.xlarge_cpu", size = 2, availability_zone = "eu-de-1d", taints = ["key=value:NoSchedule"], labels = ["label=value"]},
-    { name = "payload1", flavor = "m1.xlarge_cpu", size = 1, availability_zone = "eu-de-1b", taints = ["key=value:NoSchedule"], labels = ["label=value"]}
-  ]
-}
-
-```
-
 Building The Provider
 ---------------------
 
@@ -131,6 +54,14 @@ $ cd $GOPATH/src/github.com/sapcc/terraform-ccloud-provider
 $ make build
 ```
 
+Installing the provider
+-----------------------
+
+You can follow the official Terraform documentation to know how to [install third-party providers](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).
+
+Using the provider
+----------------------
+You can browse the documentation within this repo [here](https://github.com/sapcc/terraform-provider-ccloud/tree/master/website/docs).
 
 Developing the Provider
 ---------------------------
