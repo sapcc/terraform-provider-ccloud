@@ -14,8 +14,8 @@ Agent.
 The resource can wait for an Arc Agent to be available (the Arc Agent bootstrap
 takes time due to compute instance boot time and cloud-init execution delay)
 within the `timeouts`
-[nested](/docs/configuration/resources.html#operation-timeouts) block argument.
-The default read timeout is 0, what means don't wait.
+[nested](https://www.terraform.io/docs/configuration/resources.html#operation-timeouts)
+block argument. The default read timeout is 0, what means don't wait.
 
 ## Example Usage
 

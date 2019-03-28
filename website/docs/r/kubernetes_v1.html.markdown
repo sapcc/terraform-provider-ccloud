@@ -160,7 +160,8 @@ In addition to all arguments above, the following attributes are exported:
 ## Timeouts
 
 `ccloud_kubernetes_v1` provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+[Timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts)
+configuration options:
 
 * `create` - (Default `30 minutes`) How long to wait for the Kubernikus Cluster
   to be created.

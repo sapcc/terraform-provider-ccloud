@@ -2,76 +2,72 @@
   <% content_for :sidebar do %>
     <div class="docs-sidebar hidden-print affix-top" role="complementary">
       <ul class="nav docs-sidenav">
-        <li<%= sidebar_current("docs-home") %>>
-          <a href="/docs/providers/index.html">All Providers</a>
-        </li>
-
         <li<%= sidebar_current("docs-ccloud-index") %>>
-          <a href="/docs/providers/ccloud/index.html">Converged Cloud Provider</a>
+          <%= link_to 'Converged Cloud Provider', '/docs/providers/ccloud/index.html', :relative => true %>
         </li>
 
-        <li<%= sidebar_current("docs-ccloud-datasource") %>>
+        <li class="active"<%= sidebar_current("docs-ccloud-datasource") %>>
           <a href="#">Data Sources</a>
           <ul class="nav nav-visible">
             <li<%= sidebar_current("docs-ccloud-datasource-arc-agent-v1") %>>
-              <a href="/docs/providers/ccloud/d/arc_agent_v1.html">ccloud_arc_agent_v1</a>
+              <%= link_to 'ccloud_arc_agent_v1', '/docs/providers/ccloud/d/arc_agent_v1.html', :relative => true %>
             </li>
             <li<%= sidebar_current("docs-ccloud-datasource-arc-agent-ids-v1") %>>
-              <a href="/docs/providers/ccloud/d/arc_agent_ids_v1.html">ccloud_arc_agent_ids_v1</a>
+              <%= link_to 'ccloud_arc_agent_ids_v1', '/docs/providers/ccloud/d/arc_agent_ids_v1.html', :relative => true %>
             </li>
             <li<%= sidebar_current("docs-ccloud-datasource-arc-job-v1") %>>
-              <a href="/docs/providers/ccloud/d/arc_job_v1.html">ccloud_arc_job_v1</a>
+              <%= link_to 'ccloud_arc_job_v1', '/docs/providers/ccloud/d/arc_job_v1.html', :relative => true %>
             </li>
             <li<%= sidebar_current("docs-ccloud-datasource-arc-job-ids-v1") %>>
-              <a href="/docs/providers/ccloud/d/arc_job_ids_v1.html">ccloud_arc_job_ids_v1</a>
+              <%= link_to 'ccloud_arc_job_ids_v1', '/docs/providers/ccloud/d/arc_job_ids_v1.html', :relative => true %>
             </li>
             <li<%= sidebar_current("docs-ccloud-datasource-automation-v1") %>>
-              <a href="/docs/providers/ccloud/d/automation_v1.html">ccloud_automation_v1</a>
+              <%= link_to 'ccloud_automation_v1', '/docs/providers/ccloud/d/automation_v1.html', :relative => true %>
             </li>
           </ul>
         </li>
 
-        <li<%= sidebar_current("docs-ccloud-resource-arc") %>>
+        <li class="active"<%= sidebar_current("docs-ccloud-resource-arc") %>>
           <a href="#">Arc Resources</a>
           <ul class="nav nav-visible">
             <li<%= sidebar_current("docs-ccloud-resource-arc-agent-bootstrap-v1") %>>
-              <a href="/docs/providers/ccloud/r/arc_agent_bootstrap_v1.html">ccloud_arc_agent_bootstrap_v1</a>
+              <%= link_to 'ccloud_arc_agent_bootstrap_v1', '/docs/providers/ccloud/r/arc_agent_bootstrap_v1.html', :relative => true %>
             </li>
             <li<%= sidebar_current("docs-ccloud-resource-arc-agent-v1") %>>
-              <a href="/docs/providers/ccloud/r/arc_agent_v1.html">ccloud_arc_agent_v1</a>
+              <%= link_to 'ccloud_arc_agent_v1', '/docs/providers/ccloud/r/arc_agent_v1.html', :relative => true %>
             </li>
             <li<%= sidebar_current("docs-ccloud-resource-arc-job-v1") %>>
-              <a href="/docs/providers/ccloud/r/arc_job_v1.html">ccloud_arc_job_v1</a>
+              <%= link_to 'ccloud_arc_job_v1', '/docs/providers/ccloud/r/arc_job_v1.html', :relative => true %>
             </li>
           </ul>
         </li>
 
-        <li<%= sidebar_current("docs-ccloud-resource-automation") %>>
+        <li class="active"<%= sidebar_current("docs-ccloud-resource-automation") %>>
           <a href="#">Automation Resources</a>
           <ul class="nav nav-visible">
             <li<%= sidebar_current("docs-ccloud-resource-automation-v1") %>>
-              <a href="/docs/providers/ccloud/r/automation_v1.html">ccloud_automation_v1</a>
+              <%= link_to 'ccloud_automation_v1', '/docs/providers/ccloud/r/automation_v1.html', :relative => true %>
             </li>
             <li<%= sidebar_current("docs-ccloud-resource-automation-run-v1") %>>
-              <a href="/docs/providers/ccloud/r/automation_run_v1.html">ccloud_automation_run_v1</a>
+              <%= link_to 'ccloud_automation_run_v1', '/docs/providers/ccloud/r/automation_run_v1.html', :relative => true %>
             </li>
           </ul>
         </li>
 
-        <li<%= sidebar_current("docs-ccloud-resource-kubernetes") %>>
+        <li class="active"<%= sidebar_current("docs-ccloud-resource-kubernetes") %>>
           <a href="#">Kubernetes as a Service Resources</a>
           <ul class="nav nav-visible">
             <li<%= sidebar_current("docs-ccloud-resource-kubernetes-v1") %>>
-              <a href="/docs/providers/ccloud/r/kubernetes_v1.html">ccloud_kubernetes_v1</a>
+              <%= link_to 'ccloud_kubernetes_v1', '/docs/providers/ccloud/r/kubernetes_v1.html', :relative => true %>
             </li>
           </ul>
         </li>
 
-        <li<%= sidebar_current("docs-ccloud-resource-quota") %>>
+        <li class="active"<%= sidebar_current("docs-ccloud-resource-quota") %>>
           <a href="#">Quota Management Resources</a>
           <ul class="nav nav-visible">
             <li<%= sidebar_current("docs-ccloud-resource-quota-v1") %>>
-              <a href="/docs/providers/ccloud/r/quota_v1.html">ccloud_quota_v1</a>
+              <%= link_to 'ccloud_quota_v1', '/docs/providers/ccloud/r/quota_v1.html', :relative => true %>
             </li>
           </ul>
         </li>
