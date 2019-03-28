@@ -14,6 +14,14 @@ with the proper credentials before it can be used.
 
 Use the navigation to the left to read about the available resources.
 
+# Installing the provider
+
+Download a
+[binary release](https://github.com/sapcc/terraform-provider-ccloud/releases)
+for your OS, unpack the archive and follow the official Terraform documentation
+to know how to
+[install third-party providers](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).
+
 ## Example Usage
 
 ```hcl
@@ -137,16 +145,6 @@ The following arguments are supported:
   requires you to specify the full and complete endpoint URL. This might
   also invalidate any region you have set, too. Please see below for more details.
   Please use this at your own risk.
-
-* `swauth` - (Optional) Set to `true` to authenticate against Swauth, a
-  Swift-native authentication system. If omitted, the `OS_SWAUTH` environment
-  variable is used. You must also set `username` to the Swauth/Swift username
-  such as `username:project`. Set the `password` to the Swauth/Swift key.
-  Finally, set `auth_url` as the location of the Swift service. Note that this
-  will only work when used with the Converged Cloud Object Storage resources.
-
-* `use_octavia` - (Optional) If set to `true`, API requests will go the Load Balancer
-  service (Octavia) instead of the Networking service (Neutron).
 
 ## Overriding Service API Endpoints
 
