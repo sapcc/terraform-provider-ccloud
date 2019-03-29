@@ -68,6 +68,9 @@ resource "openstack_compute_instance_v2" "node" {
   is set to `json`, an additional `raw_map` attribute is available with the
   decoded JSON response. Changing this forces a new resource to be created.
 
+* `triggers` - (Optional) A map of arbitrary strings that, when changed, will
+  force a new Arc PKI token to be issued.
+
 ## Attributes Reference
 
 `id` is set to hash of the returned `user_data` content. In addition, the
