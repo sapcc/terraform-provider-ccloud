@@ -116,7 +116,8 @@ func resourceCCloudDomainQuotaV1CreateOrUpdate(d *schema.ResourceData, meta inte
 			for resource, unit := range resources {
 				key := fmt.Sprintf("%s.0.%s", service, resource)
 
-				if v, ok := d.GetOk(key); ok && d.HasChange(key) {
+				if d.HasChange(key) {
+					v := d.Get(key)
 					log.Printf("[QUOTA] Resource Changed: %s", key)
 					quota[resource] = limes.ValueWithUnit{uint64(v.(float64)), unit}
 					log.Printf("[QUOTA] %s.%s: %s", service, resource, quota[resource].String())
