@@ -10,8 +10,11 @@ description: |-
 
 Manages Limes (Quota) Domain resources.
 
-The `terraform destroy` command destroys the `ccloud_domain_quota_v1` state, but
-not the actual Limes domain quota.
+~> **Note:** The `terraform destroy` command destroys the
+`ccloud_domain_quota_v1` state, but not the actual Limes domain quota.
+
+~> **Note:** You _must_ have admin privileges in your OpenStack cloud to use
+this resource.
 
 ## Example Usage
 

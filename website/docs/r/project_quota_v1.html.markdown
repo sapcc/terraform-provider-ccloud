@@ -10,8 +10,11 @@ description: |-
 
 Manages Limes (Quota) Project resources.
 
-The `terraform destroy` command destroys the `ccloud_project_quota_v1` state,
-but not the actual Limes project quota.
+~> **Note:** The `terraform destroy` command destroys the
+`ccloud_project_quota_v1` state, but not the actual Limes project quota.
+
+~> **Note:** You _must_ have admin privileges in your OpenStack cloud to use
+this resource.
 
 ## Example Usage
 
