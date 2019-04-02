@@ -10,61 +10,16 @@ import (
 	"github.com/sapcc/limes"
 )
 
-var (
-	SERVICES = map[string]map[string]limes.Unit{
-		"compute": {
-			"cores":     limes.UnitNone,
-			"instances": limes.UnitNone,
-			"ram":       limes.UnitMebibytes,
-		},
-		"volumev2": {
-			"capacity":  limes.UnitGibibytes,
-			"snapshots": limes.UnitNone,
-			"volumes":   limes.UnitNone,
-		},
-		"network": {
-			"floating_ips":         limes.UnitNone,
-			"networks":             limes.UnitNone,
-			"ports":                limes.UnitNone,
-			"rbac_policies":        limes.UnitNone,
-			"routers":              limes.UnitNone,
-			"security_group_rules": limes.UnitNone,
-			"security_groups":      limes.UnitNone,
-			"subnet_pools":         limes.UnitNone,
-			"subnets":              limes.UnitNone,
-			"healthmonitors":       limes.UnitNone,
-			"l7policies":           limes.UnitNone,
-			"listeners":            limes.UnitNone,
-			"loadbalancers":        limes.UnitNone,
-			"pools":                limes.UnitNone,
-		},
-		"dns": {
-			"zones":      limes.UnitNone,
-			"recordsets": limes.UnitNone,
-		},
-		"sharev2": {
-			"share_networks":    limes.UnitNone,
-			"share_capacity":    limes.UnitGibibytes,
-			"shares":            limes.UnitNone,
-			"snapshot_capacity": limes.UnitGibibytes,
-			"share_snapshots":   limes.UnitNone,
-		},
-		"object-store": {
-			"capacity": limes.UnitBytes,
-		},
-	}
-)
-
-func resourceCCloudQuotaV1() *schema.Resource {
+func resourceCCloudProjectQuotaV1() *schema.Resource {
 	quotaResource := &schema.Resource{
 		SchemaVersion: 1,
 
-		Read:   resourceCCloudQuotaV1Read,
-		Update: resourceCCloudQuotaV1CreateOrUpdate,
-		Create: resourceCCloudQuotaV1CreateOrUpdate,
-		Delete: resourceCCloudQuotaV1Delete,
+		Read:   resourceCCloudProjectQuotaV1Read,
+		Update: resourceCCloudProjectQuotaV1CreateOrUpdate,
+		Create: resourceCCloudProjectQuotaV1CreateOrUpdate,
+		Delete: resourceCCloudProjectQuotaV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceCCloudQuotaV1Import,
+			State: resourceCCloudProjectQuotaV1Import,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -113,7 +68,7 @@ func resourceCCloudQuotaV1() *schema.Resource {
 	return quotaResource
 }
 
-func resourceCCloudQuotaV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudProjectQuotaV1Read(d *schema.ResourceData, meta interface{}) error {
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
 
@@ -147,7 +102,7 @@ func resourceCCloudQuotaV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceCCloudQuotaV1CreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
 	services := limes.QuotaRequest{}
@@ -189,23 +144,15 @@ func resourceCCloudQuotaV1CreateOrUpdate(d *schema.ResourceData, meta interface{
 
 	d.SetId(projectID)
 
-	return resourceCCloudQuotaV1Read(d, meta)
+	return resourceCCloudProjectQuotaV1Read(d, meta)
 }
 
-func resourceCCloudQuotaV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudProjectQuotaV1Delete(d *schema.ResourceData, meta interface{}) error {
 	d.SetId("")
 	return nil
 }
 
-func toString(r *limes.ProjectResourceReport) string {
-	return limes.ValueWithUnit{r.Quota, r.Unit}.String()
-}
-
-func sanitize(s string) string {
-	return strings.Replace(s, "-", "", -1)
-}
-
-func resourceCCloudQuotaV1Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCCloudProjectQuotaV1Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("Invalid format specified for Quota. Format must be <domain id>/<project id>")

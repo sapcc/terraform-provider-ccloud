@@ -35,7 +35,7 @@ provider "ccloud" {
 }
 
 # Create a Kubernetes cluster
-resource "ccloud_kubernetes" "test-cluster" {
+resource "ccloud_kubernetes_v1" "test-cluster" {
   # ...
 }
 ```

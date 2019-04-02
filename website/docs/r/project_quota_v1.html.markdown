@@ -1,17 +1,17 @@
 ---
 layout: "ccloud"
-page_title: "Converged Cloud: ccloud_quota_v1"
-sidebar_current: "docs-ccloud-resource-quota-v1"
+page_title: "Converged Cloud: ccloud_project_quota_v1"
+sidebar_current: "docs-ccloud-resource-project-quota-v1"
 description: |-
-  Manages Quota Resources
+  Manages Project Quota Resources
 ---
 
-# ccloud\_quota\_v1
+# ccloud\_project\_quota\_v1
 
-Manages Limes (Quota) resources.
+Manages Limes (Quota) Project resources.
 
-The `terraform destroy` command destroys the `ccloud_quota_v1` state, but not
-the actual Limes quota.
+The `terraform destroy` command destroys the `ccloud_project_quota_v1` state,
+but not the actual Limes project quota.
 
 ## Example Usage
 
@@ -20,7 +20,7 @@ data "openstack_identity_project_v3" "demo" {
   name = "demo"
 }
 
-resource "ccloud_quota_v1" "quota" {
+resource "ccloud_project_quota_v1" "quota" {
   domain_id  = "${openstack_identity_project_v3.demo.domain_id}"
   project_id = "${openstack_identity_project_v3.demo.id}"
 
@@ -110,9 +110,9 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-Limes Quota can be imported using the `domain_id` and `project_id` arguments,
-e.g.
+Limes Project Quota can be imported using the `domain_id` and `project_id`
+arguments, e.g.
 
 ```
-$ terraform import ccloud_quota_v1.demo bf2273b5-2926-4495-9fb7-f28c3abed5f6/ec407270-0249-4a82-a331-90ede2e78d9c
+$ terraform import ccloud_project_quota_v1.demo bf2273b5-2926-4495-9fb7-f28c3abed5f6/ec407270-0249-4a82-a331-90ede2e78d9c
 ```
