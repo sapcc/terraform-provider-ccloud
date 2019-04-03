@@ -8,6 +8,9 @@ import (
 
 var (
 	SERVICES = map[string]map[string]limes.Unit{
+		"database": {
+			"cfm_share_capacity": limes.UnitBytes,
+		},
 		"compute": {
 			"cores":     limes.UnitNone,
 			"instances": limes.UnitNone,
@@ -33,6 +36,7 @@ var (
 			"listeners":            limes.UnitNone,
 			"loadbalancers":        limes.UnitNone,
 			"pools":                limes.UnitNone,
+			"pool_members":         limes.UnitNone,
 		},
 		"dns": {
 			"zones":      limes.UnitNone,
