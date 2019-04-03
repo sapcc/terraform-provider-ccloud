@@ -51,6 +51,7 @@ resource "ccloud_domain_quota_v1" "quota" {
     listeners            = 16
     loadbalancers        = 8
     pools                = 8
+    pool_members         = 10
   }
 
   dns {
@@ -68,6 +69,10 @@ resource "ccloud_domain_quota_v1" "quota" {
 
   objectstore {
     capacity = 1073741824
+  }
+
+  database {
+    cfm_share_capacity = 1073741824
   }
 }
 ```
@@ -92,7 +97,8 @@ The following arguments are supported:
 * `network` - (Optional) The list of network resources quota. Consists of
   `floating_ips`, `networks`, `ports`, `rbac_policies`, `routers`,
   `security_group_rules`, `security_groups`, `subnet_pools`, `subnets`,
-  `healthmonitors`, `l7policies`, `listeners`, `loadbalancers` and `pools`.
+  `healthmonitors`, `l7policies`, `listeners`, `loadbalancers`, `pools` and
+  `pool_members`.
 
 * `dns` - (Optional) The list of DNS resources quota. Consists of `zones` and
   `recordsets`.
@@ -103,6 +109,9 @@ The following arguments are supported:
 
 * `objectstore` - (Optional) The list of Object Storage resources quota.
   Consists of `capacity` (Bytes).
+
+* `database` - (Optional) The list of CFM Storage resources quota. Consists of
+  `cfm_share_capacity` (Bytes).
 
 ## Attributes Reference
 
