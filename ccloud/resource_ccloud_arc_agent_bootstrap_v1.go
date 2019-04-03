@@ -36,6 +36,12 @@ func resourceCCloudArcAgentBootstrapV1() *schema.Resource {
 				}, false),
 			},
 
+			"triggers": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			// computed attributes
 			"user_data": {
 				Type:     schema.TypeString,
