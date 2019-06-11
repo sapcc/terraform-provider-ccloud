@@ -60,7 +60,7 @@ func resourceCCloudArcAgentV1() *schema.Resource {
 			"force_delete": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 			},
 
 			// Computed attributes

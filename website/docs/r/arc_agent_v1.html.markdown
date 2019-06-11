@@ -24,13 +24,14 @@ time and cloud-init execution delay) within the `timeouts`
 [nested](https://www.terraform.io/docs/configuration/resources.html#operation-timeouts)
 block argument. The default create timeout is 30 minutes.
 
-The `terraform destroy` command will wait for the compute instance, associated
-with the Arc Agent, to be deleted, then it will destroy the Arc Agent resource.
-Make sure to use implicit arguments without referring the depending component.
-Prefer using the hostname filter based on the variable (see example below).
-Don't use `agent_id = "${openstack_compute_instance_v2.node.id}"`, otherwise
-the destroy command will end in a deadlock. Use `force_delete` flag to ignore
-the compute instance state dependency.
+When the `force_delete` flag is set to `false`, the `terraform destroy` command
+will wait for the compute instance, associated with the Arc Agent, to be
+deleted, then it will destroy the Arc Agent resource. When `force_delete` is
+set to `false`, make sure to use implicit arguments without referring the
+depending component. Prefer using the hostname filter based on the variable (see
+example below). Don't use
+`agent_id = "${openstack_compute_instance_v2.node.id}"`, otherwise the destroy
+command will end in a deadlock.
 
 ## Example Usage
 
@@ -75,7 +76,8 @@ resource "openstack_compute_instance_v2" "node" {
 
 resource "ccloud_arc_agent_v1" "agent_1" {
   # implicit dependency to avoid the deadlock during the destroy
-  filter = "@metadata_name = '${local.hostname}'"
+  filter       = "@metadata_name = '${local.hostname}'"
+  force_delete = "false"
 
   timeouts {
     create = "10m"
@@ -103,7 +105,7 @@ resource "ccloud_arc_agent_v1" "agent_1" {
 * `force_delete` - (Optional) Allows deleting the Arc Agent without waiting for
   an associated compute instance to terminate. Otherwise, if the Arc Agent is
   still active inside the running compute instance, it will recreate itself.
-  Defaults to `false`.
+  Defaults to `true`.
 
 ## Attributes Reference
 
