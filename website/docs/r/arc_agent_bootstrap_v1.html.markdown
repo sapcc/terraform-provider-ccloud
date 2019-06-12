@@ -57,6 +57,44 @@ resource "openstack_compute_instance_v2" "node" {
 }
 ```
 
+### Get an extened Arc Agent bootstrap script for Windows cloud-init
+
+```hcl
+resource "ccloud_arc_agent_bootstrap_v1" "agent_1" {
+  type = "json"
+}
+
+data "template_file" "user_data" {
+  template = <<EOF
+#ps1_sysnative
+mkdir C:\monsoon\arc
+(New-Object System.Net.WebClient).DownloadFile('$${update_url}/arc/windows/amd64/latest','C:\monsoon\arc\arc.exe')
+C:\monsoon\arc\arc.exe init --endpoint $${endpoint_url} --update-uri $${update_url} --registration-url $${reg_url}
+
+net user Administrator $${admin_passwd}
+EOF
+
+  vars = {
+    token        = "${lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "token")}"
+    reg_url      = "${lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "url")}"
+    endpoint_url = "${lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "endpoint_url")}"
+    update_url   = "${lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "update_url")}"
+    admin_passwd = "${var.password}"
+  }
+}
+
+resource "openstack_compute_instance_v2" "node" {
+  name        = "win-vm"
+  image_name  = "windows-2016-amd64"
+  flavor_name = "m1.large"
+  user_data   = "${data.template_file.user_data.rendered}"
+
+  network {
+    name = "private_network"
+  }
+}
+```
+
 ## Argument Reference
 
 * `region` - (Optional) The region in which to obtain the Arc client. If
