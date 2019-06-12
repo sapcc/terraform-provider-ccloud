@@ -78,6 +78,8 @@ The following arguments are supported:
 * `ssh_public_key` - (Optional) The SSH public key, which should be used to
   authenticate the default SSH user (`core` for CoreOS images).
 
+* `version` - (Optional) The version of the Kubernetes master.
+
 * `node_pools` - (Optional) The list of Kubernetes node pools (worker pools).
   The `node_pools` object structure is documented below.
 
@@ -152,7 +154,7 @@ In addition to all arguments above, the following attributes are exported:
 * `ssh_public_key` - See Argument Reference above.
 * `node_pools` - See Argument Reference above.
 * `openstack` - See Argument Reference above.
-* `version` - The version of the Kubernetes master.
+* `version` - See Argument Reference above.
 * `phase` - The Kubernikus cluster current status. Can either be `Pending`,
   `Creating`, `Running` or `Terminating`.
 * `wormhole` - The Wormhole tunnel server endpoint.

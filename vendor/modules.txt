@@ -94,7 +94,7 @@ github.com/go-openapi/spec
 github.com/go-openapi/strfmt
 # github.com/go-openapi/swag v0.18.0
 github.com/go-openapi/swag
-# github.com/go-openapi/validate v0.18.0
+# github.com/go-openapi/validate v0.19.0
 github.com/go-openapi/validate
 # github.com/golang/protobuf v1.3.0
 github.com/golang/protobuf/proto
@@ -345,9 +345,9 @@ golang.org/x/sys/unix
 # golang.org/x/text v0.3.2
 golang.org/x/text/unicode/norm
 golang.org/x/text/transform
+golang.org/x/text/width
 golang.org/x/text/secure/bidirule
 golang.org/x/text/unicode/bidi
-golang.org/x/text/width
 # google.golang.org/api v0.1.0
 google.golang.org/api/iterator
 google.golang.org/api/googleapi

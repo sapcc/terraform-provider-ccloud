@@ -107,6 +107,13 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				Optional: true,
 			},
 
+			"version": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateKubernetesVersion,
+			},
+
 			"node_pools": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -206,11 +213,6 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				},
 			},
 
-			"version": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"phase": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -247,6 +249,7 @@ func resourceCCloudKubernetesV1Create(d *schema.ResourceData, meta interface{}) 
 	cluster.Spec.DNSDomain = d.Get("dns_domain").(string)
 	cluster.Spec.SSHPublicKey = d.Get("ssh_public_key").(string)
 	cluster.Spec.ServiceCIDR = d.Get("service_cidr").(string)
+	cluster.Spec.Version = d.Get("version").(string)
 	cluster.Spec.NodePools, err = kubernikusExpandNodePoolsV1(d.Get("node_pools"))
 	if err != nil {
 		return err
@@ -353,6 +356,10 @@ func resourceCCloudKubernetesV1Update(d *schema.ResourceData, meta interface{}) 
 		cluster.Spec.SSHPublicKey = v.(string)
 	}
 
+	if v, ok := d.GetOk("version"); ok {
+		cluster.Spec.Version = v.(string)
+	}
+
 	if v, ok := d.GetOk("openstack.0.security_group_name"); ok {
 		cluster.Spec.Openstack.SecurityGroupName = v.(string)
 	}
@@ -362,6 +369,14 @@ func resourceCCloudKubernetesV1Update(d *schema.ResourceData, meta interface{}) 
 	err = kubernikusUpdateNodePoolsV1(klient, cluster, o, n, timeout)
 	if err != nil {
 		return err
+	}
+
+	// wait for the cluster to be upgraded, when new API version was specified
+	target := "Running"
+	pending := []string{"Pending", "Creating", "Terminating", "Upgrading"}
+	err = kubernikusWaitForClusterV1(klient, d.Id(), target, pending, timeout)
+	if err != nil {
+		return kubernikusHandleErrorV1("Error waiting for cluster to be updated", err)
 	}
 
 	return resourceCCloudKubernetesV1Read(d, meta)
@@ -384,7 +399,7 @@ func resourceCCloudKubernetesV1Delete(d *schema.ResourceData, meta interface{}) 
 	}
 
 	target := "Terminated"
-	pending := []string{"Pending", "Creating", "Running", "Terminating"}
+	pending := []string{"Pending", "Creating", "Running", "Terminating", "Upgrading"}
 	err = kubernikusWaitForClusterV1(klient, d.Id(), target, pending, timeout)
 	if err != nil {
 		return kubernikusHandleErrorV1("Error waiting for cluster to be deleted", err)
@@ -563,16 +578,24 @@ func kubernikusKlusterV1GetPhase(klient *Kubernikus, target string, name string)
 		pretty, _ := json.MarshalIndent(result.Payload, "", "  ")
 		log.Printf("[DEBUG] Payload phase response: %s", string(pretty))
 
-		if target != "Terminated" && result.Payload.Status.Phase == models.KlusterPhasePending {
-			events, err := klient.GetClusterEvents(operations.NewGetClusterEventsParams().WithName(name), klient.authFunc())
-			if err != nil {
-				return nil, "", err
-			}
-			if len(events.Payload) > 0 {
-				event := events.Payload[len(events.Payload)-1]
-				if event.Reason == "ConfigurationError" {
-					return nil, event.Reason, fmt.Errorf(event.Message)
+		if target != "Terminated" {
+			if result.Payload.Status.Phase == models.KlusterPhasePending {
+				events, err := klient.GetClusterEvents(operations.NewGetClusterEventsParams().WithName(name), klient.authFunc())
+				if err != nil {
+					return nil, "", err
 				}
+				if len(events.Payload) > 0 {
+					event := events.Payload[len(events.Payload)-1]
+					if event.Reason == "ConfigurationError" {
+						return nil, event.Reason, fmt.Errorf(event.Message)
+					}
+				}
+			}
+
+			// workaround for the upgrade status race condition
+			if result.Payload.Status.Phase == models.KlusterPhaseRunning &&
+				result.Payload.Spec.Version != result.Payload.Status.ApiserverVersion {
+				return result.Payload, string(models.KlusterPhaseUpgrading), nil
 			}
 		}
 		return result.Payload, string(result.Payload.Status.Phase), nil

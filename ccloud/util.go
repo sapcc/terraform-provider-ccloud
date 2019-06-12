@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-openapi/validate"
 	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/structure"
@@ -170,4 +171,12 @@ func diffSuppressJsonArray(k, old, new string, d *schema.ResourceData) bool {
 		return true
 	}
 	return false
+}
+
+func validateKubernetesVersion(v interface{}, k string) ([]string, []error) {
+	if err := validate.Pattern("version", "", v.(string), `^[0-9]+\.[0-9]+\.[0-9]+$`); err != nil {
+		return nil, []error{fmt.Errorf("Invalid version (%s) specified for Kubernikus cluster: %s", v.(string), err)}
+	}
+
+	return nil, nil
 }
