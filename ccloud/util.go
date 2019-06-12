@@ -13,6 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/structure"
+	"github.com/sapcc/kubernikus/pkg/api/models"
 )
 
 // CheckDeleted checks the error to see if it's a 404 (Not Found) and, if so,
@@ -96,6 +97,22 @@ func expandToStringSlice(v []interface{}) []string {
 	}
 
 	return s
+}
+
+func expandToNodePoolConfig(v []interface{}) *models.NodePoolConfig {
+	c := new(models.NodePoolConfig)
+	for _, val := range v {
+		if mapVal, ok := val.(map[string]interface{}); ok {
+			if v, ok := mapVal["allow_reboot"].(bool); ok {
+				c.AllowReboot = &v
+			}
+			if v, ok := mapVal["allow_replace"].(bool); ok {
+				c.AllowReplace = &v
+			}
+		}
+	}
+
+	return c
 }
 
 func normalizeJsonString(v interface{}) string {

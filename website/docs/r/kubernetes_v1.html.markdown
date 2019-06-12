@@ -16,6 +16,8 @@ with the new argument specified.
 
 ## Example Usage
 
+### Kubernikus cluster with two node pools
+
 ```hcl
 resource "ccloud_kubernetes_v1" "demo" {
   name           = "demo"
@@ -35,6 +37,50 @@ resource "ccloud_kubernetes_v1" "demo" {
     flavor            = "m1.xlarge_cpu"
     size              = 1
     availability_zone = "eu-de-1b"
+    taints            = ["key=value:NoSchedule"]
+    labels            = ["label=value"]
+  }
+}
+```
+
+### Kubernikus cluster in the project with multiple networks and routers
+
+```hcl
+data "openstack_networking_network_v2" "fip_network_1" {
+  name     = "fip_network_1"
+  external = true
+}
+
+data "openstack_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+
+data "openstack_networking_subnet_v2" "subnet_1" {
+  name       = "subnet_1"
+  network_id = "${data.openstack_networking_network_v2.network_1.id}"
+}
+
+data "openstack_networking_router_v2" "router_1" {
+  name = "router_1"
+}
+
+resource "ccloud_kubernetes_v1" "demo" {
+  name           = "demo"
+  ssh_public_key = "ssh-rsa AAAABHTmDMP6w=="
+
+  openstack {
+    lb_floating_network_id = "${data.openstack_networking_network_v2.fip_network_1.id}"
+    network_id             = "${data.openstack_networking_network_v2.network_1.id}"
+    lb_subnet_id           = "${data.openstack_networking_subnet_v2.subnet_1.id}"
+    router_id              = "${data.openstack_networking_router_v2.router_1.id}"
+    security_group_name    = "default"
+  }
+
+  node_pools {
+    name              = "payload0"
+    flavor            = "m1.xlarge_cpu"
+    size              = 2
+    availability_zone = "eu-de-1d"
     taints            = ["key=value:NoSchedule"]
     labels            = ["label=value"]
   }
@@ -113,19 +159,30 @@ The `node_pools` block supports:
 * `labels` - (Optional) The list of Kubernetes node labels to be assigned on the
   node pool compute instance.
 
+* `config` - (Optional) Node pool extra options.
+
+The node pool `config` block supports:
+
+* `allow_reboot` - (Optional) Allow automatic drain and reboot of nodes. Enables
+  OS updates. Required by security policy. Defaults to `true`.
+
+* `allow_replace` - (Optional) Allow automatic drain and replacement of nodes.
+  Enables Kubernetes upgrades. Defaults to `true`.
+
 The `openstack` block supports:
 
 * `lb_floating_network_id` - (Optional) The network ID of the floating IP pool.
   Specify this if there are multiple floating IP networks available. Changing
   this forces a new resource to be created.
 
-* `lb_subnet_id` - (Optional) The subnet ID of the floating IP pool. Specify
-  this if the floating IP network has multiple subnets. Changing this forces a
-  new resource to be created.
-
 * `network_id` - (Optional) The ID of the private network. Specify this if there
   are multiple private networks available. Changing this forces a new resource
   to be created.
+
+* `lb_subnet_id` - (Optional) The private subnet ID of the loadbalancer. The
+  subnet ID has to be a part of private network ID, set in the `network_id`.
+  Specify this if there are multiple private subnets available. Changing this
+  forces a new resource to be created.
 
 * `project_id` - (Optional) The ID of the OpenStack project, where the
   Kubernikus cluster should be created. Available only withing the `is_admin`

@@ -157,6 +157,26 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
+						"config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"allow_reboot": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+									},
+									"allow_replace": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -175,14 +195,14 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 							ForceNew:     true,
 							ValidateFunc: validation.NoZeroValues,
 						},
-						"lb_subnet_id": {
+						"network_id": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Computed:     true,
 							ForceNew:     true,
 							ValidateFunc: validation.NoZeroValues,
 						},
-						"network_id": {
+						"lb_subnet_id": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Computed:     true,
@@ -456,6 +476,12 @@ func kubernikusFlattenNodePoolsV1(nodePools []models.NodePool) []map[string]inte
 			"size":              p.Size,
 			"taints":            p.Taints,
 			"labels":            p.Labels,
+			"config": []map[string]interface{}{
+				{
+					"allow_reboot":  p.Config.AllowReboot,
+					"allow_replace": p.Config.AllowReplace,
+				},
+			},
 		})
 	}
 	return res
@@ -531,6 +557,9 @@ func kubernikusExpandNodePoolsV1(raw interface{}) ([]models.NodePool, error) {
 					}
 					if v, ok := v["labels"]; ok {
 						p.Labels = expandToStringSlice(v.([]interface{}))
+					}
+					if v, ok := v["config"]; ok {
+						p.Config = expandToNodePoolConfig(v.([]interface{}))
 					}
 
 					res = append(res, p)
