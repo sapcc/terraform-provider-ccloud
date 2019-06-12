@@ -61,19 +61,20 @@ The following arguments are supported:
   default virtual address, routed by the Kubernikus Wormhole tunnel on worker
   nodes. Changing this forces a new resource to be created.
 
-* `cluster_cidr` - (Optional) CIDR Range for Pods in cluster. Defaults to
-  `10.100.0.0/16`. Changing this forces a new resource to be created.
+* `cluster_cidr` - (Optional) CIDR Range for Pods in cluster. If not specified,
+  generated automatically. Changing this forces a new resource to be created.
 
-* `service_cidr` - (Optional) CIDR Range for Services in cluster. Defaults to
-  `198.18.128.0/17`. Changing this forces a new resource to be created.
+* `service_cidr` - (Optional) CIDR Range for Services in cluster. If not
+  specified, generated automatically. Changing this forces a new resource to be
+  created.
 
 * `dns_address` - (Optional) The IP address of the `kube-dns` service. If not
   specified, generated automatically. Changing this forces a new resource to be
   created.
 
 * `dns_domain` - (Optional) The DNS domain, served by the `kube-dns` service.
-  Defaults to `cluster.local`. Changing this forces a new resource to be
-  created.
+  If not specified, generated automatically. Changing this forces a new resource
+  to be created.
 
 * `ssh_public_key` - (Optional) The SSH public key, which should be used to
   authenticate the default SSH user (`core` for CoreOS images).
@@ -97,8 +98,8 @@ The `node_pools` block supports:
   instance. Changing this forces a new node pool to be created.
 
 * `image` - (Optional) The name of the desired image for the node pool compute
-  instance. Defaults to `coreos-stable-amd64`. Changing this forces a new node
-  pool to be created.
+  instance. If not specified, the default is used. Changing this forces a new
+  node pool to be created.
 
 * `size` - (Optional) The size of the node pool. Defaults to `0`.
 

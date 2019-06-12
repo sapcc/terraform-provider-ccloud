@@ -67,7 +67,7 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      "1.1.1.1",
+				Computed:     true,
 				ValidateFunc: validation.SingleIP(),
 			},
 
@@ -75,7 +75,7 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      "10.100.0.0/16",
+				Computed:     true,
 				ValidateFunc: validation.CIDRNetwork(8, 16),
 			},
 
@@ -83,7 +83,7 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      "198.18.128.0/17",
+				Computed:     true,
 				ValidateFunc: validation.CIDRNetwork(8, 24),
 			},
 
@@ -99,7 +99,7 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "cluster.local",
+				Computed: true,
 			},
 
 			"ssh_public_key": {
@@ -132,7 +132,7 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 						"image": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							Default:      "coreos-stable-amd64",
+							Computed:     true,
 							ValidateFunc: validation.NoZeroValues,
 						},
 						"size": {
