@@ -57,9 +57,6 @@ type Config struct {
 //
 // Individual Service Clients are created later in this file.
 func (c *Config) LoadAndValidate() error {
-	log.Printf("[CCLOUD] LoadAndValidate")
-	c.Debug()
-
 	// Make sure at least one of auth_url or cloud was specified.
 	if c.IdentityEndpoint == "" && c.Cloud == "" {
 		return fmt.Errorf("One of 'auth_url' or 'cloud' must be specified")
@@ -248,6 +245,8 @@ func (c *Config) determineRegion(region string) string {
 	return region
 }
 
+// getEndpointType is a helper method to determine the endpoint type
+// requested by the user.
 func (c *Config) getEndpointType() gophercloud.Availability {
 	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
 		return gophercloud.AvailabilityInternal
@@ -259,8 +258,6 @@ func (c *Config) getEndpointType() gophercloud.Availability {
 }
 
 func (c *Config) limesV1Client(region string) (*gophercloud.ServiceClient, error) {
-	c.Debug()
-
 	return resources.NewLimesV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
@@ -268,8 +265,6 @@ func (c *Config) limesV1Client(region string) (*gophercloud.ServiceClient, error
 }
 
 func (c *Config) kubernikusV1Client(region string, isAdmin bool) (*Kubernikus, error) {
-	c.Debug()
-
 	serviceType := "kubernikus"
 	if isAdmin {
 		serviceType = "kubernikus-kubernikus"
@@ -328,39 +323,4 @@ func (c *Config) computeV2Client(region string) (*gophercloud.ServiceClient, err
 	client = c.determineEndpoint(client, "compute")
 
 	return client, nil
-}
-
-func (c *Config) Debug() {
-	var insecure bool
-	if c.Insecure == nil {
-		insecure = false
-	} else {
-		insecure = *c.Insecure
-	}
-
-	log.Printf("[CCLOUD] cacert_file:                 %s", c.CACertFile)
-	log.Printf("[CCLOUD] cert:                        %s", c.ClientCertFile)
-	log.Printf("[CCLOUD] key:                         %s", c.ClientKeyFile)
-	log.Printf("[CCLOUD] cloud:                       %s", c.Cloud)
-	log.Printf("[CCLOUD] default_domain:              %s", c.DefaultDomain)
-	log.Printf("[CCLOUD] domain_id:                   %s", c.DomainID)
-	log.Printf("[CCLOUD] domain_name:                 %s", c.DomainName)
-	log.Printf("[CCLOUD] endpoint_overrides:          %v", c.EndpointOverrides)
-	log.Printf("[CCLOUD] endpoint_type:               %s", c.EndpointType)
-	log.Printf("[CCLOUD] auth_url:                    %s", c.IdentityEndpoint)
-	log.Printf("[CCLOUD] insecure:                    %t", insecure)
-	log.Printf("[CCLOUD] project_domain_id:           %s", c.ProjectDomainID)
-	log.Printf("[CCLOUD] project_domain_name:         %s", c.ProjectDomainName)
-	log.Printf("[CCLOUD] region:                      %s", c.Region)
-	log.Printf("[CCLOUD] swauth:                      %t", c.Swauth)
-	log.Printf("[CCLOUD] tenant_id:                   %s", c.TenantID)
-	log.Printf("[CCLOUD] tenant_name:                 %s", c.TenantName)
-	log.Printf("[CCLOUD] user_domain_id:              %s", c.UserDomainID)
-	log.Printf("[CCLOUD] user_domain_name:            %s", c.UserDomainName)
-	log.Printf("[CCLOUD] user_name:                   %s", c.Username)
-	log.Printf("[CCLOUD] user_id:                     %s", c.UserID)
-	log.Printf("[CCLOUD] application_credential_id:   %s", c.ApplicationCredentialID)
-	log.Printf("[CCLOUD] application_credential_name: %s", c.ApplicationCredentialName)
-	log.Printf("[CCLOUD] use_octavia:                 %t", c.useOctavia)
-	log.Printf("[CCLOUD] max_retries:                 %d", c.MaxRetries)
 }

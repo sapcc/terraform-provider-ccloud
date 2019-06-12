@@ -1,16 +1,12 @@
 package ccloud
 
 import (
-	"log"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
 
 // Provider returns a schema.Provider for OpenStack.
 func Provider() terraform.ResourceProvider {
-	log.Printf("[CCLOUD] CCloud Provider Init")
-
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"auth_url": {
@@ -341,11 +337,6 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		useOctavia:                  d.Get("use_octavia").(bool),
 		MaxRetries:                  d.Get("max_retries").(int),
 	}
-
-	debug := config
-	debug.Password = ""
-	debug.Token = ""
-	log.Printf("[CCLOUD] %v", debug)
 
 	v, ok := d.GetOkExists("insecure")
 	if ok {
