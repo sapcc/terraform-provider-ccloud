@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/go-openapi/runtime v0.19.0
 	github.com/go-openapi/strfmt v0.19.0
+	github.com/go-openapi/validate v0.19.0
 	github.com/gophercloud/gophercloud v0.1.1-0.20190611014943-368f26bad44c
 	github.com/gophercloud/utils v0.0.0-20190527093828-25f1b77b8c03
 	github.com/hashicorp/terraform v0.12.1
