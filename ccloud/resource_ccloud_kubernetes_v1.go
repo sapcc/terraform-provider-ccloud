@@ -1,7 +1,9 @@
 package ccloud
 
 import (
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"log"
 	"reflect"
@@ -14,8 +16,10 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 
+	"github.com/ghodss/yaml"
 	"github.com/sapcc/kubernikus/pkg/api/client/operations"
 	"github.com/sapcc/kubernikus/pkg/api/models"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api/v1"
 )
 
 const (
@@ -242,6 +246,51 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			"kube_config": {
+				Type:     schema.TypeList,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"host": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"username": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"client_certificate": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"client_key": {
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
+						},
+						"cluster_ca_certificate": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"not_before": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"not_after": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+
+			"kube_config_raw": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
 		},
 	}
 }
@@ -349,6 +398,11 @@ func resourceCCloudKubernetesV1Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("node_pools", kubernikusFlattenNodePoolsV1(result.Payload.Spec.NodePools))
 
 	d.Set("region", GetRegion(d, config))
+
+	err = setCredentials(d, klient)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -812,4 +866,90 @@ func resourceCCloudKubernetesV1Import(d *schema.ResourceData, meta interface{}) 
 	d.Set("is_admin", isAdmin)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func setCredentials(d *schema.ResourceData, klient *Kubernikus) error {
+	var err error
+	var creds = d.Get("kube_config_raw").(string)
+	var kubeConfig []map[string]string
+	var t map[string]time.Time
+
+	if creds == "" {
+		creds, kubeConfig, err = downloadCredentials(klient, d.Id())
+		if err != nil {
+			return err
+		}
+	} else {
+		kubeConfig, t, err = flattenKubernetesClusterKubeConfig(creds)
+		if err != nil {
+			return err
+		}
+
+		// Check so that the certificate is valid now
+		now := time.Now()
+		if now.Before(t["not_before"]) || now.After(t["not_after"]) {
+			log.Printf("[DEBUG] The Kubernikus certificate is not valid")
+			creds, kubeConfig, err = downloadCredentials(klient, d.Id())
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	d.Set("kube_config", kubeConfig)
+	d.Set("kube_config_raw", creds)
+
+	return nil
+}
+
+func flattenKubernetesClusterKubeConfig(creds string) ([]map[string]string, map[string]time.Time, error) {
+	var cfg clientcmdapi.Config
+	var values = make(map[string]string)
+	var t = make(map[string]time.Time)
+
+	err := yaml.Unmarshal([]byte(creds), &cfg)
+	if err != nil {
+		return nil, nil, fmt.Errorf("Failed to unmarshal Kubernikus kubeconfig: %s", err)
+	}
+
+	for _, v := range cfg.Clusters {
+		values["host"] = v.Cluster.Server
+		values["cluster_ca_certificate"] = string(v.Cluster.CertificateAuthorityData)
+	}
+
+	for _, v := range cfg.AuthInfos {
+		values["username"] = v.Name
+		values["client_certificate"] = string(v.AuthInfo.ClientCertificateData)
+		values["client_key"] = string(v.AuthInfo.ClientKeyData)
+
+		// parse certificate date
+		pem, _ := pem.Decode(v.AuthInfo.ClientCertificateData)
+		if pem == nil {
+			return nil, nil, fmt.Errorf("Failed to decode PEM")
+		}
+		crt, err := x509.ParseCertificate(pem.Bytes)
+		if err != nil {
+			return nil, nil, fmt.Errorf("Failed to parse Kubernikus certificate %s", err)
+		}
+		t["not_before"] = crt.NotBefore
+		t["not_after"] = crt.NotAfter
+		values["not_before"] = crt.NotBefore.Format(time.RFC3339)
+		values["not_after"] = crt.NotAfter.Format(time.RFC3339)
+	}
+
+	return []map[string]string{values}, t, nil
+}
+
+func downloadCredentials(klient *Kubernikus, name string) (string, []map[string]string, error) {
+	credentials, err := klient.GetClusterCredentials(operations.NewGetClusterCredentialsParams().WithName(name), klient.authFunc())
+	if err != nil {
+		return "", nil, fmt.Errorf("Failed to download Kubernikus kubeconfig: %s", err)
+	}
+
+	kubeConfig, _, err := flattenKubernetesClusterKubeConfig(credentials.Payload.Kubeconfig)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return credentials.Payload.Kubeconfig, kubeConfig, nil
 }

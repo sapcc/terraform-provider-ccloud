@@ -3,6 +3,7 @@ module github.com/sapcc/terraform-provider-ccloud
 go 1.12
 
 require (
+	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/runtime v0.19.0
 	github.com/go-openapi/strfmt v0.19.0
 	github.com/go-openapi/validate v0.19.0
@@ -15,4 +16,6 @@ require (
 	github.com/sapcc/gophercloud-limes v0.0.0-20190319123021-2ed8e1224541
 	github.com/sapcc/kubernikus v0.0.0-20190607150640-1c55acfb983a
 	github.com/sapcc/limes v0.0.0-20190528142429-b76498a6f77f
+	k8s.io/apimachinery v0.0.0-20190612125636-6a5db36e93ad // indirect
+	k8s.io/client-go v11.0.0+incompatible
 )
