@@ -57,7 +57,7 @@ resource "openstack_compute_instance_v2" "node" {
 }
 ```
 
-### Get an extened Arc Agent bootstrap script for Windows cloud-init
+### Get an extended Arc Agent bootstrap script for Windows cloud-init
 
 ```hcl
 resource "ccloud_arc_agent_bootstrap_v1" "agent_1" {

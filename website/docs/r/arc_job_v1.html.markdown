@@ -30,7 +30,7 @@ data "ccloud_arc_agent_v1" "agent_1" {
 resource "ccloud_arc_job_v1" "job_1" {
   to = "${ccloud_arc_agent_v1.agent_1.id}"
 
-  execute = {
+  execute {
     script = <<EOF
 echo "Script start"
 for i in {1..10}; do
@@ -61,8 +61,8 @@ data "ccloud_arc_agent_v1" "agent_1" {
 resource "ccloud_arc_job_v1" "job_1" {
   to = "${ccloud_arc_agent_v1.agent_1.id}"
 
-  chef = {
-    enable = {}
+  chef {
+    enable {}
   }
 }
 
@@ -85,8 +85,8 @@ data "ccloud_arc_agent_v1" "agent_1" {
 resource "ccloud_arc_job_v1" "job_1" {
   to = "${ccloud_arc_agent_v1.agent_1.id}"
 
-  chef = {
-    zero = {
+  chef {
+    zero {
       run_list   = ["recipe[repo::default]"]
       recipe_url = "https://example.com/path/to/chef-zero-recipe.tgz"
       debug      = true

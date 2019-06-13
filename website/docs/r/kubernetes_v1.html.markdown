@@ -10,9 +10,9 @@ description: |-
 
 Manages a Kubernikus (Kubernetes as a Service) cluster.
 
-~> Changing the arguments of Kubernikus node pools (except the `size` argument)
-will result in the node pool downscaling, deleting and creating a new node pool
-with the new argument specified.
+~> Changing the arguments of Kubernikus node pools (except the `size` or
+`config` arguments) will result in the node pool downscaling, deleting and
+creating a new node pool with the new argument specified.
 
 ## Example Usage
 
@@ -214,7 +214,7 @@ In addition to all arguments above, the following attributes are exported:
 * `openstack` - See Argument Reference above.
 * `version` - See Argument Reference above.
 * `phase` - The Kubernikus cluster current status. Can either be `Pending`,
-  `Creating`, `Running` or `Terminating`.
+  `Creating`, `Running`, `Terminating` or `Upgrading`.
 * `wormhole` - The Wormhole tunnel server endpoint.
 
 ## Timeouts
