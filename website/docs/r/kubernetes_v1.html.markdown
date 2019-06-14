@@ -230,6 +230,40 @@ In addition to all arguments above, the following attributes are exported:
 * `kube_config_raw` - Contains the kubeconfig with credentials to the Kubernikus
   cluster.
 
+The `kube_config` block exports the following:
+
+* `host` - The Kubernetes cluster server host.
+
+* `client_key` - Base64 encoded private key used by clients to authenticate to
+  the Kubernetes cluster.
+
+* `client_certificate` - Base64 encoded public certificate used by clients to
+  authenticate to the Kubernetes cluster.
+
+* `cluster_ca_certificate` - Base64 encoded public CA certificate used as the
+  root of trust for the Kubernetes cluster.
+
+* `username` - A username provided by the kubeconfig credentials.
+
+* `not_after` - The credentials time validity bound, formatted as an RFC3339
+  date string.
+
+* `not_before` - The credentials time validity bound, formatted as an RFC3339
+  date string.
+
+-> **NOTE:** It is possible to use these credentials with
+[the Kubernetes Provider](https://www.terraform.io/docs/providers/kubernetes/index.html)
+like so:
+
+```hcl
+provider "kubernetes" {
+  host                   = "${ccloud_kubernetes_v1.demo.kube_config.0.host}"
+  client_certificate     = "${base64decode(ccloud_kubernetes_v1.demo.kube_config.0.client_certificate)}"
+  client_key             = "${base64decode(ccloud_kubernetes_v1.demo.kube_config.0.client_key)}"
+  cluster_ca_certificate = "${base64decode(ccloud_kubernetes_v1.demo.kube_config.0.cluster_ca_certificate)}"
+}
+```
+
 ## Timeouts
 
 `ccloud_kubernetes_v1` provides the following
