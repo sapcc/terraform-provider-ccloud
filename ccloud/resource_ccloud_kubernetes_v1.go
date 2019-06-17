@@ -236,9 +236,10 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 			},
 
 			"kube_config": {
-				Type:     schema.TypeList,
-				Computed: true,
-				MaxItems: 1,
+				Type:      schema.TypeList,
+				Computed:  true,
+				Sensitive: true,
+				MaxItems:  1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"host": {
