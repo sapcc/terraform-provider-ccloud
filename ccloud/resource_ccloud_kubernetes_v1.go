@@ -329,7 +329,7 @@ func resourceCCloudKubernetesV1Create(d *schema.ResourceData, meta interface{}) 
 	// waiting for Running state
 	timeout := d.Timeout(schema.TimeoutCreate)
 	target := "Running"
-	pending := []string{"Pending", "Creating"}
+	pending := []string{"Pending", "Creating", "Upgrading"}
 	err = kubernikusWaitForClusterV1(klient, cluster.Name, target, pending, timeout)
 	if err != nil {
 		return kubernikusHandleErrorV1("Error waiting for running cluster state", err)
