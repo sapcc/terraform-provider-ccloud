@@ -33,6 +33,7 @@ additional services:
   * Kubernikus (Kubernetes as a Service)
   * Arc for Arc resources management
   * Lyra for Automation management
+  * Billing for Billing management
 
 The provider needs to be configured with the proper OpenStack credentials
 before it can be used. For details see the OpenStack provider.

@@ -175,6 +175,7 @@ Identity/Keystone service catalog. This provider supports:
 * `automation`: Automation / Lyra v1
 * `resources`: Quota / Limes v1
 * `kubernikus`: Kubernetes / Kubernikus
+* `sapcc-billing`: Billing
 
 Please use this feature at your own risk. If you are unsure about needing
 to override an endpoint, you most likely do not need to override one.
