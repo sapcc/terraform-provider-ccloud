@@ -279,10 +279,10 @@ github.com/posener/complete
 github.com/posener/complete/cmd/install
 github.com/posener/complete/cmd
 github.com/posener/complete/match
-# github.com/sapcc/gophercloud-billing v0.0.0-20190828081850-54b59a1777cd
+# github.com/sapcc/gophercloud-billing v0.0.0-20190829160202-4357f19514cd
 github.com/sapcc/gophercloud-billing/billing
-github.com/sapcc/gophercloud-billing/billing/domains
-github.com/sapcc/gophercloud-billing/billing/projects
+github.com/sapcc/gophercloud-billing/billing/masterdata/domains
+github.com/sapcc/gophercloud-billing/billing/masterdata/projects
 # github.com/sapcc/gophercloud-limes v0.0.0-20190319123021-2ed8e1224541
 github.com/sapcc/gophercloud-limes/resources
 github.com/sapcc/gophercloud-limes/resources/v1/domains

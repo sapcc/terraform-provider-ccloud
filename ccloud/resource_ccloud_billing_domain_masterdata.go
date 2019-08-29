@@ -8,7 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	"github.com/sapcc/gophercloud-billing/billing/domains"
+	"github.com/sapcc/gophercloud-billing/billing/masterdata/domains"
 )
 
 func resourceCCloudBillingDomainMasterdata() *schema.Resource {

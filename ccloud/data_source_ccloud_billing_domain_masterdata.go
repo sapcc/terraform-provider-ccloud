@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/sapcc/gophercloud-billing/billing/domains"
+	"github.com/sapcc/gophercloud-billing/billing/masterdata/domains"
 )
 
 func dataSourceCCloudBillingDomainMasterdata() *schema.Resource {
