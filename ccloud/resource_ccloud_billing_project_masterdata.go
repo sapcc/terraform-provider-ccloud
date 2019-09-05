@@ -178,11 +178,13 @@ func resourceCCloudBillingProjectMasterdata() *schema.Resource {
 						"name": {
 							Type:          schema.TypeString,
 							Optional:      true,
+							Computed:      true,
 							ConflictsWith: []string{"cost_object.0.inherited"},
 						},
 						"type": {
 							Type:          schema.TypeString,
 							Optional:      true,
+							Computed:      true,
 							ConflictsWith: []string{"cost_object.0.inherited"},
 							ValidateFunc: validation.StringInSlice([]string{
 								"IO", "CC", "WBS", "SO",

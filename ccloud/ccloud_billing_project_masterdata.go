@@ -23,11 +23,13 @@ func billingProjectExpandCostObject(raw interface{}) projects.CostObject {
 					if v, ok := v["inherited"]; ok {
 						co.Inherited = v.(bool)
 					}
-					if v, ok := v["name"]; ok {
-						co.Name = v.(string)
-					}
-					if v, ok := v["type"]; ok {
-						co.Type = v.(string)
+					if co.Inherited == false {
+						if v, ok := v["name"]; ok {
+							co.Name = v.(string)
+						}
+						if v, ok := v["type"]; ok {
+							co.Type = v.(string)
+						}
 					}
 
 					return co
