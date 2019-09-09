@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/sapcc/gophercloud-limes/resources/v1/projects"
@@ -20,6 +21,10 @@ func resourceCCloudProjectQuotaV1() *schema.Resource {
 		Delete: resourceCCloudProjectQuotaV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: resourceCCloudProjectQuotaV1Import,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -132,6 +137,13 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta int
 				}
 			}
 			services[_service] = quota
+		}
+	}
+
+	if d.Id() == "" {
+		// when the project was just created, it may not yet appeared in the limes
+		if err := limesCCloudProjectQuotaV1WaitForProject(client, domainID, projectID, &services, d.Timeout(schema.TimeoutCreate)); err != nil {
+			return err
 		}
 	}
 
