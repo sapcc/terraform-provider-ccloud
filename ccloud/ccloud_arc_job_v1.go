@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/kayrus/gophercloud-arc/arc/v1/jobs"
+	"github.com/sapcc/gophercloud-arc/arc/v1/jobs"
 )
 
 type chefZeroPayload struct {

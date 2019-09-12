@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 
-	"github.com/kayrus/gophercloud-lyra/automation/v1/automations"
+	"github.com/sapcc/gophercloud-lyra/automation/v1/automations"
 )
 
 func resourceCCloudAutomationV1() *schema.Resource {

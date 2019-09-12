@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/kayrus/gophercloud-lyra/automation/v1/runs"
+	"github.com/sapcc/gophercloud-lyra/automation/v1/runs"
 )
 
 func resourceCCloudAutomationRunV1() *schema.Resource {

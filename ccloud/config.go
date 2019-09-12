@@ -13,10 +13,10 @@ import (
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/kayrus/gophercloud-arc/arc"
-	"github.com/kayrus/gophercloud-lyra/automation"
+	"github.com/sapcc/gophercloud-arc/arc"
 	"github.com/sapcc/gophercloud-billing/billing"
 	"github.com/sapcc/gophercloud-limes/resources"
+	"github.com/sapcc/gophercloud-lyra/automation"
 )
 
 type Config struct {

@@ -10,7 +10,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/kayrus/gophercloud-arc/arc/v1/agents"
+	"github.com/sapcc/gophercloud-arc/arc/v1/agents"
 )
 
 func arcCCloudArcAgentV1ReadAgent(d *schema.ResourceData, arcClient *gophercloud.ServiceClient, agent *agents.Agent, region string) {
