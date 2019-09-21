@@ -35,7 +35,6 @@ type Config struct {
 	ProjectDomainName           string
 	ProjectDomainID             string
 	Region                      string
-	Swauth                      bool
 	TenantID                    string
 	TenantName                  string
 	Token                       string
@@ -46,7 +45,6 @@ type Config struct {
 	ApplicationCredentialID     string
 	ApplicationCredentialName   string
 	ApplicationCredentialSecret string
-	useOctavia                  bool
 	MaxRetries                  int
 	DisableNoCacheHeader        bool
 

@@ -330,7 +330,6 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		ProjectDomainID:             d.Get("project_domain_id").(string),
 		ProjectDomainName:           d.Get("project_domain_name").(string),
 		Region:                      d.Get("region").(string),
-		Swauth:                      d.Get("swauth").(bool),
 		Token:                       d.Get("token").(string),
 		TenantID:                    d.Get("tenant_id").(string),
 		TenantName:                  d.Get("tenant_name").(string),
