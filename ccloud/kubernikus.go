@@ -119,10 +119,10 @@ func NewKubernikusV1(provider *gophercloud.ProviderClient, eo gophercloud.Endpoi
 
 	transport := httptransport.New(kurl.Host, kurl.EscapedPath(), []string{kurl.Scheme})
 
-	if osDebug := provider.HTTPClient.Transport.(*LogRoundTripper).OsDebug; osDebug {
+	if v, ok := provider.HTTPClient.Transport.(*LogRoundTripper); ok && v.OsDebug {
 		// enable JSON debug for Kubernikus
 		transport.SetLogger(kubernikusLogger{})
-		transport.Debug = osDebug
+		transport.Debug = v.OsDebug
 	}
 
 	operations := operations.New(transport, strfmt.Default)
