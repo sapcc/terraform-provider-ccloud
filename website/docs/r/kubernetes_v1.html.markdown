@@ -141,7 +141,7 @@ The following arguments are supported:
 * `backup` - (Optional) Configures the etcd database backup behaviour. Can
   either be `on`, `off` or `externalAWS`. `externalAWS` option is available only
   for admin accounts. Defaults to `on`, which corresponds to the OpenStack Swift
-  Object Storage.
+  Object Storage. Changing this forces a new resource to be created.
 
 * `version` - (Optional) The version of the Kubernetes master.
 
