@@ -10,12 +10,12 @@ import (
 	"strings"
 
 	"github.com/go-openapi/runtime"
+	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/gophercloud/gophercloud"
 	osClient "github.com/gophercloud/utils/client"
+	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	"github.com/sapcc/kubernikus/pkg/api/client/operations"
-
-	httptransport "github.com/go-openapi/runtime/client"
 )
 
 type Kubernikus struct {
@@ -106,14 +106,20 @@ func (kubernikusLogger) Debugf(format string, args ...interface{}) {
 	}
 }
 
-func NewKubernikusV1(provider *gophercloud.ProviderClient, eo gophercloud.EndpointOpts, ua string) (*Kubernikus, error) {
+func NewKubernikusV1(c *Config, eo gophercloud.EndpointOpts) (*Kubernikus, error) {
 	var err error
 	var endpoint string
 	var kurl *url.URL
 
-	if !reflect.DeepEqual(eo, gophercloud.EndpointOpts{}) {
+	if v, ok := c.EndpointOverrides["kubernikus"]; ok {
+		if e, ok := v.(string); ok && e != "" {
+			endpoint = e
+		}
+	}
+
+	if endpoint == "" && !reflect.DeepEqual(eo, gophercloud.EndpointOpts{}) {
 		eo.ApplyDefaults("kubernikus")
-		endpoint, err = provider.EndpointLocator(eo)
+		endpoint, err = c.OsClient.EndpointLocator(eo)
 		if err != nil {
 			return nil, err
 		}
@@ -125,7 +131,7 @@ func NewKubernikusV1(provider *gophercloud.ProviderClient, eo gophercloud.Endpoi
 
 	transport := httptransport.New(kurl.Host, kurl.EscapedPath(), []string{kurl.Scheme})
 
-	if v, ok := provider.HTTPClient.Transport.(*osClient.RoundTripper); ok && v.Logger != nil {
+	if v, ok := c.OsClient.HTTPClient.Transport.(*osClient.RoundTripper); ok && v.Logger != nil {
 		// enable JSON debug for Kubernikus
 		transport.SetLogger(kubernikusLogger{})
 		transport.Debug = true
@@ -133,7 +139,7 @@ func NewKubernikusV1(provider *gophercloud.ProviderClient, eo gophercloud.Endpoi
 
 	operations := operations.New(transport, strfmt.Default)
 
-	return &Kubernikus{*operations, provider, ua}, nil
+	return &Kubernikus{*operations, c.OsClient, httpclient.TerraformUserAgent(c.terraformVersion)}, nil
 }
 
 func (k *Kubernikus) authFunc() runtime.ClientAuthInfoWriterFunc {

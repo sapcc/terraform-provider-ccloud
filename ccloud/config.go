@@ -299,10 +299,19 @@ func (c *Config) limesV1Client(region string) (*gophercloud.ServiceClient, error
 		return nil, err
 	}
 
-	return resources.NewLimesV1(c.OsClient, gophercloud.EndpointOpts{
+	client, err := resources.NewLimesV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
 	})
+
+	if err != nil {
+		return client, err
+	}
+
+	// Check if an endpoint override was specified for the arc service.
+	client = c.determineEndpoint(client, "resources")
+
+	return client, nil
 }
 
 func (c *Config) kubernikusV1Client(region string, isAdmin bool) (*Kubernikus, error) {
@@ -315,11 +324,11 @@ func (c *Config) kubernikusV1Client(region string, isAdmin bool) (*Kubernikus, e
 		serviceType = "kubernikus-kubernikus"
 	}
 
-	return NewKubernikusV1(c.OsClient, gophercloud.EndpointOpts{
+	return NewKubernikusV1(c, gophercloud.EndpointOpts{
 		Type:         serviceType,
 		Region:       c.determineRegion(region),
 		Availability: gophercloud.AvailabilityPublic,
-	}, httpclient.TerraformUserAgent(c.terraformVersion))
+	})
 }
 
 func (c *Config) arcV1Client(region string) (*gophercloud.ServiceClient, error) {
