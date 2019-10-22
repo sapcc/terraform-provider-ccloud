@@ -108,6 +108,7 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 			"backup": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					models.KlusterSpecBackupOn, models.KlusterSpecBackupOff, models.KlusterSpecBackupExternalAWS,
