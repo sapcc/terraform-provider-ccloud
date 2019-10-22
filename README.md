@@ -8,7 +8,8 @@ Maintainers
 
 This provider plugin is maintained by:
 
-  * Michael Schmidt (@bugroger)
+  * [@kayrus](https://github.com/kayrus)
+  * [@bugroger](https://github.com/BugRoger)
 
 Requirements
 ------------
