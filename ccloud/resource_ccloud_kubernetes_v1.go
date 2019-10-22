@@ -105,6 +105,15 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				Default:  false,
 			},
 
+			"backup": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					models.KlusterSpecBackupOn, models.KlusterSpecBackupOff, models.KlusterSpecBackupExternalAWS,
+				}, false),
+			},
+
 			"version": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -313,6 +322,7 @@ func resourceCCloudKubernetesV1Create(d *schema.ResourceData, meta interface{}) 
 	cluster.Spec.DNSDomain = d.Get("dns_domain").(string)
 	cluster.Spec.SSHPublicKey = d.Get("ssh_public_key").(string)
 	cluster.Spec.NoCloud = d.Get("no_cloud").(bool)
+	cluster.Spec.Backup = d.Get("backup").(string)
 	cluster.Spec.ServiceCIDR = d.Get("service_cidr").(string)
 	cluster.Spec.Version = d.Get("version").(string)
 	err = verifySupportedKubernetesVersion(klient, cluster.Spec.Version)
@@ -380,6 +390,7 @@ func resourceCCloudKubernetesV1Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("name", result.Payload.Spec.Name)
 	d.Set("ssh_public_key", result.Payload.Spec.SSHPublicKey)
 	d.Set("no_cloud", result.Payload.Spec.NoCloud)
+	d.Set("backup", result.Payload.Spec.Backup)
 	d.Set("service_cidr", result.Payload.Spec.ServiceCIDR)
 	d.Set("version", result.Payload.Spec.Version)
 	d.Set("phase", result.Payload.Status.Phase)
@@ -423,6 +434,10 @@ func resourceCCloudKubernetesV1Update(d *schema.ResourceData, meta interface{}) 
 
 	if v, ok := d.GetOk("ssh_public_key"); ok {
 		cluster.Spec.SSHPublicKey = v.(string)
+	}
+
+	if v, ok := d.GetOk("backup"); ok {
+		cluster.Spec.Backup = v.(string)
 	}
 
 	if v, ok := d.GetOk("version"); ok {
