@@ -138,6 +138,11 @@ The following arguments are supported:
 * `no_cloud` - (Optional) Disable all Kubernetes cloud providers. Defaults to
   `false`. Changing this forces a new resource to be created.
 
+* `backup` - (Optional) Configures the etcd database backup behaviour. Can
+  either be `on`, `off` or `externalAWS`. `externalAWS` option is available only
+  for admin accounts. Defaults to `on`, which corresponds to the OpenStack Swift
+  Object Storage.
+
 * `version` - (Optional) The version of the Kubernetes master.
 
 * `node_pools` - (Optional) The list of Kubernetes node pools (worker pools).
