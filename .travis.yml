@@ -29,11 +29,11 @@ matrix:
   - go: tip
 
 before_deploy:
-  - GOOS=linux go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4  
+  - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4  
   - zip -9 -j terraform-provider-ccloud_linux_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4                                                                                                                                             
-  - GOOS=darwin go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4
+  - GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4
   - zip -9 -j terraform-provider-ccloud_darwin_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4                                                                                                                                       
-  - GOOS=windows go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4.exe
+  - GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4.exe
   - zip -9 -j terraform-provider-ccloud_windows_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4.exe
         
 deploy:
