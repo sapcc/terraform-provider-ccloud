@@ -67,7 +67,7 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Computed:     true,
-				ValidateFunc: validation.CIDRNetwork(8, 16),
+				ValidateFunc: validation.CIDRNetwork(8, 17),
 			},
 
 			"service_cidr": {
