@@ -22,7 +22,7 @@ import (
 
 const (
 	KlusterNameRegex = "^[a-z][-a-z0-9]{0,18}[a-z0-9]?$"
-	PoolNameRegex    = "^[a-z][a-z0-9]{0,19}$"
+	PoolNameRegex    = "^[a-z][-\\.a-z0-9]{0,18}[a-z0-9]?$"
 )
 
 func kubernikusValidateClusterName(v interface{}, k string) (ws []string, errors []error) {
@@ -40,7 +40,7 @@ func kubernikusValidatePoolName(v interface{}, k string) (ws []string, errors []
 
 	if !regexp.MustCompile(PoolNameRegex).MatchString(value) {
 		errors = append(errors, fmt.Errorf(
-			"%q must be 1 to 20 characters with lowercase and uppercase letters and numbers.", k))
+			"%q must be 1 to 20 characters with lowercase and uppercase letters, numbers, hyphens and dots.", k))
 	}
 	return
 }
