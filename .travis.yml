@@ -29,10 +29,13 @@ matrix:
   - go: tip
 
 before_deploy:
-  - GOOS=linux go build -o terraform-provider-ccloud_${TRAVIS_TAG}_linux
-  - GOOS=darwin go build -o terraform-provider-ccloud_${TRAVIS_TAG}_darwin
-  - GOOS=windows go build -o terraform-provider-ccloud_${TRAVIS_TAG}_windows.exe
-
+  - GOOS=linux go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4  
+  - zip -9 -j terraform-provider-ccloud_linux_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4                                                                                                                                             
+  - GOOS=darwin go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4
+  - zip -9 -j terraform-provider-ccloud_darwin_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4                                                                                                                                       
+  - GOOS=windows go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4.exe
+  - zip -9 -j terraform-provider-ccloud_windows_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4.exe
+        
 deploy:
   provider: releases
   skip_cleanup: true
@@ -40,7 +43,7 @@ deploy:
     secure: pJhz8dq4bLf4HjqDejp+Jy3pJCT4mJd1t8kbJ4h5GIRhTyS7Ey09ZLHRVoiYdyulI58C+dwfRDAMsj3ZNfen2fp4QT+VJ6kzA2vb/WslyxAhxdKW2KeoNrxWhZJEywATvn0gLpvZD5Nhr+QMcxRErhgQErvDPjxvePz6Fd6b2c5vVRH6HUcJjv+uWsi2t0mq++9qrz28fIi/3Tyb4aylKsoM8Ywd6xs74kAPfDzpqdGwkOhuNrr6tOpBTYsxdGLI4+SROH6mQALymD10O5/jMxcaGCNjfnB3Kzdx5tQ0QEcMdPEaMGZN1ke7MCC8nnvH4vn/OSdocpGgb0JUh/dqlo6JeJ5gbFUhukHP5ryZfeCK0szggTF3ZOUI7baJDVW4h6l5SPQjWv83ZP6hyGFmlVtAjjSDu8bbovqilIIEAV5D4y9KbOfPudC4aP4Ue65bD7KFw05CrOUq8RLBpIO1h4qJN8FbXIRIl5Y1A56dvpzGORMHhoTJc3pqfPTHaaNgr4WAhhsJTUFq7SSXqTbdKmi/sFwUTVUwGIVfRUljep+O9A7bHvyn5dBXo3piUweHFQsWxW72V+7yc8tXLiRMac61h5wXWvPEyngPw4bDsQyz7rq2vD+moNMM5Ddn/dN4yTooNJ1fh8lq9dsppv+Qy2pm0PC8Iv4y/2Ql1P6GEgw=
   file_glob: true
   file:
-  - terraform-provider-ccloud_${TRAVIS_TAG}_*
+  - terraform-provider-ccloud_${TRAVIS_TAG}_*.zip
   on:
     repo: sapcc/terraform-provider-ccloud
     tags: true
