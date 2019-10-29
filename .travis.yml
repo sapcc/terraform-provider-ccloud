@@ -4,9 +4,9 @@ services:
 - docker
 language: go
 go:
-  - "1.12.x"
+  - "1.13.x"
 env:
-  - GOFLAGS=-mod=vendor GO111MODULE=on
+  - GOFLAGS=-mod=vendor GO111MODULE=on GOARCH=amd64 CGO_ENABLED=0
 
 install:
 # This script is used by the Travis build to install a cookie for
@@ -29,13 +29,14 @@ matrix:
   - go: tip
 
 before_deploy:
-  - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4  
-  - zip -9 -j terraform-provider-ccloud_linux_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4                                                                                                                                             
-  - GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4
-  - zip -9 -j terraform-provider-ccloud_darwin_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4                                                                                                                                       
-  - GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4.exe
+  - umask 0022
+  - GOOS=linux go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4
+  - zip -9 -j terraform-provider-ccloud_linux_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4
+  - GOOS=darwin go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4
+  - zip -9 -j terraform-provider-ccloud_darwin_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4
+  - GOOS=windows go build -o terraform-provider-ccloud_${TRAVIS_TAG}_x4.exe
   - zip -9 -j terraform-provider-ccloud_windows_amd64.zip terraform-provider-ccloud_${TRAVIS_TAG}_x4.exe
-        
+
 deploy:
   provider: releases
   skip_cleanup: true
