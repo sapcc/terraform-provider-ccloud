@@ -132,7 +132,7 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta int
 				if d.HasChange(key) {
 					v := d.Get(key)
 					log.Printf("[QUOTA] Resource Changed: %s", key)
-					quota.Resources[resource] = limes.ValueWithUnit{uint64(v.(float64)), unit}
+					quota.Resources[resource] = limes.ValueWithUnit{Value: uint64(v.(float64)), Unit: unit}
 					log.Printf("[QUOTA] %s.%s: %s", service, resource, quota.Resources[resource].String())
 				}
 			}
