@@ -62,6 +62,14 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				ValidateFunc: validation.SingleIP(),
 			},
 
+			"advertise_port": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(0, 65536),
+			},
+
 			"cluster_cidr": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -318,6 +326,7 @@ func resourceCCloudKubernetesV1Create(d *schema.ResourceData, meta interface{}) 
 
 	cluster.Name = d.Get("name").(string)
 	cluster.Spec.AdvertiseAddress = d.Get("advertise_address").(string)
+	cluster.Spec.AdvertisePort = int64(d.Get("advertise_port").(int))
 	cluster.Spec.ClusterCIDR = d.Get("cluster_cidr").(string)
 	cluster.Spec.DNSAddress = d.Get("dns_address").(string)
 	cluster.Spec.DNSDomain = d.Get("dns_domain").(string)
@@ -385,6 +394,7 @@ func resourceCCloudKubernetesV1Read(d *schema.ResourceData, meta interface{}) er
 	}
 
 	d.Set("advertise_address", result.Payload.Spec.AdvertiseAddress)
+	d.Set("advertise_address", result.Payload.Spec.AdvertisePort)
 	d.Set("cluster_cidr", result.Payload.Spec.ClusterCIDR)
 	d.Set("dns_address", result.Payload.Spec.DNSAddress)
 	d.Set("dns_domain", result.Payload.Spec.DNSDomain)

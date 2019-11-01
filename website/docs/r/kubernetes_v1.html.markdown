@@ -117,6 +117,9 @@ The following arguments are supported:
   default virtual address, routed by the Kubernikus Wormhole tunnel on worker
   nodes. Changing this forces a new resource to be created.
 
+* `advertise_port` - (Optional) The port on which to advertise the API server 
+  to members of the cluster. Defaults to `6443`. 
+
 * `cluster_cidr` - (Optional) CIDR Range for Pods in cluster. If not specified,
   generated automatically. Changing this forces a new resource to be created.
 

@@ -330,6 +330,8 @@ github.com/sapcc/gophercloud-limes v0.0.0-20190715090732-81a981309360/go.mod h1:
 github.com/sapcc/gophercloud-lyra v0.0.0-20190312091744-e39ec87bb953 h1:N0B0izG6vAm+gczFgeMEFKSdT4Md4NgNrOCcpGL6Qx0=
 github.com/sapcc/gophercloud-lyra v0.0.0-20190312091744-e39ec87bb953/go.mod h1:ZnIRhj7JFmyNxkbRf2ftVGFYFiRWplhJN9C7h203t9s=
 github.com/sapcc/hermes v0.0.0-20190722215605-d772f40f9fc6/go.mod h1:WM5CVlqFCGM+AUE7lQgkLmPE89PWqJS3i+oRXaSztR8=
+github.com/sapcc/kubernikus v1.0.1-0.20191101092532-315f731682d4 h1:sw2ejO8hyeWx2t6miabQrDM2QWvS3Oh9PkximQLAeX4=
+github.com/sapcc/kubernikus v1.0.1-0.20191101092532-315f731682d4/go.mod h1:myK1pthNZIGRz7BRoztctl69QaZzj69fbGr4WvzEJ2M=
 github.com/sapcc/kubernikus v1.5.1-0.20191018133049-850e9fccd5c8 h1:ErIs1bH8G6qjmZhHAP8QZ5CElazr6tJ11vcyrJRJ4N8=
 github.com/sapcc/kubernikus v1.5.1-0.20191018133049-850e9fccd5c8/go.mod h1:myK1pthNZIGRz7BRoztctl69QaZzj69fbGr4WvzEJ2M=
 github.com/sapcc/limes v0.0.0-20190311092800-fb212143c5f5/go.mod h1:Fq0sDroTbraRqiS+OWjf8GFMREFVgrF8nhvJ76SgAk4=
