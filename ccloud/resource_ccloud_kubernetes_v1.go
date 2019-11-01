@@ -113,6 +113,20 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				Default:  false,
 			},
 
+			"dex": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  true,
+			},
+
+			"dashboard": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  true,
+			},
+
 			"backup": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -332,6 +346,8 @@ func resourceCCloudKubernetesV1Create(d *schema.ResourceData, meta interface{}) 
 	cluster.Spec.DNSDomain = d.Get("dns_domain").(string)
 	cluster.Spec.SSHPublicKey = d.Get("ssh_public_key").(string)
 	cluster.Spec.NoCloud = d.Get("no_cloud").(bool)
+	cluster.Spec.Dex = d.Get("dex").(bool)
+	cluster.Spec.Dashboard = d.Get("dashboard").(bool)
 	cluster.Spec.Backup = d.Get("backup").(string)
 	cluster.Spec.ServiceCIDR = d.Get("service_cidr").(string)
 	cluster.Spec.Version = d.Get("version").(string)
@@ -401,6 +417,8 @@ func resourceCCloudKubernetesV1Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("name", result.Payload.Spec.Name)
 	d.Set("ssh_public_key", result.Payload.Spec.SSHPublicKey)
 	d.Set("no_cloud", result.Payload.Spec.NoCloud)
+	d.Set("dex", result.Payload.Spec.Dex)
+	d.Set("dashboard", result.Payload.Spec.Dashboard)
 	d.Set("backup", result.Payload.Spec.Backup)
 	d.Set("service_cidr", result.Payload.Spec.ServiceCIDR)
 	d.Set("version", result.Payload.Spec.Version)
