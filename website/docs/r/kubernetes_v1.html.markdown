@@ -139,10 +139,10 @@ The following arguments are supported:
   authenticate the default SSH user (`core` for CoreOS images).
 
 * `no_cloud` - (Optional) Disable all Kubernetes cloud providers. Defaults to
-  `false`. Changing this forces a new resource to be created.
+  `false`.
 
 * `dex` - (Optional) Enable dex installation to Kubernetes cluster. Defaults to
-  `true`. Changing this forces a new resource to be created.
+  `true`.
 
 * `dashboard` - (Optional) Enable Kubernetes dashboard installation to Kubernetes
 cluster. Defaults to `true`. Changing this forces a new resource to be created.
