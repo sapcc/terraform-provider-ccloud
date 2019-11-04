@@ -139,13 +139,13 @@ The following arguments are supported:
   authenticate the default SSH user (`core` for CoreOS images).
 
 * `no_cloud` - (Optional) Disable all Kubernetes cloud providers. Defaults to
-  `false`.
+  `false`. Changing this forces a new resource to be created.
 
 * `dex` - (Optional) Enable dex installation to Kubernetes cluster. Defaults to
   `true`.
 
 * `dashboard` - (Optional) Enable Kubernetes dashboard installation to Kubernetes
-cluster. Defaults to `true`. Changing this forces a new resource to be created.
+cluster. Defaults to `true`. 
 
 * `backup` - (Optional) Configures the etcd database backup behaviour. Can
   either be `on`, `off` or `externalAWS`. `externalAWS` option is available only
