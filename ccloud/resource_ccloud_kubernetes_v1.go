@@ -116,14 +116,14 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 			"dex": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
+				ForceNew: false,
 				Default:  true,
 			},
 
 			"dashboard": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
+				ForceNew: false,
 				Default:  true,
 			},
 
