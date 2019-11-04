@@ -469,6 +469,14 @@ func resourceCCloudKubernetesV1Update(d *schema.ResourceData, meta interface{}) 
 		cluster.Spec.Backup = v.(string)
 	}
 
+	if v, ok := d.GetOk("dex"); ok {
+		cluster.Spec.Dex = v.(bool)
+	}
+
+	if v, ok := d.GetOk("dashboard"); ok {
+		cluster.Spec.Dashboard = v.(bool)
+	}
+
 	if v, ok := d.GetOk("version"); ok {
 		cluster.Spec.Version = v.(string)
 		err = verifySupportedKubernetesVersion(klient, cluster.Spec.Version)
