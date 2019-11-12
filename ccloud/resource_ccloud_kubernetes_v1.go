@@ -410,7 +410,7 @@ func resourceCCloudKubernetesV1Read(d *schema.ResourceData, meta interface{}) er
 	}
 
 	d.Set("advertise_address", result.Payload.Spec.AdvertiseAddress)
-	d.Set("advertise_address", result.Payload.Spec.AdvertisePort)
+	d.Set("advertise_port", result.Payload.Spec.AdvertisePort)
 	d.Set("cluster_cidr", result.Payload.Spec.ClusterCIDR)
 	d.Set("dns_address", result.Payload.Spec.DNSAddress)
 	d.Set("dns_domain", result.Payload.Spec.DNSDomain)
