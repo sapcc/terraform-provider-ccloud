@@ -71,11 +71,16 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 			},
 
 			"cluster_cidr": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
-				ValidateFunc: validation.CIDRNetwork(8, 17),
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "100.100.0.0/16",
+				ValidateFunc: func(v interface{}, k string) ([]string, []error) {
+					if v == nil || v.(string) == "" {
+						return nil, nil
+					}
+					return validation.CIDRNetwork(8, 17)(v, k)
+				},
 			},
 
 			"service_cidr": {
@@ -341,7 +346,9 @@ func resourceCCloudKubernetesV1Create(d *schema.ResourceData, meta interface{}) 
 	cluster.Name = d.Get("name").(string)
 	cluster.Spec.AdvertiseAddress = d.Get("advertise_address").(string)
 	cluster.Spec.AdvertisePort = int64(d.Get("advertise_port").(int))
-	cluster.Spec.ClusterCIDR = d.Get("cluster_cidr").(string)
+	if v, ok := d.Get("cluster_cidr").(string); ok {
+		cluster.Spec.ClusterCIDR = &v
+	}
 	cluster.Spec.DNSAddress = d.Get("dns_address").(string)
 	cluster.Spec.DNSDomain = d.Get("dns_domain").(string)
 	cluster.Spec.SSHPublicKey = d.Get("ssh_public_key").(string)

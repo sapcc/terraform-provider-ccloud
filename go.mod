@@ -14,7 +14,7 @@ require (
 	github.com/sapcc/gophercloud-billing v0.0.0-20190829163637-d8fd49ec93ce
 	github.com/sapcc/gophercloud-limes v0.0.0-20190715090732-81a981309360
 	github.com/sapcc/gophercloud-lyra v0.0.0-20190312091744-e39ec87bb953
-	github.com/sapcc/kubernikus v1.0.1-0.20191101092532-315f731682d4
+	github.com/sapcc/kubernikus v1.0.1-0.20191112145252-2b923071b4ae
 	github.com/sapcc/limes v0.0.0-20191015121456-5acc25fceb0b
 	k8s.io/apimachinery v0.0.0-20190831074630-461753078381 // indirect
 	k8s.io/client-go v11.0.0+incompatible
