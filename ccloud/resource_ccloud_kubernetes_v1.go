@@ -353,8 +353,12 @@ func resourceCCloudKubernetesV1Create(d *schema.ResourceData, meta interface{}) 
 	cluster.Spec.DNSDomain = d.Get("dns_domain").(string)
 	cluster.Spec.SSHPublicKey = d.Get("ssh_public_key").(string)
 	cluster.Spec.NoCloud = d.Get("no_cloud").(bool)
-	cluster.Spec.Dex = d.Get("dex").(bool)
-	cluster.Spec.Dashboard = d.Get("dashboard").(bool)
+	if v, ok := d.Get("dex").(bool); ok {
+		cluster.Spec.Dex = &v
+	}
+	if v, ok := d.Get("dashboard").(bool); ok {
+		cluster.Spec.Dashboard = &v
+	}
 	cluster.Spec.Backup = d.Get("backup").(string)
 	cluster.Spec.ServiceCIDR = d.Get("service_cidr").(string)
 	cluster.Spec.Version = d.Get("version").(string)
@@ -476,12 +480,12 @@ func resourceCCloudKubernetesV1Update(d *schema.ResourceData, meta interface{}) 
 		cluster.Spec.Backup = v.(string)
 	}
 
-	if v, ok := d.GetOk("dex"); ok {
-		cluster.Spec.Dex = v.(bool)
+	if v, ok := d.Get("dex").(bool); ok {
+		cluster.Spec.Dex = &v
 	}
 
-	if v, ok := d.GetOk("dashboard"); ok {
-		cluster.Spec.Dashboard = v.(bool)
+	if v, ok := d.Get("dashboard").(bool); ok {
+		cluster.Spec.Dashboard = &v
 	}
 
 	if v, ok := d.GetOk("version"); ok {
