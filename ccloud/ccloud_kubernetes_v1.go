@@ -316,10 +316,9 @@ func kubernikusUpdateNodePoolsV1(klient *Kubernikus, cluster *models.Kluster, ol
 }
 
 func kubernikusHandleErrorV1(msg string, err error) error {
-	switch err.(type) {
+	switch res := err.(type) {
 	case *operations.TerminateClusterDefault:
-		result := err.(*operations.TerminateClusterDefault)
-		return fmt.Errorf("%s: %s", msg, result.Payload.Message)
+		return fmt.Errorf("%s: %s", msg, res.Payload.Message)
 	case error:
 		return fmt.Errorf("%s: %s", msg, err)
 	}

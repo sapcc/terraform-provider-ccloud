@@ -3,9 +3,7 @@ package ccloud
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/url"
-	"sort"
 	"strings"
 	"time"
 
@@ -36,44 +34,6 @@ func GetRegion(d *schema.ResourceData, config *Config) string {
 	}
 
 	return config.Region
-}
-
-// List of headers that contain sensitive data.
-var sensitiveHeaders = map[string]struct{}{
-	"x-auth-token":                    {},
-	"x-auth-key":                      {},
-	"x-service-token":                 {},
-	"x-storage-token":                 {},
-	"x-account-meta-temp-url-key":     {},
-	"x-account-meta-temp-url-key-2":   {},
-	"x-container-meta-temp-url-key":   {},
-	"x-container-meta-temp-url-key-2": {},
-	"set-cookie":                      {},
-	"x-subject-token":                 {},
-}
-
-func hideSensitiveHeadersData(headers http.Header) []string {
-	result := make([]string, len(headers))
-	headerIdx := 0
-	for header, data := range headers {
-		if _, ok := sensitiveHeaders[strings.ToLower(header)]; ok {
-			result[headerIdx] = fmt.Sprintf("%s: %s", header, "***")
-		} else {
-			result[headerIdx] = fmt.Sprintf("%s: %s", header, strings.Join(data, " "))
-		}
-		headerIdx++
-	}
-
-	return result
-}
-
-// formatHeaders converts standard http.Header type to a string with separated headers.
-// It will hide data of sensitive headers.
-func formatHeaders(headers http.Header, separator string) string {
-	redactedHeaders := hideSensitiveHeadersData(headers)
-	sort.Strings(redactedHeaders)
-
-	return strings.Join(redactedHeaders, separator)
 }
 
 // IsSliceContainsStr returns true if the string exists in given slice, ignore case.

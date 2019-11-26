@@ -34,7 +34,7 @@ func arcCCloudArcAgentV1ReadAgent(d *schema.ResourceData, arcClient *gophercloud
 	d.Set("updated_by", agent.UpdatedBy)
 
 	d.Set("facts", expandToMapStringString(agent.Facts))
-	factsAgents, _ := agent.Facts["agents"]
+	factsAgents := agent.Facts["agents"]
 	if v, ok := factsAgents.(map[string]interface{}); ok {
 		d.Set("facts_agents", expandToMapStringString(v))
 	} else {

@@ -404,16 +404,14 @@ func resourceCCloudKubernetesV1Read(d *schema.ResourceData, meta interface{}) er
 
 	result, err := klient.ShowCluster(operations.NewShowClusterParams().WithName(d.Id()), klient.authFunc())
 	if err != nil {
-		switch err.(type) {
+		switch res := err.(type) {
 		case *operations.ShowClusterDefault:
-			result := err.(*operations.ShowClusterDefault)
-
-			if result.Payload.Message == "Not found" {
+			if res.Payload.Message == "Not found" {
 				d.SetId("")
 				return nil
 			}
 
-			return fmt.Errorf("Error reading Kubernikus cluster: %s", result.Payload.Message)
+			return fmt.Errorf("Error reading Kubernikus cluster: %s", res.Payload.Message)
 		case error:
 			return fmt.Errorf("Error reading Kubernikus cluster: %s", err)
 		}
