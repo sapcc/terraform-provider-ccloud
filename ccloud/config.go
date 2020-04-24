@@ -14,10 +14,7 @@ import (
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
 	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
-	"github.com/sapcc/gophercloud-arc/arc"
-	"github.com/sapcc/gophercloud-billing/billing"
-	"github.com/sapcc/gophercloud-limes/resources"
-	"github.com/sapcc/gophercloud-lyra/automation"
+	"github.com/sapcc/gophercloud-sapcc/clients"
 )
 
 type Config struct {
@@ -299,7 +296,7 @@ func (c *Config) limesV1Client(region string) (*gophercloud.ServiceClient, error
 		return nil, err
 	}
 
-	client, err := resources.NewLimesV1(c.OsClient, gophercloud.EndpointOpts{
+	client, err := clients.NewLimesV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
 	})
@@ -336,7 +333,7 @@ func (c *Config) arcV1Client(region string) (*gophercloud.ServiceClient, error) 
 		return nil, err
 	}
 
-	client, err := arc.NewArcV1(c.OsClient, gophercloud.EndpointOpts{
+	client, err := clients.NewArcV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
 	})
@@ -356,7 +353,7 @@ func (c *Config) automationV1Client(region string) (*gophercloud.ServiceClient, 
 		return nil, err
 	}
 
-	client, err := automation.NewAutomationV1(c.OsClient, gophercloud.EndpointOpts{
+	client, err := clients.NewAutomationV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
 	})
@@ -396,7 +393,7 @@ func (c *Config) billingClient(region string) (*gophercloud.ServiceClient, error
 		return nil, err
 	}
 
-	client, err := billing.NewBilling(c.OsClient, gophercloud.EndpointOpts{
+	client, err := clients.NewBilling(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
 	})

@@ -1,7 +1,7 @@
 package ccloud
 
 import (
-	"github.com/sapcc/gophercloud-billing/billing/masterdata/domains"
+	"github.com/sapcc/gophercloud-sapcc/billing/masterdata/domains"
 )
 
 func billingDomainFlattenCostObject(co domains.CostObject) []map[string]interface{} {

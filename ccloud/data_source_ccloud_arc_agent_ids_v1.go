@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
-	"github.com/sapcc/gophercloud-arc/arc/v1/agents"
+	"github.com/sapcc/gophercloud-sapcc/arc/v1/agents"
 )
 
 func dataSourceCCloudArcAgentIDsV1() *schema.Resource {

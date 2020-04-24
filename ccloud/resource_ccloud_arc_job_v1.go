@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
-	"github.com/sapcc/gophercloud-arc/arc/v1/jobs"
+	"github.com/sapcc/gophercloud-sapcc/arc/v1/jobs"
 )
 
 func resourceCCloudArcJobV1() *schema.Resource {

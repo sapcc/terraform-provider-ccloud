@@ -6,8 +6,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/sapcc/gophercloud-limes/resources/v1/projects"
+	"github.com/sapcc/gophercloud-sapcc/resources/v1/projects"
 	"github.com/sapcc/limes"
 )
 
@@ -77,7 +78,7 @@ func resourceCCloudProjectQuotaV1Read(d *schema.ResourceData, meta interface{}) 
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
 
-	log.Printf("[QUOTA] Reading Quota for: %s/%s", domainID, projectID)
+	log.Printf("[DEBUG] Reading Quota for: %s/%s", domainID, projectID)
 
 	config := meta.(*Config)
 	limes, err := config.limesV1Client(GetRegion(d, config))
@@ -97,7 +98,7 @@ func resourceCCloudProjectQuotaV1Read(d *schema.ResourceData, meta interface{}) 
 				continue
 			}
 			res[resource] = float64(quota.Services[service].Resources[resource].Quota)
-			log.Printf("[QUOTA] %s.%s: %s", service, resource, toString(quota.Services[service].Resources[resource]))
+			log.Printf("[DEBUG] %s.%s: %s", service, resource, toString(quota.Services[service].Resources[resource]))
 		}
 		d.Set(sanitize(service), []map[string]float64{res})
 	}
@@ -112,7 +113,7 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta int
 	projectID := d.Get("project_id").(string)
 	services := limes.QuotaRequest{}
 
-	log.Printf("[QUOTA] Updating Quota for: %s/%s", domainID, projectID)
+	log.Printf("[DEBUG] Updating Quota for: %s/%s", domainID, projectID)
 
 	config := meta.(*Config)
 	client, err := config.limesV1Client(GetRegion(d, config))
@@ -123,7 +124,7 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta int
 	for _service, resources := range SERVICES {
 		service := sanitize(_service)
 		if _, ok := d.GetOk(service); ok && d.HasChange(service) {
-			log.Printf("[QUOTA] Service Changed: %s", service)
+			log.Printf("[DEBUG] Service Changed: %s", service)
 
 			quota := limes.ServiceQuotaRequest{Resources: make(limes.ResourceQuotaRequest)}
 			for resource, unit := range resources {
@@ -131,9 +132,9 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta int
 
 				if d.HasChange(key) {
 					v := d.Get(key)
-					log.Printf("[QUOTA] Resource Changed: %s", key)
+					log.Printf("[DEBUG] Resource Changed: %s", key)
 					quota.Resources[resource] = limes.ValueWithUnit{Value: uint64(v.(float64)), Unit: unit}
-					log.Printf("[QUOTA] %s.%s: %s", service, resource, quota.Resources[resource].String())
+					log.Printf("[DEBUG] %s.%s: %s", service, resource, quota.Resources[resource].String())
 				}
 			}
 			services[_service] = quota
@@ -148,12 +149,18 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta int
 	}
 
 	opts := projects.UpdateOpts{Services: services}
-	_, err = projects.Update(client, domainID, projectID, opts)
+	warn, err := projects.Update(client, domainID, projectID, opts).Extract()
 	if err != nil {
+		if err, ok := err.(gophercloud.ErrDefault400); ok {
+			return fmt.Errorf("Error updating Limes project: %s: %s", err.Body, err)
+		}
 		return fmt.Errorf("Error updating Limes project: %s", err)
 	}
+	if warn != nil {
+		log.Printf("[DEBUG] %s", string(warn))
+	}
 
-	log.Printf("[QUOTA] Resulting Quota for: %s/%s", domainID, projectID)
+	log.Printf("[DEBUG] Resulting Quota for: %s/%s", domainID, projectID)
 
 	d.SetId(projectID)
 

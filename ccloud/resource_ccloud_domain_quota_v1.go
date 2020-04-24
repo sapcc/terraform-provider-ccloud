@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/sapcc/gophercloud-limes/resources/v1/domains"
+	"github.com/sapcc/gophercloud-sapcc/resources/v1/domains"
 	"github.com/sapcc/limes"
 )
 
@@ -128,7 +128,7 @@ func resourceCCloudDomainQuotaV1CreateOrUpdate(d *schema.ResourceData, meta inte
 	}
 
 	opts := domains.UpdateOpts{Services: services}
-	err = domains.Update(client, domainID, opts)
+	err = domains.Update(client, domainID, opts).ExtractErr()
 	if err != nil {
 		return fmt.Errorf("Error updating Limes domain: %s", err)
 	}
