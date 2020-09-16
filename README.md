@@ -1,9 +1,7 @@
 Converged Cloud Enterprise Edition - Terraform Provider
 =======================================================
 
-- Website: https://www.terraform.io
-- [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
-- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
+- Website: https://registry.terraform.io/providers/sapcc/ccloud/latest/docs
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
@@ -25,7 +23,7 @@ Usage
 
 
 The CCloudEE provider is an extension to the [OpenStack Terraform
-Provider](https://github.com/terraform-providers/terraform-provider-openstack).
+Provider](https://github.com/terraform-provider-openstack/terraform-provider-openstack).
 It provides resources that allow to use Terraform for Converged Cloud's
 additional services:
 
@@ -56,11 +54,26 @@ $ make build
 
 Installing the provider
 -----------------------
-Download a [binary release](https://github.com/sapcc/terraform-provider-ccloud/releases) for your OS, unpack the archive and follow the official Terraform documentation to know how to [install third-party providers](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).
+
+To install this provider, copy and paste this code into your Terraform configuration. Then, run `terraform init`.
+
+```hcl
+terraform {
+  required_providers {
+    ccloud = {
+      source = "sapcc/ccloud"
+    }
+  }
+}
+
+provider "ccloud" {
+  # Configuration options
+}
+```
 
 Using the provider
 ----------------------
-You can browse the documentation within this repo [here](https://github.com/sapcc/terraform-provider-ccloud/tree/master/website/docs).
+You can browse the documentation [here](https://registry.terraform.io/providers/sapcc/ccloud/latest/docs).
 
 Developing the Provider
 ---------------------------
