@@ -16,15 +16,19 @@ Use the navigation to the left to read about the available resources.
 
 # Installing the provider
 
-Download a
-[binary release](https://github.com/sapcc/terraform-provider-ccloud/releases)
-for your OS, unpack the archive and follow the official Terraform documentation
-to know how to
-[install third-party providers](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).
+Since v1.4.8 you can use the provider from a [Terraform Registry](https://registry.terraform.io/providers/sapcc/ccloud).
 
 ## Example Usage
 
 ```hcl
+terraform {
+  required_providers {
+    ccloud = {
+      source = "sapcc/ccloud"
+    }
+  }
+}
+
 # Configure the Converged Cloud Provider
 provider "ccloud" {
   user_name   = "admin"
