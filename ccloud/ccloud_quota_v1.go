@@ -15,9 +15,6 @@ import (
 
 var (
 	limesServices = map[string]map[string]limes.Unit{
-		"database": {
-			"cfm_share_capacity": limes.UnitBytes,
-		},
 		"compute": {
 			"cores":                limes.UnitNone,
 			"instances":            limes.UnitNone,
@@ -26,9 +23,12 @@ var (
 			"server_group_members": limes.UnitNone,
 		},
 		"volumev2": {
-			"capacity":  limes.UnitGibibytes,
-			"snapshots": limes.UnitNone,
-			"volumes":   limes.UnitNone,
+			"capacity":               limes.UnitGibibytes,
+			"capacity_standard_hdd":  limes.UnitGibibytes,
+			"snapshots":              limes.UnitNone,
+			"snapshots_standard_hdd": limes.UnitNone,
+			"volumes":                limes.UnitNone,
+			"volumes_standard_hdd":   limes.UnitNone,
 		},
 		"network": {
 			"floating_ips":         limes.UnitNone,

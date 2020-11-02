@@ -24,7 +24,7 @@ data "openstack_identity_project_v3" "demo" {
 }
 
 resource "ccloud_domain_quota_v1" "quota" {
-  domain_id = "${openstack_identity_project_v3.demo.domain_id}"
+  domain_id = "${data.openstack_identity_project_v3.demo.domain_id}"
 
   compute {
     instances = 8
@@ -33,9 +33,12 @@ resource "ccloud_domain_quota_v1" "quota" {
   }
 
   volumev2 {
-    capacity  = 1024
-    snapshots = 0
-    volumes   = 128
+    capacity               = 1024
+    snapshots              = 0
+    volumes                = 128
+    capacity_standard_hdd  = 4096
+    snapshots_standard_hdd = 0
+    volumes_standard_hdd   = 1000
   }
 
   network {
@@ -69,10 +72,6 @@ resource "ccloud_domain_quota_v1" "quota" {
 
   objectstore {
     capacity = 1073741824
-  }
-
-  database {
-    cfm_share_capacity = 1073741824
   }
 }
 ```
@@ -110,9 +109,6 @@ The following arguments are supported:
 
 * `objectstore` - (Optional) The list of Object Storage resources quota.
   Consists of `capacity` (Bytes).
-
-* `database` - (Optional) The list of CFM Storage resources quota. Consists of
-  `cfm_share_capacity` (Bytes).
 
 ## Attributes Reference
 
