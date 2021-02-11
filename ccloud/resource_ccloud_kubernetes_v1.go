@@ -271,6 +271,16 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 				Computed: true,
 			},
 
+			"apiserver_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"dashboard_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"kube_config": {
 				Type:      schema.TypeList,
 				Computed:  true,
@@ -429,6 +439,8 @@ func resourceCCloudKubernetesV1Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("version", result.Payload.Spec.Version)
 	d.Set("phase", result.Payload.Status.Phase)
 	d.Set("wormhole", result.Payload.Status.Wormhole)
+	d.Set("apiserver_url", result.Payload.Status.Apiserver)
+	d.Set("dashboard_url", result.Payload.Status.Dashboard)
 	d.Set("openstack", kubernikusFlattenOpenstackSpecV1(&result.Payload.Spec.Openstack))
 	d.Set("node_pools", kubernikusFlattenNodePoolsV1(result.Payload.Spec.NodePools))
 

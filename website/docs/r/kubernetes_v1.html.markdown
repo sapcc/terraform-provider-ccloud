@@ -242,6 +242,9 @@ In addition to all arguments above, the following attributes are exported:
 * `phase` - The Kubernikus cluster current status. Can either be `Pending`,
   `Creating`, `Running`, `Terminating` or `Upgrading`.
 * `wormhole` - The Wormhole tunnel server endpoint.
+* `apiserver_url` - The URL to Kubernetes API server.
+* `dashboard_url` - The URL to Kubernetes dashboard (when a cluster was created
+  with a `dashboard` argument.
 * `kube_config` - Contains the credentials block to the Kubernikus cluster.
 * `kube_config_raw` - Contains the kubeconfig with credentials to the Kubernikus
   cluster.
