@@ -15,7 +15,7 @@ This provider plugin is maintained by:
 Requirements
 ------------
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.13.x
+-	[Terraform](https://www.terraform.io/downloads.html) 0.14.x
 -	[Go](https://golang.org/doc/install) 1.15 (to build the provider plugin)
 
 Usage
