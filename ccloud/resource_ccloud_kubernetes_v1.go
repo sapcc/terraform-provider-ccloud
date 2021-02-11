@@ -354,10 +354,13 @@ func resourceCCloudKubernetesV1Create(d *schema.ResourceData, meta interface{}) 
 	}
 	cluster.Spec.Backup = d.Get("backup").(string)
 	cluster.Spec.ServiceCIDR = d.Get("service_cidr").(string)
-	cluster.Spec.Version = d.Get("version").(string)
-	err = verifySupportedKubernetesVersion(klient, cluster.Spec.Version)
-	if err != nil {
-		return err
+	if v, ok := d.GetOk("version"); ok {
+		v := v.(string)
+		err = verifySupportedKubernetesVersion(klient, v)
+		if err != nil {
+			return err
+		}
+		cluster.Spec.Version = v
 	}
 	cluster.Spec.NodePools, err = kubernikusExpandNodePoolsV1(d.Get("node_pools"))
 	if err != nil {
