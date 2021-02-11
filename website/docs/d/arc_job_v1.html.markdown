@@ -21,7 +21,7 @@ resource "ccloud_automation_run_v1" "run_1" {
 }
 
 data "ccloud_arc_job_v1" "job_1" {
-  job_id = "${ccloud_automation_run_v1.run_1.jobs[0]}"
+  job_id = ccloud_automation_run_v1.run_1.jobs[0]
 }
 ```
 
@@ -33,7 +33,7 @@ data "ccloud_arc_agent_v1" "agent_1" {
 }
 
 data "ccloud_arc_job_v1" "job_1" {
-  agent_id = "${data.ccloud_arc_agent_v1.agent_1.id}"
+  agent_id = data.ccloud_arc_agent_v1.agent_1.id
   timeout  = 3600
   agent    = "chef"
   action   = "zero"

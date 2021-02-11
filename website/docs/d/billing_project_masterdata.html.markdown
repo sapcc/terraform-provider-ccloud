@@ -21,7 +21,7 @@ data "ccloud_billing_project_masterdata" "masterdata" {
 }
 
 output "cost_object" {
-  value = "${data.ccloud_billing_project_masterdata.masterdata.cost_object}"
+  value = data.ccloud_billing_project_masterdata.masterdata.cost_object
 }
 ```
 

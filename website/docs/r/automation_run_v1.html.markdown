@@ -22,20 +22,20 @@ data "ccloud_automation_v1" "automation_1" {
 }
 
 resource "ccloud_automation_run_v1" "run_1" {
-  automation_id = "${data.ccloud_automation_v1.automation_1.id}"
+  automation_id = data.ccloud_automation_v1.automation_1.id
   selector      = "@metadata_name = 'hostname'"
 }
 
 data "ccloud_arc_job_v1" "job" {
-  job_id = "${ccloud_automation_run_v1.run_1.jobs[0]}"
+  job_id = ccloud_automation_run_v1.run_1.jobs[0]
 }
 
 output "run_log" {
-  value = "${ccloud_automation_run_v1.run_1.log}"
+  value = ccloud_automation_run_v1.run_1.log
 }
 
 output "job_log" {
-  value = "${data.ccloud_arc_job_v1.job.log}"
+  value = data.ccloud_arc_job_v1.job.log
 }
 ```
 

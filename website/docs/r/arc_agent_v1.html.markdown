@@ -30,7 +30,7 @@ deleted, then it will destroy the Arc Agent resource. When `force_delete` is
 set to `false`, make sure to use implicit arguments without referring the
 depending component. Prefer using the hostname filter based on the variable (see
 example below). Don't use
-`agent_id = "${openstack_compute_instance_v2.node.id}"`, otherwise the destroy
+`agent_id = openstack_compute_instance_v2.node.id`, otherwise the destroy
 command will end in a deadlock.
 
 ## Example Usage
@@ -64,10 +64,10 @@ locals {
 resource "ccloud_arc_agent_bootstrap_v1" "agent_1" {}
 
 resource "openstack_compute_instance_v2" "node" {
-  name        = "${local.hostname}"
+  name        = local.hostname
   image_name  = "ubuntu-16.04-amd64"
   flavor_name = "m1.small"
-  user_data   = "${ccloud_arc_agent_bootstrap_v1.agent_1.user_data}"
+  user_data   = ccloud_arc_agent_bootstrap_v1.agent_1.user_data
 
   network {
     name = "private_network"

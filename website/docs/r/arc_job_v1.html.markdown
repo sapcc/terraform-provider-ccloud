@@ -28,7 +28,7 @@ data "ccloud_arc_agent_v1" "agent_1" {
 }
 
 resource "ccloud_arc_job_v1" "job_1" {
-  to = "${ccloud_arc_agent_v1.agent_1.id}"
+  to = ccloud_arc_agent_v1.agent_1.id
 
   execute {
     script = <<EOF
@@ -43,7 +43,7 @@ EOF
 }
 
 output "job_status" {
-  value = "${ccloud_arc_job_v1.job_1.status}"
+  value = ccloud_arc_job_v1.job_1.status
 }
 ```
 
@@ -59,7 +59,7 @@ data "ccloud_arc_agent_v1" "agent_1" {
 }
 
 resource "ccloud_arc_job_v1" "job_1" {
-  to = "${ccloud_arc_agent_v1.agent_1.id}"
+  to = ccloud_arc_agent_v1.agent_1.id
 
   chef {
     enable {}
@@ -67,7 +67,7 @@ resource "ccloud_arc_job_v1" "job_1" {
 }
 
 output "job_status" {
-  value = "${ccloud_arc_job_v1.job_1.status}"
+  value = ccloud_arc_job_v1.job_1.status
 }
 ```
 
@@ -83,7 +83,7 @@ data "ccloud_arc_agent_v1" "agent_1" {
 }
 
 resource "ccloud_arc_job_v1" "job_1" {
-  to = "${ccloud_arc_agent_v1.agent_1.id}"
+  to = ccloud_arc_agent_v1.agent_1.id
 
   chef {
     zero {
@@ -99,7 +99,7 @@ EOF
 }
 
 output "job_status" {
-  value = "${ccloud_arc_job_v1.job_1.status}"
+  value = ccloud_arc_job_v1.job_1.status
 }
 ```
 

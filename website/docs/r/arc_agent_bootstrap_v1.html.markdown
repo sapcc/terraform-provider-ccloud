@@ -30,7 +30,7 @@ resource "openstack_compute_instance_v2" "node" {
   name        = "linux-vm"
   image_name  = "ubuntu-16.04-amd64"
   flavor_name = "m1.small"
-  user_data   = "${ccloud_arc_agent_bootstrap_v1.agent_1.user_data}"
+  user_data   = ccloud_arc_agent_bootstrap_v1.agent_1.user_data
 
   network {
     name = "private_network"
@@ -49,7 +49,7 @@ resource "openstack_compute_instance_v2" "node" {
   name        = "win-vm"
   image_name  = "windows-2016-amd64"
   flavor_name = "m1.large"
-  user_data   = "${ccloud_arc_agent_bootstrap_v1.agent_1.user_data}"
+  user_data   = ccloud_arc_agent_bootstrap_v1.agent_1.user_data
 
   network {
     name = "private_network"
@@ -75,11 +75,11 @@ net user Administrator $${admin_passwd}
 EOF
 
   vars = {
-    token        = "${lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "token")}"
-    reg_url      = "${lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "url")}"
-    endpoint_url = "${lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "endpoint_url")}"
-    update_url   = "${lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "update_url")}"
-    admin_passwd = "${var.password}"
+    token        = lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "token")
+    reg_url      = lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "url")
+    endpoint_url = lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "endpoint_url")
+    update_url   = lookup(ccloud_arc_agent_bootstrap_v1.agent_1.raw_map, "update_url")
+    admin_passwd = var.password
   }
 }
 
@@ -87,7 +87,7 @@ resource "openstack_compute_instance_v2" "node" {
   name        = "win-vm"
   image_name  = "windows-2016-amd64"
   flavor_name = "m1.large"
-  user_data   = "${data.template_file.user_data.rendered}"
+  user_data   = data.template_file.user_data.rendered
 
   network {
     name = "private_network"

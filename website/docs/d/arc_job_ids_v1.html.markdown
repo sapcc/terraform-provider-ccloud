@@ -18,7 +18,7 @@ data "ccloud_arc_agent_v1" "agent_1" {
 }
 
 data "ccloud_arc_job_ids_v1" "job_ids_1" {
-  agent_id = "${data.ccloud_arc_agent_v1.agent_1.id}"
+  agent_id = data.ccloud_arc_agent_v1.agent_1.id
   agent    = "chef"
   action   = "zero"
 }

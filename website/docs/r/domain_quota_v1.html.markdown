@@ -24,7 +24,7 @@ data "openstack_identity_project_v3" "demo" {
 }
 
 resource "ccloud_domain_quota_v1" "quota" {
-  domain_id = "${data.openstack_identity_project_v3.demo.domain_id}"
+  domain_id = data.openstack_identity_project_v3.demo.domain_id
 
   compute {
     instances = 8

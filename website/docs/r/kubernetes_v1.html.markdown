@@ -62,7 +62,7 @@ data "openstack_networking_network_v2" "network_1" {
 
 data "openstack_networking_subnet_v2" "subnet_1" {
   name       = "subnet_1"
-  network_id = "${data.openstack_networking_network_v2.network_1.id}"
+  network_id = data.openstack_networking_network_v2.network_1.id
 }
 
 data "openstack_networking_router_v2" "router_1" {
@@ -74,10 +74,10 @@ resource "ccloud_kubernetes_v1" "demo" {
   ssh_public_key = "ssh-rsa AAAABHTmDMP6w=="
 
   openstack {
-    lb_floating_network_id = "${data.openstack_networking_network_v2.fip_network_1.id}"
-    network_id             = "${data.openstack_networking_network_v2.network_1.id}"
-    lb_subnet_id           = "${data.openstack_networking_subnet_v2.subnet_1.id}"
-    router_id              = "${data.openstack_networking_router_v2.router_1.id}"
+    lb_floating_network_id = data.openstack_networking_network_v2.fip_network_1.id
+    network_id             = data.openstack_networking_network_v2.network_1.id
+    lb_subnet_id           = data.openstack_networking_subnet_v2.subnet_1.id
+    router_id              = data.openstack_networking_router_v2.router_1.id
     security_group_name    = "default"
   }
 
@@ -92,7 +92,7 @@ resource "ccloud_kubernetes_v1" "demo" {
 }
 
 resource "local_file" "kubeconfig" {
-  sensitive_content = "${ccloud_kubernetes_v1.demo.kube_config_raw}"
+  sensitive_content = ccloud_kubernetes_v1.demo.kube_config_raw
   filename          = "kubeconfig"
 }
 ```
@@ -273,10 +273,10 @@ like so:
 
 ```hcl
 provider "kubernetes" {
-  host                   = "${ccloud_kubernetes_v1.demo.kube_config.0.host}"
-  client_certificate     = "${base64decode(ccloud_kubernetes_v1.demo.kube_config.0.client_certificate)}"
-  client_key             = "${base64decode(ccloud_kubernetes_v1.demo.kube_config.0.client_key)}"
-  cluster_ca_certificate = "${base64decode(ccloud_kubernetes_v1.demo.kube_config.0.cluster_ca_certificate)}"
+  host                   = ccloud_kubernetes_v1.demo.kube_config.0.host
+  client_certificate     = base64decode(ccloud_kubernetes_v1.demo.kube_config.0.client_certificate)
+  client_key             = base64decode(ccloud_kubernetes_v1.demo.kube_config.0.client_key)
+  cluster_ca_certificate = base64decode(ccloud_kubernetes_v1.demo.kube_config.0.cluster_ca_certificate)
 }
 ```
 
