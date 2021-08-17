@@ -37,6 +37,6 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-In addition to arguments above, an extra attributes are exported. Please refer
+In addition to arguments above, extra attributes are exported. Please refer
 to the `ccloud_billing_domain_masterdata` resource arguments and attributes
-[documentation](../r/billing_domain_masterdata.html) for more information.
+[documentation](../resources/billing_domain_masterdata.html) for more information.

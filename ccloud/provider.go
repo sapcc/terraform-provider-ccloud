@@ -239,6 +239,8 @@ func Provider() terraform.ResourceProvider {
 			"ccloud_automation_v1":              dataSourceCCloudAutomationV1(),
 			"ccloud_billing_domain_masterdata":  dataSourceCCloudBillingDomainMasterdata(),
 			"ccloud_billing_project_masterdata": dataSourceCCloudBillingProjectMasterdata(),
+			"ccloud_project_quota_v1":           dataSourceCCloudProjectQuotaV1(),
+			"ccloud_domain_quota_v1":            dataSourceCCloudDomainQuotaV1(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{

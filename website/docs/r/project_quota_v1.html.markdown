@@ -74,6 +74,10 @@ resource "ccloud_project_quota_v1" "quota" {
   objectstore {
     capacity = 1073741824
   }
+
+  keppel {
+    images = 100
+  }
 }
 ```
 
