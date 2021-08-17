@@ -17,14 +17,8 @@ var (
 	limesServices = map[string]map[string]limes.Unit{
 		"compute": {
 			"cores":                limes.UnitNone,
-			"cores_bigvm":          limes.UnitNone,
-			"cores_regular":        limes.UnitNone,
 			"instances":            limes.UnitNone,
-			"instances_bigvm":      limes.UnitNone,
-			"instances_regular":    limes.UnitNone,
 			"ram":                  limes.UnitMebibytes,
-			"ram_bigvm":            limes.UnitMebibytes,
-			"ram_regular":          limes.UnitMebibytes,
 			"server_groups":        limes.UnitNone,
 			"server_group_members": limes.UnitNone,
 		},
