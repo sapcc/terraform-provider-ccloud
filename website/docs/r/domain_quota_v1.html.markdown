@@ -110,6 +110,9 @@ The following arguments are supported:
 * `objectstore` - (Optional) The list of Object Storage resources quota.
   Consists of `capacity` (Bytes).
 
+* `keppel` - (Optional) The list of Image Registry resources quota. Consists of
+  `images`.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
