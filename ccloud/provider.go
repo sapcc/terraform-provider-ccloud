@@ -44,7 +44,7 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_USER_ID", ""),
-				Description: descriptions["user_name"],
+				Description: descriptions["user_id"],
 			},
 
 			"application_credential_id": {

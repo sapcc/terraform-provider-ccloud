@@ -124,7 +124,7 @@ func newKubernikusV1(c *Config, eo gophercloud.EndpointOpts) (*kubernikus, error
 func (k *kubernikus) authFunc() runtime.ClientAuthInfoWriterFunc {
 	return runtime.ClientAuthInfoWriterFunc(
 		func(req runtime.ClientRequest, reg strfmt.Registry) error {
-			req.SetHeaderParam("X-AUTH-TOKEN", k.provider.Token())
+			req.SetHeaderParam("X-Auth-Token", k.provider.Token())
 			req.SetHeaderParam("User-Agent", k.userAgent)
 			return nil
 		})
