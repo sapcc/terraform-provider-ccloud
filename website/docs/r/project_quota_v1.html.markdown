@@ -56,6 +56,8 @@ resource "ccloud_project_quota_v1" "quota" {
     loadbalancers        = 8
     pools                = 8
     pool_members         = 10
+    bgpvpns              = 0
+    trunks               = 0
   }
 
   dns {
@@ -105,8 +107,8 @@ The following arguments are supported:
 * `network` - (Optional) The list of network resources quota. Consists of
   `floating_ips`, `networks`, `ports`, `rbac_policies`, `routers`,
   `security_group_rules`, `security_groups`, `subnet_pools`, `subnets`,
-  `healthmonitors`, `l7policies`, `listeners`, `loadbalancers`, `pools` and
-  `pool_members`.
+  `healthmonitors`, `l7policies`, `listeners`, `loadbalancers`, `pools`,
+  `pool_members`, `bgpvpns` and `trunks`.
 
 * `dns` - (Optional) The list of DNS resources quota. Consists of `zones` and
   `recordsets`.

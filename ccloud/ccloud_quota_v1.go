@@ -46,6 +46,8 @@ var (
 			"loadbalancers":        limes.UnitNone,
 			"pools":                limes.UnitNone,
 			"pool_members":         limes.UnitNone,
+			"bgpvpns":              limes.UnitNone,
+			"trunks":               limes.UnitNone,
 		},
 		"dns": {
 			"zones":      limes.UnitNone,
