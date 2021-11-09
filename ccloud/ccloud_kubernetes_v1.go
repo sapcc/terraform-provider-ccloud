@@ -65,13 +65,14 @@ func kubernikusFlattenNodePoolsV1(nodePools []models.NodePool) []map[string]inte
 	var res []map[string]interface{}
 	for _, p := range nodePools {
 		res = append(res, map[string]interface{}{
-			"availability_zone": p.AvailabilityZone,
-			"flavor":            p.Flavor,
-			"image":             p.Image,
-			"name":              p.Name,
-			"size":              p.Size,
-			"taints":            p.Taints,
-			"labels":            p.Labels,
+			"availability_zone":     p.AvailabilityZone,
+			"flavor":                p.Flavor,
+			"image":                 p.Image,
+			"name":                  p.Name,
+			"size":                  p.Size,
+			"taints":                p.Taints,
+			"labels":                p.Labels,
+			"custom_root_disk_size": p.CustomRootDiskSize,
 			"config": []map[string]interface{}{
 				{
 					"allow_reboot":  p.Config.AllowReboot,
@@ -150,6 +151,9 @@ func kubernikusExpandNodePoolsV1(raw interface{}) ([]models.NodePool, error) {
 					}
 					if v, ok := v["labels"]; ok {
 						p.Labels = expandToStringSlice(v.([]interface{}))
+					}
+					if v, ok := v["custom_root_disk_size"]; ok {
+						p.CustomRootDiskSize = int64(v.(int))
 					}
 					if v, ok := v["config"]; ok {
 						p.Config = expandToNodePoolConfig(v.([]interface{}))
