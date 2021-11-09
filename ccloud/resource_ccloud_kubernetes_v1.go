@@ -192,6 +192,11 @@ func resourceCCloudKubernetesV1() *schema.Resource {
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
+						"custom_root_disk_size": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(64, 1024),
+						},
 						"config": {
 							Type:     schema.TypeList,
 							Optional: true,

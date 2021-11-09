@@ -190,6 +190,9 @@ The `node_pools` block supports:
 * `labels` - (Optional) The list of Kubernetes node labels to be assigned on the
   node pool compute instance.
 
+* `custom_root_disk_size` - (Optional) The size of a custom cinder root disk in
+  GB. Must be a value between `64` and `1024` when specified.
+
 * `config` - (Optional) Node pool extra options.
 
 The node pool `config` block supports:
