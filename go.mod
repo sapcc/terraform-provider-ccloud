@@ -13,5 +13,7 @@ require (
 	github.com/sapcc/gophercloud-sapcc v0.0.0-20201205201040-3739d487e866
 	github.com/sapcc/kubernikus v1.0.1-0.20211105103951-e08a4abb453a
 	github.com/sapcc/limes v0.0.0-20210202142824-88364f9c65af
+	github.com/ulikunitz/xz v0.5.8 // indirect
+	go.mongodb.org/mongo-driver v1.5.1 // indirect
 	k8s.io/client-go v0.16.15
 )
