@@ -1,20 +1,20 @@
 package ccloud
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/sapcc/gophercloud-sapcc/automation/v1/automations"
 )
 
 func dataSourceCCloudAutomationV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCCloudAutomationV1Read,
+		ReadContext: dataSourceCCloudAutomationV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -133,25 +133,25 @@ func dataSourceCCloudAutomationV1() *schema.Resource {
 	}
 }
 
-func dataSourceCCloudAutomationV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCCloudAutomationV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	automationClient, err := config.automationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Automation client: %s", err)
+		return diag.Errorf("Error creating OpenStack Automation client: %s", err)
 	}
 
 	allPages, err := automations.List(automationClient, automations.ListOpts{}).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list ccloud_automation_v1: %s", err)
+		return diag.Errorf("Unable to list ccloud_automation_v1: %s", err)
 	}
 
 	allAutomations, err := automations.ExtractAutomations(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve ccloud_automation_v1: %s", err)
+		return diag.Errorf("Unable to retrieve ccloud_automation_v1: %s", err)
 	}
 
 	if len(allAutomations) == 0 {
-		return fmt.Errorf("No ccloud_automation_v1 found")
+		return diag.Errorf("No ccloud_automation_v1 found")
 	}
 
 	var automations []automations.Automation
@@ -202,11 +202,11 @@ func dataSourceCCloudAutomationV1Read(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if len(automations) == 0 {
-		return fmt.Errorf("No ccloud_automation_v1 found")
+		return diag.Errorf("No ccloud_automation_v1 found")
 	}
 
 	if len(automations) > 1 {
-		return fmt.Errorf("More than one ccloud_automation_v1 found (%d)", len(automations))
+		return diag.Errorf("More than one ccloud_automation_v1 found (%d)", len(automations))
 	}
 
 	automation := automations[0]

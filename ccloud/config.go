@@ -1,9 +1,10 @@
 package ccloud
 
 import (
+	"github.com/sapcc/gophercloud-sapcc/clients"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/utils/openstack/clientconfig"
-	"github.com/sapcc/gophercloud-sapcc/clients"
 )
 
 func (c *Config) limesV1Client(region string) (*gophercloud.ServiceClient, error) {

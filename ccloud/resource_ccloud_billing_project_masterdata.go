@@ -1,24 +1,26 @@
 package ccloud
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/sapcc/gophercloud-sapcc/billing/masterdata/projects"
+
+	"github.com/gophercloud/gophercloud"
 )
 
 func resourceCCloudBillingProjectMasterdata() *schema.Resource {
 	return &schema.Resource{
-		Read:   resourceCCloudBillingProjectMasterdataRead,
-		Update: resourceCCloudBillingProjectMasterdataCreateOrUpdate,
-		Create: resourceCCloudBillingProjectMasterdataCreateOrUpdate,
-		Delete: schema.RemoveFromState,
+		ReadContext:   resourceCCloudBillingProjectMasterdataRead,
+		UpdateContext: resourceCCloudBillingProjectMasterdataCreateOrUpdate,
+		CreateContext: resourceCCloudBillingProjectMasterdataCreateOrUpdate,
+		Delete:        schema.RemoveFromState,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -228,11 +230,11 @@ func resourceCCloudBillingProjectMasterdata() *schema.Resource {
 	}
 }
 
-func resourceCCloudBillingProjectMasterdataCreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudBillingProjectMasterdataCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	billing, err := config.billingClient(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack billing client: %s", err)
+		return diag.Errorf("Error creating OpenStack billing client: %s", err)
 	}
 
 	projectID := d.Get("project_id").(string)
@@ -242,16 +244,16 @@ func resourceCCloudBillingProjectMasterdataCreateOrUpdate(d *schema.ResourceData
 		// first call, expecting to get current scope project
 		allPages, err := projects.List(billing).AllPages()
 		if err != nil {
-			return fmt.Errorf("Error getting billing project masterdata: %s", err)
+			return diag.Errorf("Error getting billing project masterdata: %s", err)
 		}
 
 		allProjects, err := projects.ExtractProjects(allPages)
 		if err != nil {
-			return fmt.Errorf("Error extracting billing projects masterdata: %s", err)
+			return diag.Errorf("Error extracting billing projects masterdata: %s", err)
 		}
 
 		if len(allProjects) != 1 {
-			return fmt.Errorf("Error getting billing project masterdata: expecting 1 project, got %d", len(allProjects))
+			return diag.Errorf("Error getting billing project masterdata: expecting 1 project, got %d", len(allProjects))
 		}
 
 		project = &allProjects[0]
@@ -261,7 +263,7 @@ func resourceCCloudBillingProjectMasterdataCreateOrUpdate(d *schema.ResourceData
 		project, err = projects.Get(billing, projectID).Extract()
 		if err != nil {
 			if _, ok := err.(gophercloud.ErrDefault404); d.Id() != "" || !ok {
-				return fmt.Errorf("Error getting billing project masterdata: %s", err)
+				return diag.Errorf("Error getting billing project masterdata: %s", err)
 			}
 			log.Printf("[DEBUG] Error getting billing project masterdata, probably this project was not created yet: %s", err)
 			project = &projects.Project{ProjectID: projectID}
@@ -302,30 +304,30 @@ func resourceCCloudBillingProjectMasterdataCreateOrUpdate(d *schema.ResourceData
 	opts.ParentID = replaceEmpty(d, "parent_id", opts.ParentID)
 	opts.ProjectType = replaceEmpty(d, "project_type", opts.ProjectType)
 
-	log.Printf("[QUOTA] Updating %s project masterdata: %+v", opts.ProjectID, opts)
+	log.Printf("[DEBUG] Updating %s project masterdata: %+v", opts.ProjectID, opts)
 
 	_, err = projects.Update(billing, opts.ProjectID, opts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating billing project masterdata: %s", err)
+		return diag.Errorf("Error updating billing project masterdata: %s", err)
 	}
 
 	if d.Id() == "" {
 		d.SetId(opts.ProjectID)
 	}
 
-	return resourceCCloudBillingProjectMasterdataRead(d, meta)
+	return resourceCCloudBillingProjectMasterdataRead(ctx, d, meta)
 }
 
-func resourceCCloudBillingProjectMasterdataRead(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudBillingProjectMasterdataRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	billing, err := config.billingClient(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack billing client: %s", err)
+		return diag.Errorf("Error creating OpenStack billing client: %s", err)
 	}
 
 	project, err := projects.Get(billing, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting billing project masterdata")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting billing project masterdata"))
 	}
 
 	log.Printf("[DEBUG] Retrieved project masterdata: %+v", project)

@@ -1,12 +1,15 @@
 package ccloud
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceCCloudProjectQuotaV1() *schema.Resource {
 	quotaResource := &schema.Resource{
-		Read: dataSourceCCloudProjectQuotaV1Read,
+		ReadContext: dataSourceCCloudProjectQuotaV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -44,17 +47,16 @@ func dataSourceCCloudProjectQuotaV1() *schema.Resource {
 			Type:     schema.TypeList,
 			Computed: true,
 			Elem:     elem,
-			MaxItems: 1,
 		}
 	}
 
 	return quotaResource
 }
 
-func dataSourceCCloudProjectQuotaV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCCloudProjectQuotaV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	projectID := d.Get("project_id").(string)
 
 	d.SetId(projectID)
 
-	return resourceCCloudProjectQuotaV1Read(d, meta)
+	return resourceCCloudProjectQuotaV1Read(ctx, d, meta)
 }

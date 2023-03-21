@@ -1,25 +1,25 @@
 package ccloud
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/sapcc/gophercloud-sapcc/automation/v1/automations"
 )
 
 func resourceCCloudAutomationV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCCloudAutomationV1Create,
-		Read:   resourceCCloudAutomationV1Read,
-		Update: resourceCCloudAutomationV1Update,
-		Delete: resourceCCloudAutomationV1Delete,
+		CreateContext: resourceCCloudAutomationV1Create,
+		ReadContext:   resourceCCloudAutomationV1Read,
+		UpdateContext: resourceCCloudAutomationV1Update,
+		DeleteContext: resourceCCloudAutomationV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -157,11 +157,11 @@ func resourceCCloudAutomationV1() *schema.Resource {
 	}
 }
 
-func resourceCCloudAutomationV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudAutomationV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	automationClient, err := config.automationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Automation client: %s", err)
+		return diag.Errorf("Error creating OpenStack Automation client: %s", err)
 	}
 
 	var chefAttributes map[string]interface{}
@@ -171,7 +171,7 @@ func resourceCCloudAutomationV1Create(d *schema.ResourceData, meta interface{}) 
 	if len(chefAttributesJSON) > 0 {
 		err := json.Unmarshal([]byte(chefAttributesJSON), &chefAttributes)
 		if err != nil {
-			return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+			return diag.Errorf("Failed to unmarshal the JSON: %s", err)
 		}
 	}
 
@@ -204,24 +204,24 @@ func resourceCCloudAutomationV1Create(d *schema.ResourceData, meta interface{}) 
 
 	automation, err := automations.Create(automationClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating ccloud_automation_v1: %s", err)
+		return diag.Errorf("Error creating ccloud_automation_v1: %s", err)
 	}
 
 	d.SetId(automation.ID)
 
-	return resourceCCloudAutomationV1Read(d, meta)
+	return resourceCCloudAutomationV1Read(ctx, d, meta)
 }
 
-func resourceCCloudAutomationV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudAutomationV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	automationClient, err := config.automationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	automation, err := automations.Get(automationClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Unable to retrieve ccloud_automation_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve ccloud_automation_v1"))
 	}
 
 	d.Set("name", automation.Name)
@@ -254,11 +254,11 @@ func resourceCCloudAutomationV1Read(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceCCloudAutomationV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudAutomationV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	automationClient, err := config.automationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	var updateOpts automations.UpdateOpts
@@ -302,7 +302,7 @@ func resourceCCloudAutomationV1Update(d *schema.ResourceData, meta interface{}) 
 		if len(chefAttributesJSON) > 0 {
 			err := json.Unmarshal([]byte(chefAttributesJSON), &chefAttributes)
 			if err != nil {
-				return fmt.Errorf("Failed to unmarshal the JSON: %s", err)
+				return diag.Errorf("Failed to unmarshal the JSON: %s", err)
 			}
 		}
 
@@ -341,23 +341,23 @@ func resourceCCloudAutomationV1Update(d *schema.ResourceData, meta interface{}) 
 
 	_, err = automations.Update(automationClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating ccloud_automation_v1: %s", err)
+		return diag.Errorf("Error updating ccloud_automation_v1: %s", err)
 	}
 
-	return resourceCCloudAutomationV1Read(d, meta)
+	return resourceCCloudAutomationV1Read(ctx, d, meta)
 }
 
-func resourceCCloudAutomationV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudAutomationV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	automationClient, err := config.automationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting ccloud_automation_v1: %s", d.Id())
 	err = automations.Delete(automationClient, d.Id()).ExtractErr()
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting ccloud_automation_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting ccloud_automation_v1"))
 	}
 
 	return nil

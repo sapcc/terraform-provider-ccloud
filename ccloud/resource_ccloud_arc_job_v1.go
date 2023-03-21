@@ -1,21 +1,21 @@
 package ccloud
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/sapcc/gophercloud-sapcc/arc/v1/jobs"
 )
 
 func resourceCCloudArcJobV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCCloudArcJobV1Create,
-		Read:   resourceCCloudArcJobV1Read,
-		Delete: func(*schema.ResourceData, interface{}) error { return nil },
+		CreateContext: resourceCCloudArcJobV1Create,
+		ReadContext:   resourceCCloudArcJobV1Read,
+		DeleteContext: func(context.Context, *schema.ResourceData, interface{}) diag.Diagnostics { return nil },
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -275,7 +275,6 @@ func resourceCCloudArcJobV1() *schema.Resource {
 			"user": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -310,34 +309,37 @@ func resourceCCloudArcJobV1() *schema.Resource {
 	}
 }
 
-func resourceCCloudArcJobV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudArcJobV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	var agent, action, payload string
 
 	if v, ok := d.GetOkExists("execute"); ok {
 		agent = "execute"
-		action, payload = arcCCloudArcJobV1BuildPayload(v.([]interface{}))
+		action, payload, err = arcCCloudArcJobV1BuildPayload(v.([]interface{}))
 	}
 	if v, ok := d.GetOkExists("chef"); ok {
 		agent = "chef"
-		action, payload = arcCCloudArcJobV1BuildPayload(v.([]interface{}))
+		action, payload, err = arcCCloudArcJobV1BuildPayload(v.([]interface{}))
+	}
+	if err != nil {
+		return diag.Errorf("Failed to detect an agent: %v", err)
 	}
 
 	if len(agent) == 0 {
-		return fmt.Errorf("Failed to detect an agent")
+		return diag.Errorf("Failed to detect an agent")
 	}
 
 	if len(action) == 0 {
-		return fmt.Errorf("Failed to detect a %s action", agent)
+		return diag.Errorf("Failed to detect a %s action", agent)
 	}
 
 	if len(payload) == 0 {
-		return fmt.Errorf("Failed to build %s agent %s action payload", agent, action)
+		return diag.Errorf("Failed to build %s agent %s action payload", agent, action)
 	}
 
 	createOpts := jobs.CreateOpts{
@@ -352,43 +354,49 @@ func resourceCCloudArcJobV1Create(d *schema.ResourceData, meta interface{}) erro
 
 	job, err := jobs.Create(arcClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating ccloud_arc_job_v1: %s", err)
+		return diag.Errorf("Error creating ccloud_arc_job_v1: %s", err)
 	}
 
 	d.SetId(job.RequestID)
 
 	timeout := d.Timeout(schema.TimeoutCreate)
-	target := []string{"complete", "failed"}
-	pending := []string{"queued", "executing"}
-	err = waitForArcJobV1(arcClient, job.RequestID, target, pending, timeout)
+	target := []string{
+		"complete",
+		"failed",
+	}
+	pending := []string{
+		"queued",
+		"executing",
+	}
+	err = waitForArcJobV1(ctx, arcClient, job.RequestID, target, pending, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceCCloudArcJobV1Read(d, meta)
+	return resourceCCloudArcJobV1Read(ctx, d, meta)
 }
 
-func resourceCCloudArcJobV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudArcJobV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	job, err := jobs.Get(arcClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Unable to retrieve ccloud_arc_job_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve ccloud_arc_job_v1"))
 	}
 
 	log := arcJobV1GetLog(arcClient, job.RequestID)
 
 	execute, err := arcCCloudArcJobV1FlattenExecute(job)
 	if err != nil {
-		return fmt.Errorf("Error extracting execute payload for %s ccloud_arc_job_v1: %s", job.RequestID, err)
+		return diag.Errorf("Error extracting execute payload for %s ccloud_arc_job_v1: %v", job.RequestID, err)
 	}
 	chef, err := arcCCloudArcJobV1FlattenChef(job)
 	if err != nil {
-		return fmt.Errorf("Error extracting chef payload for %s ccloud_arc_job_v1: %s", job.RequestID, err)
+		return diag.Errorf("Error extracting chef payload for %s ccloud_arc_job_v1: %v", job.RequestID, err)
 	}
 
 	d.Set("version", job.Version)

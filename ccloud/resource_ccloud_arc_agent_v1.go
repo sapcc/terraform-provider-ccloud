@@ -1,25 +1,25 @@
 package ccloud
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/sapcc/gophercloud-sapcc/arc/v1/agents"
 )
 
 func resourceCCloudArcAgentV1() *schema.Resource {
 	return &schema.Resource{
-		Read:   resourceCCloudArcAgentV1Read,
-		Create: resourceCCloudArcAgentV1Create,
-		Update: resourceCCloudArcAgentV1Update,
-		Delete: resourceCCloudArcAgentV1Delete,
+		ReadContext:   resourceCCloudArcAgentV1Read,
+		CreateContext: resourceCCloudArcAgentV1Create,
+		UpdateContext: resourceCCloudArcAgentV1Update,
+		DeleteContext: resourceCCloudArcAgentV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -117,42 +117,42 @@ func resourceCCloudArcAgentV1() *schema.Resource {
 	}
 }
 
-func resourceCCloudArcAgentV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudArcAgentV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	agentID := d.Get("agent_id").(string)
 	filter := d.Get("filter").(string)
 	timeout := d.Timeout(schema.TimeoutCreate)
 
-	agent, err := arcCCloudArcAgentV1WaitForAgent(arcClient, agentID, filter, timeout)
+	agent, err := arcCCloudArcAgentV1WaitForAgent(ctx, arcClient, agentID, filter, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(agent.AgentID)
 
 	err = updateArcAgentTagsV1(arcClient, d.Id(), nil, d.Get("tags"))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceCCloudArcAgentV1Read(d, meta)
+	return resourceCCloudArcAgentV1Read(ctx, d, meta)
 }
 
-func resourceCCloudArcAgentV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudArcAgentV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	agent, err := agents.Get(arcClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Unable to retrieve ccloud_arc_agent_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve ccloud_arc_agent_v1"))
 	}
 
 	arcCCloudArcAgentV1ReadAgent(d, arcClient, agent, GetRegion(d, config))
@@ -160,27 +160,27 @@ func resourceCCloudArcAgentV1Read(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceCCloudArcAgentV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudArcAgentV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	oldTags, newTags := d.GetChange("tags")
 	err = updateArcAgentTagsV1(arcClient, d.Id(), oldTags, newTags)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceCCloudArcAgentV1Read(d, meta)
+	return resourceCCloudArcAgentV1Read(ctx, d, meta)
 }
 
-func resourceCCloudArcAgentV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudArcAgentV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	if !d.Get("force_delete").(bool) {
@@ -189,7 +189,7 @@ func resourceCCloudArcAgentV1Delete(d *schema.ResourceData, meta interface{}) er
 
 		computeClient, err := config.ComputeV2Client(GetRegion(d, config))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+			return diag.Errorf("Error creating OpenStack compute client: %s", err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -201,16 +201,16 @@ func resourceCCloudArcAgentV1Delete(d *schema.ResourceData, meta interface{}) er
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf("Error waiting for compute instance (%s) to delete: %s", d.Id(), err)
+			return diag.Errorf("Error waiting for compute instance (%s) to delete: %v", d.Id(), err)
 		}
 	}
 
 	log.Printf("[DEBUG] Deleting ccloud_arc_agent_v1: %s", d.Id())
 	err = agents.Delete(arcClient, d.Id()).ExtractErr()
 	if err != nil {
-		return CheckDeleted(d, err, "Error deleting ccloud_arc_agent_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Error deleting ccloud_arc_agent_v1"))
 	}
 
 	return nil

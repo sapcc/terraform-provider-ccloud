@@ -1,17 +1,18 @@
 package ccloud
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sapcc/gophercloud-sapcc/billing/masterdata/projects"
 )
 
 func dataSourceCCloudBillingProjectMasterdata() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCCloudBillingProjectMasterdataRead,
+		ReadContext: dataSourceCCloudBillingProjectMasterdataRead,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -128,7 +129,6 @@ func dataSourceCCloudBillingProjectMasterdata() *schema.Resource {
 			"cost_object": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"inherited": {
@@ -180,11 +180,11 @@ func dataSourceCCloudBillingProjectMasterdata() *schema.Resource {
 	}
 }
 
-func dataSourceCCloudBillingProjectMasterdataRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCCloudBillingProjectMasterdataRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	billing, err := config.billingClient(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack billing client: %s", err)
+		return diag.Errorf("Error creating OpenStack billing client: %s", err)
 	}
 
 	projectID := d.Get("project_id").(string)
@@ -193,23 +193,23 @@ func dataSourceCCloudBillingProjectMasterdataRead(d *schema.ResourceData, meta i
 	if projectID == "" {
 		allPages, err := projects.List(billing).AllPages()
 		if err != nil {
-			return fmt.Errorf("Error getting billing project masterdata: %s", err)
+			return diag.Errorf("Error getting billing project masterdata: %s", err)
 		}
 
 		allProjects, err := projects.ExtractProjects(allPages)
 		if err != nil {
-			return fmt.Errorf("Error extracting billing projects masterdata: %s", err)
+			return diag.Errorf("Error extracting billing projects masterdata: %s", err)
 		}
 
 		if len(allProjects) != 1 {
-			return fmt.Errorf("Error getting billing project masterdata: expecting 1 project, got %d", len(allProjects))
+			return diag.Errorf("Error getting billing project masterdata: expecting 1 project, got %d", len(allProjects))
 		}
 
 		project = &allProjects[0]
 	} else {
 		project, err = projects.Get(billing, projectID).Extract()
 		if err != nil {
-			return fmt.Errorf("Error getting billing project masterdata: %s", err)
+			return diag.Errorf("Error getting billing project masterdata: %s", err)
 		}
 	}
 

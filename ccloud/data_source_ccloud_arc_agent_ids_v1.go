@@ -1,19 +1,21 @@
 package ccloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sapcc/gophercloud-sapcc/arc/v1/agents"
+
+	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
 func dataSourceCCloudArcAgentIDsV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCCloudArcAgentIDsV1Read,
+		ReadContext: dataSourceCCloudArcAgentIDsV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -38,11 +40,11 @@ func dataSourceCCloudArcAgentIDsV1() *schema.Resource {
 	}
 }
 
-func dataSourceCCloudArcAgentIDsV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCCloudArcAgentIDsV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	filter := d.Get("filter").(string)
@@ -53,15 +55,15 @@ func dataSourceCCloudArcAgentIDsV1Read(d *schema.ResourceData, meta interface{})
 
 	allPages, err := agents.List(arcClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list ccloud_arc_agent_ids_v1: %s", err)
+		return diag.Errorf("Unable to list ccloud_arc_agent_ids_v1: %s", err)
 	}
 
 	allAgents, err := agents.ExtractAgents(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve ccloud_arc_agent_ids_v1: %s", err)
+		return diag.Errorf("Unable to retrieve ccloud_arc_agent_ids_v1: %s", err)
 	}
 
-	var agentIDs []string
+	agentIDs := make([]string, 0, len(allAgents))
 	for _, a := range allAgents {
 		agentIDs = append(agentIDs, a.AgentID)
 	}

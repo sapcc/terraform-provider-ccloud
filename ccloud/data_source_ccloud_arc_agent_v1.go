@@ -1,15 +1,16 @@
 package ccloud
 
 import (
-	"fmt"
+	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceCCloudArcAgentV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCCloudArcAgentV1Read,
+		ReadContext: dataSourceCCloudArcAgentV1Read,
 
 		// Terraform timeouts don't work in data sources.
 		// However "Timeouts" has to be specified, otherwise "timeouts" argument below won't work.
@@ -113,11 +114,11 @@ func dataSourceCCloudArcAgentV1() *schema.Resource {
 	}
 }
 
-func dataSourceCCloudArcAgentV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCCloudArcAgentV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	agentID := d.Get("agent_id").(string)
@@ -125,12 +126,12 @@ func dataSourceCCloudArcAgentV1Read(d *schema.ResourceData, meta interface{}) er
 
 	timeout, err := arcAgentV1ParseTimeout(d.Get("timeouts"))
 	if err != nil {
-		return fmt.Errorf("Error parsing the read timeout for ccloud_arc_job_v1: %s", err)
+		return diag.Errorf("Error parsing the read timeout for ccloud_arc_job_v1: %s", err)
 	}
 
-	agent, err := arcCCloudArcAgentV1WaitForAgent(arcClient, agentID, filter, timeout)
+	agent, err := arcCCloudArcAgentV1WaitForAgent(ctx, arcClient, agentID, filter, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(agent.AgentID)

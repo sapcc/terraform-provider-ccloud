@@ -1,24 +1,26 @@
 package ccloud
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/sapcc/gophercloud-sapcc/automation/v1/runs"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/sapcc/gophercloud-sapcc/automation/v1/runs"
 )
 
 func resourceCCloudAutomationRunV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCCloudAutomationRunV1Create,
-		Read:   resourceCCloudAutomationRunV1Read,
-		Delete: func(*schema.ResourceData, interface{}) error { return nil },
+		CreateContext: resourceCCloudAutomationRunV1Create,
+		ReadContext:   resourceCCloudAutomationRunV1Read,
+		DeleteContext: func(context.Context, *schema.ResourceData, interface{}) diag.Diagnostics { return nil },
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -109,7 +111,6 @@ func resourceCCloudAutomationRunV1() *schema.Resource {
 			"owner": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -135,11 +136,11 @@ func resourceCCloudAutomationRunV1() *schema.Resource {
 	}
 }
 
-func resourceCCloudAutomationRunV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudAutomationRunV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	automationClient, err := config.automationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	createOpts := runs.CreateOpts{
@@ -151,32 +152,38 @@ func resourceCCloudAutomationRunV1Create(d *schema.ResourceData, meta interface{
 
 	run, err := runs.Create(automationClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating ccloud_automation_run_v1: %s", err)
+		return diag.Errorf("Error creating ccloud_automation_run_v1: %s", err)
 	}
 
 	d.SetId(run.ID)
 
 	timeout := d.Timeout(schema.TimeoutCreate)
-	target := []string{"completed", "failed"}
-	pending := []string{"preparing", "executing"}
-	err = waitForAutomationRunV1(automationClient, run.ID, target, pending, timeout)
+	target := []string{
+		"completed",
+		"failed",
+	}
+	pending := []string{
+		"preparing",
+		"executing",
+	}
+	err = waitForAutomationRunV1(ctx, automationClient, run.ID, target, pending, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceCCloudAutomationRunV1Read(d, meta)
+	return resourceCCloudAutomationRunV1Read(ctx, d, meta)
 }
 
-func resourceCCloudAutomationRunV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudAutomationRunV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	automationClient, err := config.automationV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Automation client: %s", err)
+		return diag.Errorf("Error creating OpenStack Automation client: %s", err)
 	}
 
 	run, err := runs.Get(automationClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Unable to retrieve ccloud_automation_run_v1")
+		return diag.FromErr(CheckDeleted(d, err, "Unable to retrieve ccloud_automation_run_v1"))
 	}
 
 	d.Set("automation_id", run.AutomationID)
@@ -212,7 +219,7 @@ func flattenAutomationiOwnerV1(owner runs.Owner) []interface{} {
 	}}
 }
 
-func waitForAutomationRunV1(automationClient *gophercloud.ServiceClient, id string, target []string, pending []string, timeout time.Duration) error {
+func waitForAutomationRunV1(ctx context.Context, automationClient *gophercloud.ServiceClient, id string, target []string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for %s run to become %v.", id, target)
 
 	stateConf := &resource.StateChangeConf{
@@ -224,7 +231,7 @@ func waitForAutomationRunV1(automationClient *gophercloud.ServiceClient, id stri
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err := stateConf.WaitForState()
+	_, err := stateConf.WaitForStateContext(ctx)
 
 	return err
 }
@@ -233,7 +240,7 @@ func automationRunV1GetState(automationClient *gophercloud.ServiceClient, id str
 	return func() (interface{}, string, error) {
 		run, err := runs.Get(automationClient, id).Extract()
 		if err != nil {
-			return nil, "", fmt.Errorf("Unable to retrieve %s ccloud_automation_run_v1: %s", id, err)
+			return nil, "", fmt.Errorf("Unable to retrieve %s ccloud_automation_run_v1: %v", id, err)
 		}
 
 		return run, run.State, nil

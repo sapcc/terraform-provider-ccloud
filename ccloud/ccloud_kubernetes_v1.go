@@ -1,6 +1,7 @@
 package ccloud
 
 import (
+	"context"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
@@ -12,9 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-
 	"github.com/ghodss/yaml"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/sapcc/kubernikus/pkg/api/client/operations"
 	"github.com/sapcc/kubernikus/pkg/api/models"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api/v1"
@@ -62,7 +62,7 @@ func kubernikusFlattenOpenstackSpecV1(spec *models.OpenstackSpec) []map[string]i
 }
 
 func kubernikusFlattenNodePoolsV1(nodePools []models.NodePool) []map[string]interface{} {
-	var res []map[string]interface{}
+	res := make([]map[string]interface{}, 0, len(nodePools))
 	for _, p := range nodePools {
 		res = append(res, map[string]interface{}{
 			"availability_zone":     p.AvailabilityZone,
@@ -170,7 +170,7 @@ func kubernikusExpandNodePoolsV1(raw interface{}) ([]models.NodePool, error) {
 	return nil, nil
 }
 
-func kubernikusWaitForClusterV1(klient *kubernikus, name string, target string, pending []string, timeout time.Duration) error {
+func kubernikusWaitForClusterV1(ctx context.Context, klient *kubernikus, name string, target string, pending []string, timeout time.Duration) error {
 	// Phase: "Pending","Creating","Running","Terminating","Upgrading"
 	log.Printf("[DEBUG] Waiting for %s cluster to become %s.", name, target)
 
@@ -183,7 +183,7 @@ func kubernikusWaitForClusterV1(klient *kubernikus, name string, target string, 
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err := stateConf.WaitForState()
+	_, err := stateConf.WaitForStateContext(ctx)
 
 	if err != nil {
 		if e, ok := err.(*operations.ShowClusterDefault); ok && target == "Terminated" && e.Payload.Message == "Not found" {
@@ -242,7 +242,7 @@ func kubernikusKlusterV1GetPhase(klient *kubernikus, target string, name string)
 	}
 }
 
-func kubernikusUpdateNodePoolsV1(klient *kubernikus, cluster *models.Kluster, oldNodePoolsRaw, newNodePoolsRaw interface{}, target string, pending []string, timeout time.Duration) error {
+func kubernikusUpdateNodePoolsV1(ctx context.Context, klient *kubernikus, cluster *models.Kluster, oldNodePoolsRaw, newNodePoolsRaw interface{}, target string, pending []string, timeout time.Duration) error {
 	var poolsToKeep []models.NodePool
 	var poolsToDelete []models.NodePool
 	oldNodePools, err := kubernikusExpandNodePoolsV1(oldNodePoolsRaw)
@@ -254,9 +254,15 @@ func kubernikusUpdateNodePoolsV1(klient *kubernikus, cluster *models.Kluster, ol
 		return err
 	}
 
-	pretty, _ := json.MarshalIndent(oldNodePools, "", "  ")
+	pretty, err := json.MarshalIndent(oldNodePools, "", "  ")
+	if err != nil {
+		return err
+	}
 	log.Printf("[DEBUG] Old node pools: %s", string(pretty))
-	pretty, _ = json.MarshalIndent(newNodePools, "", "  ")
+	pretty, err = json.MarshalIndent(newNodePools, "", "  ")
+	if err != nil {
+		return err
+	}
 	log.Printf("[DEBUG] New node pools: %s", string(pretty))
 
 	// Determine if any node pools removed from the configuration.
@@ -290,7 +296,7 @@ func kubernikusUpdateNodePoolsV1(klient *kubernikus, cluster *models.Kluster, ol
 	if len(poolsToDelete) > 0 {
 		// downscale
 		cluster.Spec.NodePools = append(poolsToKeep, poolsToDelete...)
-		err = kubernikusUpdateAndWait(klient, cluster, target, pending, timeout)
+		err = kubernikusUpdateAndWait(ctx, klient, cluster, target, pending, timeout)
 		if err != nil {
 			return err
 		}
@@ -298,7 +304,7 @@ func kubernikusUpdateNodePoolsV1(klient *kubernikus, cluster *models.Kluster, ol
 
 	// delete old
 	cluster.Spec.NodePools = poolsToKeep
-	err = kubernikusUpdateAndWait(klient, cluster, target, pending, timeout)
+	err = kubernikusUpdateAndWait(ctx, klient, cluster, target, pending, timeout)
 	if err != nil {
 		return err
 	}
@@ -306,7 +312,7 @@ func kubernikusUpdateNodePoolsV1(klient *kubernikus, cluster *models.Kluster, ol
 	if !reflect.DeepEqual(poolsToKeep, newNodePools) {
 		// create new
 		cluster.Spec.NodePools = newNodePools
-		err = kubernikusUpdateAndWait(klient, cluster, target, pending, timeout)
+		err = kubernikusUpdateAndWait(ctx, klient, cluster, target, pending, timeout)
 		if err != nil {
 			return err
 		}
@@ -320,18 +326,18 @@ func kubernikusHandleErrorV1(msg string, err error) error {
 	case *operations.TerminateClusterDefault:
 		return fmt.Errorf("%s: %s", msg, res.Payload.Message)
 	case error:
-		return fmt.Errorf("%s: %s", msg, err)
+		return fmt.Errorf("%s: %v", msg, err)
 	}
 	return err
 }
 
-func kubernikusUpdateAndWait(klient *kubernikus, cluster *models.Kluster, target string, pending []string, timeout time.Duration) error {
+func kubernikusUpdateAndWait(ctx context.Context, klient *kubernikus, cluster *models.Kluster, target string, pending []string, timeout time.Duration) error {
 	_, err := klient.UpdateCluster(operations.NewUpdateClusterParams().WithName(cluster.Name).WithBody(cluster), klient.authFunc())
 	if err != nil {
 		return kubernikusHandleErrorV1("Error updating cluster", err)
 	}
 
-	err = kubernikusWaitForClusterV1(klient, cluster.Name, target, pending, timeout)
+	err = kubernikusWaitForClusterV1(ctx, klient, cluster.Name, target, pending, timeout)
 	if err != nil {
 		return kubernikusHandleErrorV1("Error waiting for cluster node pools Running state", err)
 	}

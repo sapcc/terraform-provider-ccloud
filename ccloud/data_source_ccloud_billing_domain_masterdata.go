@@ -1,17 +1,18 @@
 package ccloud
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sapcc/gophercloud-sapcc/billing/masterdata/domains"
 )
 
 func dataSourceCCloudBillingDomainMasterdata() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCCloudBillingDomainMasterdataRead,
+		ReadContext: dataSourceCCloudBillingDomainMasterdataRead,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -63,7 +64,6 @@ func dataSourceCCloudBillingDomainMasterdata() *schema.Resource {
 			"cost_object": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"projects_can_inherit": {
@@ -115,11 +115,11 @@ func dataSourceCCloudBillingDomainMasterdata() *schema.Resource {
 	}
 }
 
-func dataSourceCCloudBillingDomainMasterdataRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCCloudBillingDomainMasterdataRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	billing, err := config.billingClient(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack billing client: %s", err)
+		return diag.Errorf("Error creating OpenStack billing client: %s", err)
 	}
 
 	domainID := d.Get("domain_id").(string)
@@ -128,23 +128,23 @@ func dataSourceCCloudBillingDomainMasterdataRead(d *schema.ResourceData, meta in
 	if domainID == "" {
 		allPages, err := domains.List(billing).AllPages()
 		if err != nil {
-			return fmt.Errorf("Error getting billing domain masterdata: %s", err)
+			return diag.Errorf("Error getting billing domain masterdata: %s", err)
 		}
 
 		allDomains, err := domains.ExtractDomains(allPages)
 		if err != nil {
-			return fmt.Errorf("Error extracting billing domains masterdata: %s", err)
+			return diag.Errorf("Error extracting billing domains masterdata: %s", err)
 		}
 
 		if len(allDomains) != 1 {
-			return fmt.Errorf("Error getting billing domain masterdata: expecting 1 domain, got %d", len(allDomains))
+			return diag.Errorf("Error getting billing domain masterdata: expecting 1 domain, got %d", len(allDomains))
 		}
 
 		domain = &allDomains[0]
 	} else {
 		domain, err = domains.Get(billing, domainID).Extract()
 		if err != nil {
-			return fmt.Errorf("Error getting billing domain masterdata: %s", err)
+			return diag.Errorf("Error getting billing domain masterdata: %s", err)
 		}
 	}
 

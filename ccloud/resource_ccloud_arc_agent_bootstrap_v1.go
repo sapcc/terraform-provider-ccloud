@@ -1,22 +1,24 @@
 package ccloud
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/sapcc/gophercloud-sapcc/arc/v1/agents"
+
+	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
 func resourceCCloudArcAgentBootstrapV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCCloudArcAgentBootstrapV1Create,
-		Read:   func(*schema.ResourceData, interface{}) error { return nil },
-		Delete: func(*schema.ResourceData, interface{}) error { return nil },
+		CreateContext: resourceCCloudArcAgentBootstrapV1Create,
+		ReadContext:   func(context.Context, *schema.ResourceData, interface{}) diag.Diagnostics { return nil },
+		DeleteContext: func(context.Context, *schema.ResourceData, interface{}) diag.Diagnostics { return nil },
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -56,11 +58,11 @@ func resourceCCloudArcAgentBootstrapV1() *schema.Resource {
 	}
 }
 
-func resourceCCloudArcAgentBootstrapV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudArcAgentBootstrapV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	var bootstrapType string
@@ -81,21 +83,21 @@ func resourceCCloudArcAgentBootstrapV1Create(d *schema.ResourceData, meta interf
 
 	res := agents.Init(arcClient, createOpts)
 	if res.Err != nil {
-		return fmt.Errorf("Error creating ccloud_arc_agent_bootstrap_v1: %s", res.Err)
+		return diag.Errorf("Error creating ccloud_arc_agent_bootstrap_v1: %s", res.Err)
 	}
 
 	headers, err := res.ExtractHeaders()
 	if err != nil {
-		return fmt.Errorf("Error extracting headers while creating ccloud_arc_agent_bootstrap_v1: %s", err)
+		return diag.Errorf("Error extracting headers while creating ccloud_arc_agent_bootstrap_v1: %s", err)
 	}
 
 	if bootstrapType != headers.ContentType {
-		return fmt.Errorf("Error verifying headers while creating ccloud_arc_agent_bootstrap_v1: wants '%s', got '%s'", bootstrapType, headers.ContentType)
+		return diag.Errorf("Error verifying headers while creating ccloud_arc_agent_bootstrap_v1: wants '%s', got '%s'", bootstrapType, headers.ContentType)
 	}
 
 	data, err := res.ExtractContent()
 	if err != nil {
-		return fmt.Errorf("Error extracting content while creating ccloud_arc_agent_bootstrap_v1: %s", err)
+		return diag.Errorf("Error extracting content while creating ccloud_arc_agent_bootstrap_v1: %s", err)
 	}
 
 	userData := string(data)
@@ -106,7 +108,7 @@ func resourceCCloudArcAgentBootstrapV1Create(d *schema.ResourceData, meta interf
 		var initMap map[string]string
 		err = json.Unmarshal(data, &initMap)
 		if err != nil {
-			return fmt.Errorf("Error unmarshalling JSON content while creating ccloud_arc_agent_bootstrap_v1: %s", err)
+			return diag.Errorf("Error unmarshalling JSON content while creating ccloud_arc_agent_bootstrap_v1: %s", err)
 		}
 		d.Set("raw_map", initMap)
 	} else {

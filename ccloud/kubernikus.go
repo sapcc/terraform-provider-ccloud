@@ -12,21 +12,30 @@ import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/sapcc/kubernikus/pkg/api/client/operations"
+
 	"github.com/gophercloud/gophercloud"
 	osClient "github.com/gophercloud/utils/client"
-	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
-	"github.com/sapcc/kubernikus/pkg/api/client/operations"
 )
 
 var (
-	httpMethods = []string{"GET", "POST", "PATCH", "DELETE", "PUT", "HEAD", "OPTIONS", "CONNECT", "TRACE"}
-	maskHeader  = strings.ToLower("X-Auth-Token:")
+	httpMethods = []string{
+		"GET",
+		"POST",
+		"PATCH",
+		"DELETE",
+		"PUT",
+		"HEAD",
+		"OPTIONS",
+		"CONNECT",
+		"TRACE",
+	}
+	maskHeader = strings.ToLower("X-Auth-Token:")
 )
 
 type kubernikus struct {
-	operations.Client
-	provider  *gophercloud.ProviderClient
-	userAgent string
+	operations.ClientService
+	provider *gophercloud.ProviderClient
 }
 
 type kubernikusLogger struct{}
@@ -70,7 +79,7 @@ func (kubernikusLogger) Debugf(format string, args ...interface{}) {
 						printHeaders(cycle, &printed)
 						log.Print(s)
 					} else {
-						log.Printf("[DEBUG] Kubernikus %s Body: %s\n", cycle, debugInfo)
+						log.Printf("[DEBUG] Kubernikus %s Body: %s", cycle, debugInfo)
 					}
 				} else if strings.HasPrefix(strings.ToLower(s), maskHeader) {
 					printHeaders(cycle, &printed)
@@ -118,14 +127,20 @@ func newKubernikusV1(c *Config, eo gophercloud.EndpointOpts) (*kubernikus, error
 
 	operations := operations.New(transport, strfmt.Default)
 
-	return &kubernikus{*operations, c.OsClient, httpclient.TerraformUserAgent(c.TerraformVersion)}, nil
+	return &kubernikus{operations, c.OsClient}, nil
 }
 
 func (k *kubernikus) authFunc() runtime.ClientAuthInfoWriterFunc {
 	return runtime.ClientAuthInfoWriterFunc(
 		func(req runtime.ClientRequest, reg strfmt.Registry) error {
-			req.SetHeaderParam("X-Auth-Token", k.provider.Token())
-			req.SetHeaderParam("User-Agent", k.userAgent)
+			err := req.SetHeaderParam("X-Auth-Token", k.provider.Token())
+			if err != nil {
+				log.Printf("[DEBUG] Kubernikus auth func cannot set X-Auth-Token header value: %v", err)
+			}
+			err = req.SetHeaderParam("User-Agent", k.provider.UserAgent.Join())
+			if err != nil {
+				log.Printf("[DEBUG] Kubernikus auth func cannot set User-Agent header value: %v", err)
+			}
 			return nil
 		})
 }
@@ -142,7 +157,7 @@ func deleteEmpty(s []string) []string {
 
 func printHeaders(cycle string, printed *bool) {
 	if !*printed {
-		log.Printf("[DEBUG] Kubernikus %s Headers:\n", cycle)
+		log.Printf("[DEBUG] Kubernikus %s Headers:", cycle)
 		*printed = true
 	}
 }

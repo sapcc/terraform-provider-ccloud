@@ -1,18 +1,21 @@
 package ccloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/gophercloud/utils/terraform/hashcode"
 )
 
 func dataSourceCCloudArcJobIDsV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCCloudArcJobIDsV1Read,
+		ReadContext: dataSourceCCloudArcJobIDsV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -66,19 +69,19 @@ func dataSourceCCloudArcJobIDsV1() *schema.Resource {
 	}
 }
 
-func dataSourceCCloudArcJobIDsV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCCloudArcJobIDsV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	jobs, err := arcCCloudArcJobV1Filter(d, arcClient, "ccloud_arc_job_ids_v1")
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	var jobIDs []string
+	jobIDs := make([]string, 0, len(jobs))
 	for _, j := range jobs {
 		jobIDs = append(jobIDs, j.RequestID)
 	}

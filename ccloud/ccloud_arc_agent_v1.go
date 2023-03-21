@@ -1,16 +1,17 @@
 package ccloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/sapcc/gophercloud-sapcc/arc/v1/agents"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/sapcc/gophercloud-sapcc/arc/v1/agents"
 )
 
 func arcCCloudArcAgentV1ReadAgent(d *schema.ResourceData, arcClient *gophercloud.ServiceClient, agent *agents.Agent, region string) {
@@ -44,7 +45,7 @@ func arcCCloudArcAgentV1ReadAgent(d *schema.ResourceData, arcClient *gophercloud
 	d.Set("region", region)
 }
 
-func arcCCloudArcAgentV1WaitForAgent(arcClient *gophercloud.ServiceClient, agentID, filter string, timeout time.Duration) (*agents.Agent, error) {
+func arcCCloudArcAgentV1WaitForAgent(ctx context.Context, arcClient *gophercloud.ServiceClient, agentID, filter string, timeout time.Duration) (*agents.Agent, error) {
 	var agent interface{}
 	var msg string
 	var err error
@@ -61,7 +62,7 @@ func arcCCloudArcAgentV1WaitForAgent(arcClient *gophercloud.ServiceClient, agent
 			MinTimeout:     1 * time.Second,
 			NotFoundChecks: 1000, // workaround for default 20 retries, when the resource is nil
 		}
-		agent, err = waitForAgent.WaitForState()
+		agent, err = waitForAgent.WaitForStateContext(ctx)
 	} else {
 		// When timeout is not set, just get the agent
 		agent, msg, err = arcCCloudArcAgentV1GetAgent(arcClient, agentID, filter, timeout)()
@@ -92,9 +93,9 @@ func arcCCloudArcAgentV1GetAgent(arcClient *gophercloud.ServiceClient, agentID, 
 			if err != nil {
 				if _, ok := err.(gophercloud.ErrDefault404); ok && timeout > 0 {
 					// Retryable case, when timeout is set
-					return nil, fmt.Sprintf("Unable to retrieve %s ccloud_arc_agent_v1: %s", agentID, err), nil
+					return nil, fmt.Sprintf("Unable to retrieve %s ccloud_arc_agent_v1: %v", agentID, err), nil
 				}
-				return nil, "", fmt.Errorf("Unable to retrieve %s ccloud_arc_agent_v1: %s", agentID, err)
+				return nil, "", fmt.Errorf("Unable to retrieve %s ccloud_arc_agent_v1: %v", agentID, err)
 			}
 		} else {
 			listOpts := agents.ListOpts{Filter: filter}
@@ -152,7 +153,7 @@ func updateArcAgentTagsV1(arcClient *gophercloud.ServiceClient, agentID string, 
 	for _, key := range tagsToDelete {
 		err := agents.DeleteTag(arcClient, agentID, key).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error deleting %s tag from %s ccloud_arc_agent_v1: %s", key, agentID, err)
+			return fmt.Errorf("Error deleting %s tag from %s ccloud_arc_agent_v1: %v", key, agentID, err)
 		}
 	}
 
@@ -164,7 +165,7 @@ func updateArcAgentTagsV1(arcClient *gophercloud.ServiceClient, agentID string, 
 
 	err := agents.CreateTags(arcClient, agentID, tagsOpts).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error updating tags for %s ccloud_arc_agent_v1: %s", agentID, err)
+		return fmt.Errorf("Error updating tags for %s ccloud_arc_agent_v1: %v", agentID, err)
 	}
 
 	return nil

@@ -1,18 +1,18 @@
 package ccloud
 
 import (
-	"fmt"
+	"context"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/sapcc/gophercloud-sapcc/arc/v1/jobs"
 )
 
 func dataSourceCCloudArcJobV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCCloudArcJobV1Read,
+		ReadContext: dataSourceCCloudArcJobV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -161,9 +161,8 @@ func dataSourceCCloudArcJobV1() *schema.Resource {
 									},
 
 									"attributes": {
-										Type:      schema.TypeString,
-										Computed:  true,
-										StateFunc: normalizeJSONString,
+										Type:     schema.TypeString,
+										Computed: true,
 									},
 
 									"debug": {
@@ -172,9 +171,8 @@ func dataSourceCCloudArcJobV1() *schema.Resource {
 									},
 
 									"nodes": {
-										Type:      schema.TypeString,
-										Computed:  true,
-										StateFunc: normalizeJSONString,
+										Type:     schema.TypeString,
+										Computed: true,
 									},
 
 									"node_name": {
@@ -238,7 +236,6 @@ func dataSourceCCloudArcJobV1() *schema.Resource {
 			"user": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -269,11 +266,11 @@ func dataSourceCCloudArcJobV1() *schema.Resource {
 	}
 }
 
-func dataSourceCCloudArcJobV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCCloudArcJobV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	arcClient, err := config.arcV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack Arc client: %s", err)
+		return diag.Errorf("Error creating OpenStack Arc client: %s", err)
 	}
 
 	var job jobs.Job
@@ -282,21 +279,21 @@ func dataSourceCCloudArcJobV1Read(d *schema.ResourceData, meta interface{}) erro
 	if len(jobID) > 0 {
 		err = jobs.Get(arcClient, jobID).ExtractInto(&job)
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve %s ccloud_arc_job_v1: %s", jobID, err)
+			return diag.Errorf("Unable to retrieve %s ccloud_arc_job_v1: %v", jobID, err)
 		}
 	} else {
 		// filter arc jobs by parameters
 		jobs, err := arcCCloudArcJobV1Filter(d, arcClient, "ccloud_arc_job_v1")
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if len(jobs) == 0 {
-			return fmt.Errorf("No ccloud_arc_job_v1 found")
+			return diag.Errorf("No ccloud_arc_job_v1 found")
 		}
 
 		if len(jobs) > 1 {
-			return fmt.Errorf("More than one ccloud_arc_job_v1 found (%d)", len(jobs))
+			return diag.Errorf("More than one ccloud_arc_job_v1 found (%d)", len(jobs))
 		}
 
 		job = jobs[0]
@@ -306,11 +303,11 @@ func dataSourceCCloudArcJobV1Read(d *schema.ResourceData, meta interface{}) erro
 
 	execute, err := arcCCloudArcJobV1FlattenExecute(&job)
 	if err != nil {
-		return fmt.Errorf("Error extracting execute payload for %s ccloud_arc_job_v1: %s", job.RequestID, err)
+		return diag.Errorf("Error extracting execute payload for %s ccloud_arc_job_v1: %v", job.RequestID, err)
 	}
 	chef, err := arcCCloudArcJobV1FlattenChef(&job)
 	if err != nil {
-		return fmt.Errorf("Error extracting chef payload for %s ccloud_arc_job_v1: %s", job.RequestID, err)
+		return diag.Errorf("Error extracting chef payload for %s ccloud_arc_job_v1: %v", job.RequestID, err)
 	}
 
 	d.SetId(job.RequestID)

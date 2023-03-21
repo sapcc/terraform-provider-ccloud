@@ -1,24 +1,26 @@
 package ccloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	limesresources "github.com/sapcc/go-api-declarations/limes/resources"
 	"github.com/sapcc/gophercloud-sapcc/resources/v1/domains"
-	"github.com/sapcc/limes"
 )
 
 func resourceCCloudDomainQuotaV1() *schema.Resource {
 	quotaResource := &schema.Resource{
 		SchemaVersion: 1,
 
-		Read:   resourceCCloudDomainQuotaV1Read,
-		Update: resourceCCloudDomainQuotaV1CreateOrUpdate,
-		Create: resourceCCloudDomainQuotaV1CreateOrUpdate,
-		Delete: resourceCCloudDomainQuotaV1Delete,
+		ReadContext:   resourceCCloudDomainQuotaV1Read,
+		UpdateContext: resourceCCloudDomainQuotaV1CreateOrUpdate,
+		CreateContext: resourceCCloudDomainQuotaV1CreateOrUpdate,
+		DeleteContext: resourceCCloudDomainQuotaV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceCCloudDomainQuotaV1Import,
+			StateContext: resourceCCloudDomainQuotaV1Import,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -62,20 +64,20 @@ func resourceCCloudDomainQuotaV1() *schema.Resource {
 	return quotaResource
 }
 
-func resourceCCloudDomainQuotaV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudDomainQuotaV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	domainID := d.Get("domain_id").(string)
 
-	log.Printf("[QUOTA] Reading Quota for: %s", domainID)
+	log.Printf("[DEBUG] Reading Quota for: %s", domainID)
 
 	config := meta.(*Config)
 	limes, err := config.limesV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack limes client: %s", err)
+		return diag.Errorf("Error creating OpenStack limes client: %s", err)
 	}
 
 	quota, err := domains.Get(limes, domainID, domains.GetOpts{}).Extract()
 	if err != nil {
-		return fmt.Errorf("Error getting Limes domain: %s", err)
+		return diag.Errorf("Error getting Limes domain: %s", err)
 	}
 
 	for service, resources := range limesServices {
@@ -85,7 +87,7 @@ func resourceCCloudDomainQuotaV1Read(d *schema.ResourceData, meta interface{}) e
 				continue
 			}
 			res[resource] = quota.Services[service].Resources[resource].DomainQuota
-			log.Printf("[QUOTA] %s.%s: %s", service, resource, toString(quota.Services[service].Resources[resource]))
+			log.Printf("[DEBUG] %s.%s: %s", service, resource, toString(quota.Services[service].Resources[resource]))
 		}
 		d.Set(sanitize(service), []map[string]*uint64{res})
 	}
@@ -95,32 +97,32 @@ func resourceCCloudDomainQuotaV1Read(d *schema.ResourceData, meta interface{}) e
 	return nil
 }
 
-func resourceCCloudDomainQuotaV1CreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudDomainQuotaV1CreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	domainID := d.Get("domain_id").(string)
-	services := limes.QuotaRequest{}
+	services := limesresources.QuotaRequest{}
 
-	log.Printf("[QUOTA] Updating Quota for: %s", domainID)
+	log.Printf("[DEBUG] Updating Quota for: %s", domainID)
 
 	config := meta.(*Config)
 	client, err := config.limesV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack limes client: %s", err)
+		return diag.Errorf("Error creating OpenStack limes client: %s", err)
 	}
 
 	for _service, resources := range limesServices {
 		service := sanitize(_service)
 		if _, ok := d.GetOk(service); ok && d.HasChange(service) {
-			log.Printf("[QUOTA] Service Changed: %s", service)
+			log.Printf("[DEBUG] Service Changed: %s", service)
 
-			quota := limes.ServiceQuotaRequest{Resources: make(limes.ResourceQuotaRequest)}
+			quota := make(limesresources.ServiceQuotaRequest)
 			for resource, unit := range resources {
 				key := fmt.Sprintf("%s.0.%s", service, resource)
 
 				if d.HasChange(key) {
 					v := d.Get(key)
-					log.Printf("[QUOTA] Resource Changed: %s", key)
-					quota.Resources[resource] = limes.ValueWithUnit{Value: uint64(v.(float64)), Unit: unit}
-					log.Printf("[QUOTA] %s.%s: %s", service, resource, quota.Resources[resource].String())
+					log.Printf("[DEBUG] Resource Changed: %s", key)
+					quota[resource] = limesresources.ResourceQuotaRequest{Value: uint64(v.(float64)), Unit: unit}
+					log.Printf("[DEBUG] %s.%s: %v", service, resource, quota[resource])
 				}
 			}
 			services[_service] = quota
@@ -130,22 +132,22 @@ func resourceCCloudDomainQuotaV1CreateOrUpdate(d *schema.ResourceData, meta inte
 	opts := domains.UpdateOpts{Services: services}
 	err = domains.Update(client, domainID, opts).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error updating Limes domain: %s", err)
+		return diag.Errorf("Error updating Limes domain: %s", err)
 	}
 
-	log.Printf("[QUOTA] Resulting Quota for: %s", domainID)
+	log.Printf("[DEBUG] Resulting Quota for: %s", domainID)
 
 	d.SetId(domainID)
 
-	return resourceCCloudDomainQuotaV1Read(d, meta)
+	return resourceCCloudDomainQuotaV1Read(ctx, d, meta)
 }
 
-func resourceCCloudDomainQuotaV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudDomainQuotaV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	d.SetId("")
 	return nil
 }
 
-func resourceCCloudDomainQuotaV1Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCCloudDomainQuotaV1Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	d.Set("domain_id", d.Id())
 
 	return []*schema.ResourceData{d}, nil

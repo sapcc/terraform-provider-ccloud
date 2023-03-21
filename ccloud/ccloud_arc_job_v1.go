@@ -1,16 +1,17 @@
 package ccloud
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/sapcc/gophercloud-sapcc/arc/v1/jobs"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/sapcc/gophercloud-sapcc/arc/v1/jobs"
 )
 
 type chefZeroPayload struct {
@@ -34,7 +35,7 @@ type tarballPayload struct {
 	Environment map[string]string `json:"environment,omitempty"`
 }
 
-func arcCCloudArcJobV1BuildPayload(v []interface{}) (string, string) {
+func arcCCloudArcJobV1BuildPayload(v []interface{}) (string, string, error) {
 	var payload string
 
 	for _, a := range v {
@@ -42,27 +43,30 @@ func arcCCloudArcJobV1BuildPayload(v []interface{}) (string, string) {
 			action := a.(map[string]interface{})
 
 			if v, ok := action["script"]; ok && len(v.(string)) > 0 {
-				return "script", v.(string)
+				return "script", v.(string), nil
 			}
 
 			if v, ok := action["tarball"]; ok && len(v.([]interface{})) > 0 {
-				return "tarball", arcCCloudArcJobV1ParseTarball(v.([]interface{}))
+				v, err := arcCCloudArcJobV1ParseTarball(v.([]interface{}))
+				return "tarball", v, err
 			}
 
 			if v, ok := action["enable"]; ok && len(v.([]interface{})) > 0 {
-				return "enable", arcCCloudArcJobV1ParseChefEnable(v.([]interface{}))
+				v, err := arcCCloudArcJobV1ParseChefEnable(v.([]interface{}))
+				return "enable", v, err
 			}
 
 			if v, ok := action["zero"]; ok && len(v.([]interface{})) > 0 {
-				return "zero", arcCCloudArcJobV1ParseChefZero(v.([]interface{}))
+				v, err := arcCCloudArcJobV1ParseChefZero(v.([]interface{}))
+				return "zero", v, err
 			}
 		}
 	}
 
-	return "", payload
+	return "", payload, nil
 }
 
-func arcCCloudArcJobV1ParseTarball(v []interface{}) string {
+func arcCCloudArcJobV1ParseTarball(v []interface{}) (string, error) {
 	var payload string
 
 	for _, t := range v {
@@ -83,15 +87,18 @@ func arcCCloudArcJobV1ParseTarball(v []interface{}) string {
 				tarball.Environment = expandToMapStringString(val.(map[string]interface{}))
 			}
 
-			bytes, _ := json.Marshal(tarball)
+			bytes, err := json.Marshal(tarball)
+			if err != nil {
+				return "", err
+			}
 			payload = string(bytes[:])
 		}
 	}
 
-	return payload
+	return payload, nil
 }
 
-func arcCCloudArcJobV1ParseChefEnable(v []interface{}) string {
+func arcCCloudArcJobV1ParseChefEnable(v []interface{}) (string, error) {
 	var payload string
 
 	for _, c := range v {
@@ -106,15 +113,18 @@ func arcCCloudArcJobV1ParseChefEnable(v []interface{}) string {
 				chefEnable.ChefVersion = val.(string)
 			}
 
-			bytes, _ := json.Marshal(chefEnable)
+			bytes, err := json.Marshal(chefEnable)
+			if err != nil {
+				return "", err
+			}
 			payload = string(bytes[:])
 		}
 	}
 
-	return payload
+	return payload, nil
 }
 
-func arcCCloudArcJobV1ParseChefZero(v []interface{}) string {
+func arcCCloudArcJobV1ParseChefZero(v []interface{}) (string, error) {
 	var payload string
 
 	for _, c := range v {
@@ -132,13 +142,19 @@ func arcCCloudArcJobV1ParseChefZero(v []interface{}) string {
 				chefZero.RecipeURL = val.(string)
 			}
 			if val, ok := chef["attributes"]; ok {
-				json.Unmarshal([]byte(val.(string)), &chefZero.Attributes)
+				err := json.Unmarshal([]byte(val.(string)), &chefZero.Attributes)
+				if err != nil {
+					return "", err
+				}
 			}
 			if val, ok := chef["debug"]; ok {
 				chefZero.Debug = val.(bool)
 			}
 			if val, ok := chef["nodes"]; ok {
-				json.Unmarshal([]byte(val.(string)), &chefZero.Nodes)
+				err := json.Unmarshal([]byte(val.(string)), &chefZero.Nodes)
+				if err != nil {
+					return "", err
+				}
 			}
 			if val, ok := chef["node_name"]; ok {
 				chefZero.NodeName = val.(string)
@@ -150,12 +166,15 @@ func arcCCloudArcJobV1ParseChefZero(v []interface{}) string {
 				chefZero.ChefVersion = val.(string)
 			}
 
-			bytes, _ := json.Marshal(chefZero)
+			bytes, err := json.Marshal(chefZero)
+			if err != nil {
+				return "", err
+			}
 			payload = string(bytes[:])
 		}
 	}
 
-	return payload
+	return payload, nil
 }
 
 func arcCCloudArcJobV1FlattenExecute(job *jobs.Job) ([]map[string]interface{}, error) {
@@ -174,7 +193,7 @@ func arcCCloudArcJobV1FlattenExecute(job *jobs.Job) ([]map[string]interface{}, e
 
 	err := json.Unmarshal([]byte(job.Payload), &tarball)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal execute %s payload: %s", job.Action, err)
+		return nil, fmt.Errorf("failed to unmarshal execute %s payload: %v", job.Action, err)
 	}
 
 	return []map[string]interface{}{{
@@ -200,7 +219,7 @@ func arcCCloudArcJobV1FlattenChef(job *jobs.Job) ([]map[string]interface{}, erro
 
 	err := json.Unmarshal([]byte(job.Payload), &chef)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal chef %s payload: %s", job.Action, err)
+		return nil, fmt.Errorf("failed to unmarshal chef %s payload: %v", job.Action, err)
 	}
 
 	if job.Action == "enable" {
@@ -213,8 +232,14 @@ func arcCCloudArcJobV1FlattenChef(job *jobs.Job) ([]map[string]interface{}, erro
 		}}, nil
 	}
 
-	attributes, _ := json.Marshal(chef.Attributes)
-	nodes, _ := json.Marshal(chef.Nodes)
+	attributes, err := json.Marshal(chef.Attributes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal chef attributes: %v", err)
+	}
+	nodes, err := json.Marshal(chef.Nodes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal chef nodes: %v", err)
+	}
 
 	return []map[string]interface{}{{
 		"enable": []map[string]interface{}{},
@@ -244,12 +269,12 @@ func arcCCloudArcJobV1Filter(d *schema.ResourceData, arcClient *gophercloud.Serv
 
 	allPages, err := jobs.List(arcClient, listOpts).AllPages()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to list %s: %s", resourceName, err)
+		return nil, fmt.Errorf("Unable to list %s: %v", resourceName, err)
 	}
 
 	allJobs, err := jobs.ExtractJobs(allPages)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve %s: %s", resourceName, err)
+		return nil, fmt.Errorf("Unable to retrieve %s: %v", resourceName, err)
 	}
 
 	var jobs []jobs.Job
@@ -286,7 +311,7 @@ func flattenArcJobUserV1(user jobs.User) []interface{} {
 	}}
 }
 
-func waitForArcJobV1(arcClient *gophercloud.ServiceClient, id string, target []string, pending []string, timeout time.Duration) error {
+func waitForArcJobV1(ctx context.Context, arcClient *gophercloud.ServiceClient, id string, target []string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for %s job to become %v.", id, target)
 
 	stateConf := &resource.StateChangeConf{
@@ -298,7 +323,7 @@ func waitForArcJobV1(arcClient *gophercloud.ServiceClient, id string, target []s
 		MinTimeout: 1 * time.Second,
 	}
 
-	_, err := stateConf.WaitForState()
+	_, err := stateConf.WaitForStateContext(ctx)
 
 	return err
 }
@@ -307,7 +332,7 @@ func arcJobV1GetStatus(arcClient *gophercloud.ServiceClient, id string) resource
 	return func() (interface{}, string, error) {
 		job, err := jobs.Get(arcClient, id).Extract()
 		if err != nil {
-			return nil, "", fmt.Errorf("Unable to retrieve %s ccloud_arc_job_v1: %s", id, err)
+			return nil, "", fmt.Errorf("Unable to retrieve %s ccloud_arc_job_v1: %v", id, err)
 		}
 
 		return job, job.Status, nil
@@ -316,16 +341,19 @@ func arcJobV1GetStatus(arcClient *gophercloud.ServiceClient, id string) resource
 
 func arcJobV1GetLog(arcClient *gophercloud.ServiceClient, id string) []byte {
 	var err error
-	var l []byte = []byte("Log not available")
+	l := []byte("Log not available")
 
 	res := jobs.GetLog(arcClient, id)
 	if res.Err != nil {
 		log.Printf("[DEBUG] Error retrieving logs for %s ccloud_arc_job_v1: %s", id, res.Err)
-	} else {
-		l, err = res.ExtractContent()
-		if err != nil {
-			log.Printf("[DEBUG] Error extracting logs for %s ccloud_arc_job_v1: %s", id, err)
-		}
+		return l
 	}
-	return l
+
+	logData, err := res.ExtractContent()
+	if err != nil {
+		log.Printf("[DEBUG] Error extracting logs for %s ccloud_arc_job_v1: %v", id, err)
+		return l
+	}
+
+	return logData
 }

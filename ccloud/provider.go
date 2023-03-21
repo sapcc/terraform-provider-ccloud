@@ -1,9 +1,13 @@
 package ccloud
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/meta"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"context"
+	"os"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
 	"github.com/gophercloud/utils/terraform/auth"
 	"github.com/gophercloud/utils/terraform/mutexkv"
@@ -16,7 +20,7 @@ type Config struct {
 }
 
 // Provider returns a schema.Provider for OpenStack.
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"auth_url": {
@@ -229,6 +233,13 @@ func Provider() terraform.ResourceProvider {
 				Default:     false,
 				Description: descriptions["disable_no_cache_header"],
 			},
+
+			"enable_logging": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: descriptions["enable_logging"],
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -260,7 +271,7 @@ func Provider() terraform.ResourceProvider {
 		},
 	}
 
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+	provider.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		terraformVersion := provider.TerraformVersion
 		if terraformVersion == "" {
 			// Terraform 0.12 introduced this field to the protocol
@@ -339,10 +350,22 @@ func init() {
 			"automatically, if the initial auth token get expired. Defaults to `true`",
 
 		"max_retries": "How many times HTTP connection should be retried until giving up.",
+
+		"enable_logging": "Outputs very verbose logs with all calls made to and responses from OpenStack",
 	}
 }
 
-func configureProvider(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
+func configureProvider(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
+	enableLogging := d.Get("enable_logging").(bool)
+	if !enableLogging {
+		// enforce logging (similar to OS_DEBUG) when TF_LOG is 'DEBUG' or 'TRACE'
+		if logLevel := logging.LogLevel(); logLevel != "" && os.Getenv("OS_DEBUG") == "" {
+			if logLevel == "DEBUG" || logLevel == "TRACE" {
+				enableLogging = true
+			}
+		}
+	}
+
 	config := Config{
 		auth.Config{
 			CACertFile:                  d.Get("cacert_file").(string),
@@ -376,6 +399,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 			TerraformVersion:            terraformVersion,
 			SDKVersion:                  meta.SDKVersionString(),
 			MutexKV:                     mutexkv.NewMutexKV(),
+			EnableLogger:                enableLogging,
 		},
 	}
 
@@ -386,7 +410,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 
 	return &config, nil

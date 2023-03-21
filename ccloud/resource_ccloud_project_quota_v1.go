@@ -1,27 +1,30 @@
 package ccloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	limesresources "github.com/sapcc/go-api-declarations/limes/resources"
 	"github.com/sapcc/gophercloud-sapcc/resources/v1/projects"
-	"github.com/sapcc/limes"
+
+	"github.com/gophercloud/gophercloud"
 )
 
 func resourceCCloudProjectQuotaV1() *schema.Resource {
 	quotaResource := &schema.Resource{
 		SchemaVersion: 1,
 
-		Read:   resourceCCloudProjectQuotaV1Read,
-		Update: resourceCCloudProjectQuotaV1CreateOrUpdate,
-		Create: resourceCCloudProjectQuotaV1CreateOrUpdate,
-		Delete: resourceCCloudProjectQuotaV1Delete,
+		ReadContext:   resourceCCloudProjectQuotaV1Read,
+		UpdateContext: resourceCCloudProjectQuotaV1CreateOrUpdate,
+		CreateContext: resourceCCloudProjectQuotaV1CreateOrUpdate,
+		DeleteContext: resourceCCloudProjectQuotaV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceCCloudProjectQuotaV1Import,
+			StateContext: resourceCCloudProjectQuotaV1Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -74,7 +77,7 @@ func resourceCCloudProjectQuotaV1() *schema.Resource {
 	return quotaResource
 }
 
-func resourceCCloudProjectQuotaV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudProjectQuotaV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
 
@@ -83,12 +86,12 @@ func resourceCCloudProjectQuotaV1Read(d *schema.ResourceData, meta interface{}) 
 	config := meta.(*Config)
 	limes, err := config.limesV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack limes client: %s", err)
+		return diag.Errorf("Error creating OpenStack limes client: %s", err)
 	}
 
 	quota, err := projects.Get(limes, domainID, projectID, projects.GetOpts{}).Extract()
 	if err != nil {
-		return fmt.Errorf("Error getting Limes project: %s", err)
+		return diag.Errorf("Error getting Limes project: %s", err)
 	}
 
 	for service, resources := range limesServices {
@@ -108,17 +111,17 @@ func resourceCCloudProjectQuotaV1Read(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudProjectQuotaV1CreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
-	services := limes.QuotaRequest{}
+	services := limesresources.QuotaRequest{}
 
 	log.Printf("[DEBUG] Updating Quota for: %s/%s", domainID, projectID)
 
 	config := meta.(*Config)
 	client, err := config.limesV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack limes client: %s", err)
+		return diag.Errorf("Error creating OpenStack limes client: %s", err)
 	}
 
 	for _service, resources := range limesServices {
@@ -126,15 +129,15 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta int
 		if _, ok := d.GetOk(service); ok && d.HasChange(service) {
 			log.Printf("[DEBUG] Service Changed: %s", service)
 
-			quota := limes.ServiceQuotaRequest{Resources: make(limes.ResourceQuotaRequest)}
+			quota := make(limesresources.ServiceQuotaRequest)
 			for resource, unit := range resources {
 				key := fmt.Sprintf("%s.0.%s", service, resource)
 
 				if d.HasChange(key) {
 					v := d.Get(key)
 					log.Printf("[DEBUG] Resource Changed: %s", key)
-					quota.Resources[resource] = limes.ValueWithUnit{Value: uint64(v.(float64)), Unit: unit}
-					log.Printf("[DEBUG] %s.%s: %s", service, resource, quota.Resources[resource].String())
+					quota[resource] = limesresources.ResourceQuotaRequest{Value: uint64(v.(float64)), Unit: unit}
+					log.Printf("[DEBUG] %s.%s: %v", service, resource, quota[resource])
 				}
 			}
 			services[_service] = quota
@@ -143,8 +146,8 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta int
 
 	if d.Id() == "" {
 		// when the project was just created, it may not yet appeared in the limes
-		if err := limesCCloudProjectQuotaV1WaitForProject(client, domainID, projectID, &services, d.Timeout(schema.TimeoutCreate)); err != nil {
-			return err
+		if err := limesCCloudProjectQuotaV1WaitForProject(ctx, client, domainID, projectID, &services, d.Timeout(schema.TimeoutCreate)); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -152,9 +155,9 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta int
 	warn, err := projects.Update(client, domainID, projectID, opts).Extract()
 	if err != nil {
 		if err, ok := err.(gophercloud.ErrDefault400); ok {
-			return fmt.Errorf("Error updating Limes project: %s: %s", err.Body, err)
+			return diag.Errorf("Error updating Limes project: %s: %v", err.Body, err)
 		}
-		return fmt.Errorf("Error updating Limes project: %s", err)
+		return diag.Errorf("Error updating Limes project: %s", err)
 	}
 	if warn != nil {
 		log.Printf("[DEBUG] %s", string(warn))
@@ -164,15 +167,15 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(d *schema.ResourceData, meta int
 
 	d.SetId(projectID)
 
-	return resourceCCloudProjectQuotaV1Read(d, meta)
+	return resourceCCloudProjectQuotaV1Read(ctx, d, meta)
 }
 
-func resourceCCloudProjectQuotaV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudProjectQuotaV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	d.SetId("")
 	return nil
 }
 
-func resourceCCloudProjectQuotaV1Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCCloudProjectQuotaV1Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("Invalid format specified for Quota. Format must be <domain id>/<project id>")

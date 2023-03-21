@@ -1,24 +1,26 @@
 package ccloud
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/sapcc/gophercloud-sapcc/billing/masterdata/domains"
+
+	"github.com/gophercloud/gophercloud"
 )
 
 func resourceCCloudBillingDomainMasterdata() *schema.Resource {
 	return &schema.Resource{
-		Read:   resourceCCloudBillingDomainMasterdataRead,
-		Update: resourceCCloudBillingDomainMasterdataCreateOrUpdate,
-		Create: resourceCCloudBillingDomainMasterdataCreateOrUpdate,
-		Delete: schema.RemoveFromState,
+		ReadContext:   resourceCCloudBillingDomainMasterdataRead,
+		UpdateContext: resourceCCloudBillingDomainMasterdataCreateOrUpdate,
+		CreateContext: resourceCCloudBillingDomainMasterdataCreateOrUpdate,
+		Delete:        schema.RemoveFromState,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -137,11 +139,11 @@ func resourceCCloudBillingDomainMasterdata() *schema.Resource {
 	}
 }
 
-func resourceCCloudBillingDomainMasterdataCreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudBillingDomainMasterdataCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	billing, err := config.billingClient(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack billing client: %s", err)
+		return diag.Errorf("Error creating OpenStack billing client: %s", err)
 	}
 
 	domainID := d.Get("domain_id").(string)
@@ -151,16 +153,16 @@ func resourceCCloudBillingDomainMasterdataCreateOrUpdate(d *schema.ResourceData,
 		// first call, expecting to get current scope domain
 		allPages, err := domains.List(billing).AllPages()
 		if err != nil {
-			return fmt.Errorf("Error getting billing domain masterdata: %s", err)
+			return diag.Errorf("Error getting billing domain masterdata: %s", err)
 		}
 
 		allDomains, err := domains.ExtractDomains(allPages)
 		if err != nil {
-			return fmt.Errorf("Error extracting billing domains masterdata: %s", err)
+			return diag.Errorf("Error extracting billing domains masterdata: %s", err)
 		}
 
 		if len(allDomains) != 1 {
-			return fmt.Errorf("Error getting billing domain masterdata: expecting 1 domain, got %d", len(allDomains))
+			return diag.Errorf("Error getting billing domain masterdata: expecting 1 domain, got %d", len(allDomains))
 		}
 
 		domain = &allDomains[0]
@@ -170,7 +172,7 @@ func resourceCCloudBillingDomainMasterdataCreateOrUpdate(d *schema.ResourceData,
 		domain, err = domains.Get(billing, domainID).Extract()
 		if err != nil {
 			if _, ok := err.(gophercloud.ErrDefault404); d.Id() != "" || !ok {
-				return fmt.Errorf("Error getting billing domain masterdata: %s", err)
+				return diag.Errorf("Error getting billing domain masterdata: %s", err)
 			}
 			log.Printf("[DEBUG] Error getting billing domain masterdata, probably this domain was not created yet: %s", err)
 			domain = &domains.Domain{DomainID: domainID}
@@ -194,30 +196,30 @@ func resourceCCloudBillingDomainMasterdataCreateOrUpdate(d *schema.ResourceData,
 		opts.CostObject = v
 	}
 
-	log.Printf("[QUOTA] Updating %s domain masterdata: %+v", opts.DomainID, opts)
+	log.Printf("[DEBUG] Updating %s domain masterdata: %+v", opts.DomainID, opts)
 
 	_, err = domains.Update(billing, opts.DomainID, opts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating billing domain masterdata: %s", err)
+		return diag.Errorf("Error updating billing domain masterdata: %s", err)
 	}
 
 	if d.Id() == "" {
 		d.SetId(opts.DomainID)
 	}
 
-	return resourceCCloudBillingDomainMasterdataRead(d, meta)
+	return resourceCCloudBillingDomainMasterdataRead(ctx, d, meta)
 }
 
-func resourceCCloudBillingDomainMasterdataRead(d *schema.ResourceData, meta interface{}) error {
+func resourceCCloudBillingDomainMasterdataRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	billing, err := config.billingClient(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack billing client: %s", err)
+		return diag.Errorf("Error creating OpenStack billing client: %s", err)
 	}
 
 	domain, err := domains.Get(billing, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "Error getting billing domain masterdata")
+		return diag.FromErr(CheckDeleted(d, err, "Error getting billing domain masterdata"))
 	}
 
 	log.Printf("[DEBUG] Retrieved domain masterdata: %+v", domain)

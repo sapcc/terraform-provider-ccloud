@@ -16,14 +16,13 @@ Use the navigation to the left to read about the available resources.
 
 # Installing the provider
 
-Since v1.4.8 you can use the provider from a [Terraform Registry](https://registry.terraform.io/providers/sapcc/ccloud).
+Starting from v1.4.8, you can utilize the provider from a [Terraform Registry](https://registry.terraform.io/providers/sapcc/ccloud).
 
 ## Example Usage
 
 ```hcl
 # Define required providers
 terraform {
-required_version = ">= 0.14.0"
   required_providers {
     ccloud = {
       source = "sapcc/ccloud"
@@ -74,14 +73,17 @@ The following arguments are supported:
 * `application_credential_id` - (Optional) (Identity v3 only) The ID of an
   application credential to authenticate with. An
   `application_credential_secret` has to bet set along with this parameter.
+  If omitted, the `OS_APPLICATION_CREDENTIAL_ID` environment variable is used.
 
 * `application_credential_name` - (Optional) (Identity v3 only) The name of an
   application credential to authenticate with. Requires `user_id`, or
   `user_name` and `user_domain_name` (or `user_domain_id`) to be set.
+  If omitted, the `OS_APPLICATION_CREDENTIAL_NAME` environment variable is used.
 
 * `application_credential_secret` - (Optional) (Identity v3 only) The secret of
   an application credential to authenticate with. Required by
   `application_credential_id` or `application_credential_name`.
+  If omitted, the `OS_APPLICATION_CREDENTIAL_SECRET` environment variable is used.
 
 * `tenant_id` - (Optional) The ID of the Tenant (Identity v2) or Project
   (Identity v3) to login with. If omitted, the `OS_TENANT_ID` or
@@ -142,7 +144,7 @@ The following arguments are supported:
   the key. If omitted the `OS_KEY` environment variable is used.
 
 * `endpoint_type` - (Optional) Specify which type of endpoint to use from the
-  service catalog. It can be set using the OS_ENDPOINT_TYPE environment
+  service catalog. It can be set using the `OS_ENDPOINT_TYPE` environment
   variable. If not set, public endpoints is used.
 
 * `endpoint_overrides` - (Optional) A set of key/value pairs that can
@@ -158,13 +160,18 @@ The following arguments are supported:
 
 * `delayed_auth` - (Optional) If set to `false`, OpenStack authorization will be perfomed,
   every time the service provider client is called. Defaults to `true`.
+  If omitted, the `OS_DELAYED_AUTH` environment variable is checked.
 
 * `allow_reauth` - (Optional) If set to `false`, OpenStack authorization won't be
   perfomed automatically, if the initial auth token get expired. Defaults to `true`.
+  If omitted, the `OS_ALLOW_REAUTH` environment variable is checked.
 
 * `max_retries` - (Optional) If set to a value greater than 0, the OpenStack
   client will retry failed HTTP connections and Too Many Requests (429 code)
   HTTP responses with a `Retry-After` header within the specified value.
+
+* `enable_logging` - (Optional) When enabled, generates verbose logs containing
+  all the calls made to and responses received from OpenStack.
 
 ## Overriding Service API Endpoints
 
