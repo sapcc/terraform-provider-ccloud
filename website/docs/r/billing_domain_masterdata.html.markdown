@@ -53,12 +53,6 @@ The following arguments are supported:
 * `responsible_primary_contact_email` - (Optional) Email-address of primary
   contact for the domain.
 
-* `responsible_controller_id` - (Optional) SAP-User-Id of the controller who is
-  responsible for the domain / the costobject.
-
-* `responsible_controller_email` - (Optional) Email-address or DL of the
-  person/group who is controlling the domain / the costobject.
-
 * `cost_object` - (Optional) The cost object. The `cost_object` object structure
   is documented below.
 

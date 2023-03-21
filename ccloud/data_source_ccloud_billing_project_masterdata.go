@@ -96,32 +96,22 @@ func dataSourceCCloudBillingProjectMasterdata() *schema.Resource {
 				Computed: true,
 			},
 
-			"responsible_security_expert_id": {
+			"responsible_inventory_role_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"responsible_security_expert_email": {
+			"responsible_inventory_role_email": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"responsible_product_owner_id": {
+			"responsible_infrastructure_coordinator_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"responsible_product_owner_email": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"responsible_controller_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"responsible_controller_email": {
+			"responsible_infrastructure_coordinator_email": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -141,6 +131,69 @@ func dataSourceCCloudBillingProjectMasterdata() *schema.Resource {
 						},
 						"type": {
 							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+
+			"environment": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"soft_license_mode": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"type_of_data": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"gpu_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+
+			"contains_pii_dpp_hr": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+
+			"contains_external_customer_data": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+
+			"ext_certification": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"c5": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"iso": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"pci": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"soc1": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"soc2": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"sox": {
+							Type:     schema.TypeBool,
 							Computed: true,
 						},
 					},
@@ -228,12 +281,18 @@ func dataSourceCCloudBillingProjectMasterdataRead(ctx context.Context, d *schema
 	d.Set("responsible_primary_contact_email", project.ResponsiblePrimaryContactEmail)
 	d.Set("responsible_operator_id", project.ResponsibleOperatorID)
 	d.Set("responsible_operator_email", project.ResponsibleOperatorEmail)
-	d.Set("responsible_security_expert_id", project.ResponsibleSecurityExpertID)
-	d.Set("responsible_security_expert_email", project.ResponsibleSecurityExpertEmail)
-	d.Set("responsible_product_owner_id", project.ResponsibleProductOwnerID)
-	d.Set("responsible_product_owner_email", project.ResponsibleProductOwnerEmail)
-	d.Set("responsible_controller_id", project.ResponsibleControllerID)
-	d.Set("responsible_controller_email", project.ResponsibleControllerEmail)
+	d.Set("responsible_inventory_role_id", project.ResponsibleInventoryRoleID)
+	d.Set("responsible_inventory_role_email", project.ResponsibleInventoryRoleEmail)
+	d.Set("responsible_infrastructure_coordinator_id", project.ResponsibleInfrastructureCoordinatorID)
+	d.Set("responsible_infrastructure_coordinator_email", project.ResponsibleInfrastructureCoordinatorEmail)
+	d.Set("customer", project.Customer)
+	d.Set("environment", project.Environment)
+	d.Set("soft_license_mode", project.SoftLicenseMode)
+	d.Set("type_of_data", project.TypeOfData)
+	d.Set("gpu_enabled", project.GPUEnabled)
+	d.Set("contains_pii_dpp_hr", project.ContainsPIIDPPHR)
+	d.Set("contains_external_customer_data", project.ContainsExternalCustomerData)
+	d.Set("ext_certification", billingProjectFlattenExtCertificationV1(project.ExtCertification))
 	d.Set("revenue_relevance", project.RevenueRelevance)
 	d.Set("business_criticality", project.BusinessCriticality)
 	d.Set("number_of_endusers", project.NumberOfEndusers)

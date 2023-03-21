@@ -51,16 +51,6 @@ func dataSourceCCloudBillingDomainMasterdata() *schema.Resource {
 				Computed: true,
 			},
 
-			"responsible_controller_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"responsible_controller_email": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"cost_object": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -157,8 +147,6 @@ func dataSourceCCloudBillingDomainMasterdataRead(ctx context.Context, d *schema.
 	d.Set("description", domain.Description)
 	d.Set("responsible_primary_contact_id", domain.ResponsiblePrimaryContactID)
 	d.Set("responsible_primary_contact_email", domain.ResponsiblePrimaryContactEmail)
-	d.Set("responsible_controller_id", domain.ResponsibleControllerID)
-	d.Set("responsible_controller_email", domain.ResponsibleControllerEmail)
 	d.Set("additional_information", domain.AdditionalInformation)
 	d.Set("cost_object", billingDomainFlattenCostObject(domain.CostObject))
 	d.Set("created_at", domain.CreatedAt.Format(time.RFC3339))

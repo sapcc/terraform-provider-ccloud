@@ -85,25 +85,45 @@ The following arguments are supported:
 * `responsible_operator_email` - (Optional) Email-address or DL of the
   person/group who is operating the project.
 
-* `responsible_security_expert_id` - (Optional) SAP-User-Id of the person who is
-  responsible for the security of the project.
+* `responsible_inventory_role_id` - (Optional) SAP-User-Id of the Person/entity
+  responsible to correctly maintain assets in SAP's Global DC HW asset inventory
+  SISM/CCIR.
 
-* `responsible_security_expert_email` - (Optional) Email-address or DL of the
-  person/group who is responsible for the security of the project.
+* `responsible_inventory_role_email` - (Optional) Email-address or DL of the
+  Person/entity responsible to correctly maintain assets in SAP's Global DC HW
+  asset inventory SISM/CCIR.
 
-* `responsible_product_owner_id` - (Optional) SAP-User-Id of the product owner.
+* `responsible_infrastructure_coordinator_id` - (Optional) SAP-User-Id of the
+  infrastructure coordinator.
 
-* `responsible_product_owner_email` - (Optional) Email-address or DL of the
-  product owner.
-
-* `responsible_controller_id` - (Optional) SAP-User-Id of the controller who is
-  responsible for the project / the costobject.
-
-* `responsible_controller_email` - (Optional) Email-address or DL of the
-  person/group who is controlling the project / the costobject.
+* `responsible_infrastructure_coordinator_email` - (Optional) Email-address or
+  DL of the infrastructure coordinator.
 
 * `cost_object` - (Optional) The cost object. The `cost_object` object structure
   is documented below.
+
+* `environment` - (Optional) Build environment of the project. Can either be
+  `Prod`, `QA`, `Admin`, `DEV`, `Demo`, `Train`, `Sandbox`, `Lab` or `Test`.
+
+* `soft_license_mode` - (Optional) Software License Mode. Can either be
+  `Revenue Generating`, `Training & Demo`, `Development`, `Test & QS`,
+  `Administration`, `Make`, `Virtualization-Host` or `Productive`.
+
+* `type_of_data` - (Optional) Input parameter for KRITIS flag in CCIR. Can
+  either be `SAP Business Process`, `Customer Cloud Service`, `Customer Business
+  Process` or `Training & Demo Cloud`.
+
+* `gpu_enabled` - (Optional) Indicates whether the project uses GPUs.
+
+* `contains_pii_dpp_hr` - (Optional) Indicates whether the project contains
+  sensitive personal data.
+
+* `contains_external_customer_data` - (Optional) Indicates whether the project
+  contains data from external customer.
+
+* `ext_certification` - (Optional) Contains information about whether there is
+  any external certification present in this project. The `ext_certification`
+  object structure is documented below.
 
 The `cost_object` block supports:
 
@@ -115,6 +135,27 @@ The `cost_object` block supports:
 * `type` - Type of the costobject. Can either be `IO` (internal order), `CC`
   (cost center), `WBS` (Work Breakdown Structure element) or `SO` (sales order).
   Required, if `inherited` not true.
+
+The `ext_certification` block supports boolean values indicating whether the
+project has a corresponding certification:
+
+* `c5` - C5 is a government-backed verification framework implemented by the
+  German Federal Office for Information Security (BSI).
+
+* `iso` - An ISO certification describes the process that confirms that ISO
+  standards are being followed.
+
+* `pci` - PCI certification ensures the security of card data at your business
+  through a set of requirements established by the PCI SSC.
+
+* `soc1` - SOC is a type of audit report that attests to the trustworthiness of
+  services provided by a service organization.
+
+* `soc2` - SOC is a type of audit report that attests to the trustworthiness of
+  services provided by a service organization.
+
+* `sox` - The law mandates strict reforms to improve financial disclosures from
+  corporations and prevent accounting fraud.
 
 ## Attributes Reference
 

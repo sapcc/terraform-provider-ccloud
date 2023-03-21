@@ -73,102 +73,123 @@ func resourceCCloudBillingProjectMasterdata() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 
 			"revenue_relevance": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"generating", "enabling", "other",
+					"generating",
+					"enabling",
+					"other",
 				}, false),
 			},
 
 			"business_criticality": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"dev", "test", "prod",
+					"dev",
+					"test",
+					"prod",
 				}, false),
 			},
 
 			"number_of_endusers": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Computed:     true,
 				ValidateFunc: validation.IntAtLeast(-1),
+			},
+
+			"customer": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"additional_information": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 
 			"responsible_primary_contact_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"responsible_primary_contact_email": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"responsible_operator_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 
 			"responsible_operator_email": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+			},
+
+			"responsible_inventory_role_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"responsible_inventory_role_email": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"responsible_infrastructure_coordinator_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"responsible_infrastructure_coordinator_email": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"responsible_security_expert_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This field has been deprecated",
 			},
 
 			"responsible_security_expert_email": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This field has been deprecated",
 			},
 
 			"responsible_product_owner_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This field has been deprecated",
 			},
 
 			"responsible_product_owner_email": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This field has been deprecated",
 			},
 
 			"responsible_controller_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This field has been deprecated",
 			},
 
 			"responsible_controller_email": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This field has been deprecated",
 			},
 
 			"cost_object": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -191,6 +212,103 @@ func resourceCCloudBillingProjectMasterdata() *schema.Resource {
 							ValidateFunc: validation.StringInSlice([]string{
 								"IO", "CC", "WBS", "SO",
 							}, false),
+						},
+					},
+				},
+			},
+
+			"environment": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"Prod",
+					"QA",
+					"Admin",
+					"DEV",
+					"Demo",
+					"Train",
+					"Sandbox",
+					"Lab",
+					"Test",
+				}, false),
+			},
+
+			"soft_license_mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"Revenue Generating",
+					"Training & Demo",
+					"Development",
+					"Test & QS",
+					"Administration",
+					"Make",
+					"Virtualization-Host",
+					"Productive",
+				}, false),
+			},
+
+			"type_of_data": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"SAP Business Process",
+					"Customer Cloud Service",
+					"Customer Business Process",
+					"Training & Demo Cloud",
+				}, false),
+			},
+
+			"gpu_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
+			"contains_pii_dpp_hr": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
+			"contains_external_customer_data": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
+			"ext_certification": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"c5": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"iso": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"pci": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"soc1": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"soc2": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"sox": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -274,19 +392,25 @@ func resourceCCloudBillingProjectMasterdataCreateOrUpdate(ctx context.Context, d
 
 	// API doesn't support partial update, thus prefilling the update options with the existing data
 	opts := projects.ProjectToUpdateOpts(project)
-	opts.ResponsiblePrimaryContactID = replaceEmpty(d, "responsible_primary_contact_id", opts.ResponsiblePrimaryContactID)
-	opts.ResponsiblePrimaryContactEmail = replaceEmpty(d, "responsible_primary_contact_email", opts.ResponsiblePrimaryContactEmail)
-	opts.ResponsibleOperatorID = replaceEmpty(d, "responsible_operator_id", opts.ResponsibleOperatorID)
-	opts.ResponsibleOperatorEmail = replaceEmpty(d, "responsible_operator_email", opts.ResponsibleOperatorEmail)
-	opts.ResponsibleSecurityExpertID = replaceEmpty(d, "responsible_security_expert_id", opts.ResponsibleSecurityExpertID)
-	opts.ResponsibleSecurityExpertEmail = replaceEmpty(d, "responsible_security_expert_email", opts.ResponsibleSecurityExpertEmail)
-	opts.ResponsibleProductOwnerID = replaceEmpty(d, "responsible_product_owner_id", opts.ResponsibleProductOwnerID)
-	opts.ResponsibleProductOwnerEmail = replaceEmpty(d, "responsible_product_owner_email", opts.ResponsibleProductOwnerEmail)
-	opts.ResponsibleControllerID = replaceEmpty(d, "responsible_controller_id", opts.ResponsibleControllerID)
-	opts.ResponsibleControllerEmail = replaceEmpty(d, "responsible_controller_email", opts.ResponsibleControllerEmail)
-	opts.RevenueRelevance = replaceEmpty(d, "revenue_relevance", opts.RevenueRelevance)
-	opts.BusinessCriticality = replaceEmpty(d, "business_criticality", opts.BusinessCriticality)
-	opts.AdditionalInformation = replaceEmpty(d, "additional_information", opts.AdditionalInformation)
+	opts.ResponsiblePrimaryContactID = replaceEmptyString(d, "responsible_primary_contact_id", opts.ResponsiblePrimaryContactID)
+	opts.ResponsiblePrimaryContactEmail = replaceEmptyString(d, "responsible_primary_contact_email", opts.ResponsiblePrimaryContactEmail)
+	opts.ResponsibleOperatorID = replaceEmptyString(d, "responsible_operator_id", opts.ResponsibleOperatorID)
+	opts.ResponsibleOperatorEmail = replaceEmptyString(d, "responsible_operator_email", opts.ResponsibleOperatorEmail)
+	opts.ResponsibleInventoryRoleID = replaceEmptyString(d, "responsible_inventory_role_id", opts.ResponsibleInventoryRoleID)
+	opts.ResponsibleInventoryRoleEmail = replaceEmptyString(d, "responsible_inventory_role_email", opts.ResponsibleInventoryRoleEmail)
+	opts.ResponsibleInfrastructureCoordinatorID = replaceEmptyString(d, "responsible_infrastructure_coordinator_id", opts.ResponsibleInfrastructureCoordinatorID)
+	opts.ResponsibleInfrastructureCoordinatorEmail = replaceEmptyString(d, "responsible_infrastructure_coordinator_email", opts.ResponsibleInfrastructureCoordinatorEmail)
+	opts.Customer = replaceEmptyString(d, "customer", opts.Customer)
+	opts.Environment = replaceEmptyString(d, "environment", opts.Environment)
+	opts.SoftLicenseMode = replaceEmptyString(d, "soft_license_mode", opts.SoftLicenseMode)
+	opts.TypeOfData = replaceEmptyString(d, "type_of_data", opts.TypeOfData)
+	opts.RevenueRelevance = replaceEmptyString(d, "revenue_relevance", opts.RevenueRelevance)
+	opts.BusinessCriticality = replaceEmptyString(d, "business_criticality", opts.BusinessCriticality)
+	opts.AdditionalInformation = replaceEmptyString(d, "additional_information", opts.AdditionalInformation)
+	opts.GPUEnabled = replaceEmptyBool(d, "gpu_enabled", opts.GPUEnabled)
+	opts.ContainsPIIDPPHR = replaceEmptyBool(d, "contains_pii_dpp_hr", opts.ContainsPIIDPPHR)
+	opts.ContainsExternalCustomerData = replaceEmptyBool(d, "contains_external_customer_data", opts.ContainsExternalCustomerData)
+	opts.ExtCertification = billingProjectExpandExtCertificationV1(d.Get("ext_certification"))
 
 	if v, ok := d.GetOkExists("number_of_endusers"); ok {
 		opts.NumberOfEndusers = v.(int)
@@ -297,12 +421,12 @@ func resourceCCloudBillingProjectMasterdataCreateOrUpdate(ctx context.Context, d
 	}
 
 	// admin only parameters
-	opts.ProjectID = replaceEmpty(d, "project_id", opts.ProjectID)
-	opts.ProjectName = replaceEmpty(d, "project_name", opts.ProjectName)
-	opts.DomainID = replaceEmpty(d, "domain_id", opts.DomainID)
-	opts.DomainName = replaceEmpty(d, "domain_name", opts.DomainName)
-	opts.ParentID = replaceEmpty(d, "parent_id", opts.ParentID)
-	opts.ProjectType = replaceEmpty(d, "project_type", opts.ProjectType)
+	opts.ProjectID = replaceEmptyString(d, "project_id", opts.ProjectID)
+	opts.ProjectName = replaceEmptyString(d, "project_name", opts.ProjectName)
+	opts.DomainID = replaceEmptyString(d, "domain_id", opts.DomainID)
+	opts.DomainName = replaceEmptyString(d, "domain_name", opts.DomainName)
+	opts.ParentID = replaceEmptyString(d, "parent_id", opts.ParentID)
+	opts.ProjectType = replaceEmptyString(d, "project_type", opts.ProjectType)
 
 	log.Printf("[DEBUG] Updating %s project masterdata: %+v", opts.ProjectID, opts)
 
@@ -343,12 +467,18 @@ func resourceCCloudBillingProjectMasterdataRead(ctx context.Context, d *schema.R
 	d.Set("responsible_primary_contact_email", project.ResponsiblePrimaryContactEmail)
 	d.Set("responsible_operator_id", project.ResponsibleOperatorID)
 	d.Set("responsible_operator_email", project.ResponsibleOperatorEmail)
-	d.Set("responsible_security_expert_id", project.ResponsibleSecurityExpertID)
-	d.Set("responsible_security_expert_email", project.ResponsibleSecurityExpertEmail)
-	d.Set("responsible_product_owner_id", project.ResponsibleProductOwnerID)
-	d.Set("responsible_product_owner_email", project.ResponsibleProductOwnerEmail)
-	d.Set("responsible_controller_id", project.ResponsibleControllerID)
-	d.Set("responsible_controller_email", project.ResponsibleControllerEmail)
+	d.Set("responsible_inventory_role_id", project.ResponsibleInventoryRoleID)
+	d.Set("responsible_inventory_role_email", project.ResponsibleInventoryRoleEmail)
+	d.Set("responsible_infrastructure_coordinator_id", project.ResponsibleInfrastructureCoordinatorID)
+	d.Set("responsible_infrastructure_coordinator_email", project.ResponsibleInfrastructureCoordinatorEmail)
+	d.Set("customer", project.Customer)
+	d.Set("environment", project.Environment)
+	d.Set("soft_license_mode", project.SoftLicenseMode)
+	d.Set("type_of_data", project.TypeOfData)
+	d.Set("gpu_enabled", project.GPUEnabled)
+	d.Set("contains_pii_dpp_hr", project.ContainsPIIDPPHR)
+	d.Set("contains_external_customer_data", project.ContainsExternalCustomerData)
+	d.Set("ext_certification", billingProjectFlattenExtCertificationV1(project.ExtCertification))
 	d.Set("revenue_relevance", project.RevenueRelevance)
 	d.Set("business_criticality", project.BusinessCriticality)
 	d.Set("number_of_endusers", project.NumberOfEndusers)

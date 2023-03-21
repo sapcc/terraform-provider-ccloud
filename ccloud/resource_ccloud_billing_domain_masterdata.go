@@ -47,41 +47,38 @@ func resourceCCloudBillingDomainMasterdata() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 
 			"additional_information": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 
 			"responsible_primary_contact_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"responsible_primary_contact_email": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"responsible_controller_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This field has been deprecated",
 			},
 
 			"responsible_controller_email": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "This field has been deprecated",
 			},
 
 			"cost_object": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -183,14 +180,12 @@ func resourceCCloudBillingDomainMasterdataCreateOrUpdate(ctx context.Context, d 
 
 	// API doesn't support partial update, thus prefilling the update options with the existing data
 	opts := domains.DomainToUpdateOpts(domain)
-	opts.DomainID = replaceEmpty(d, "domain_id", opts.DomainID)
-	opts.DomainName = replaceEmpty(d, "domain_name", opts.DomainName)
-	opts.ResponsiblePrimaryContactID = replaceEmpty(d, "responsible_primary_contact_id", opts.ResponsiblePrimaryContactID)
-	opts.ResponsiblePrimaryContactEmail = replaceEmpty(d, "responsible_primary_contact_email", opts.ResponsiblePrimaryContactEmail)
-	opts.ResponsibleControllerID = replaceEmpty(d, "responsible_controller_id", opts.ResponsibleControllerID)
-	opts.ResponsibleControllerEmail = replaceEmpty(d, "responsible_controller_email", opts.ResponsibleControllerEmail)
-	opts.AdditionalInformation = replaceEmpty(d, "additional_information", opts.AdditionalInformation)
-	opts.Collector = replaceEmpty(d, "collector", opts.Collector)
+	opts.DomainID = replaceEmptyString(d, "domain_id", opts.DomainID)
+	opts.DomainName = replaceEmptyString(d, "domain_name", opts.DomainName)
+	opts.ResponsiblePrimaryContactID = replaceEmptyString(d, "responsible_primary_contact_id", opts.ResponsiblePrimaryContactID)
+	opts.ResponsiblePrimaryContactEmail = replaceEmptyString(d, "responsible_primary_contact_email", opts.ResponsiblePrimaryContactEmail)
+	opts.AdditionalInformation = replaceEmptyString(d, "additional_information", opts.AdditionalInformation)
+	opts.Collector = replaceEmptyString(d, "collector", opts.Collector)
 
 	if v := billingDomainExpandCostObject(d.Get("cost_object")); v != (domains.CostObject{}) {
 		opts.CostObject = v
@@ -229,8 +224,6 @@ func resourceCCloudBillingDomainMasterdataRead(ctx context.Context, d *schema.Re
 	d.Set("description", domain.Description)
 	d.Set("responsible_primary_contact_id", domain.ResponsiblePrimaryContactID)
 	d.Set("responsible_primary_contact_email", domain.ResponsiblePrimaryContactEmail)
-	d.Set("responsible_controller_id", domain.ResponsibleControllerID)
-	d.Set("responsible_controller_email", domain.ResponsibleControllerEmail)
 	d.Set("additional_information", domain.AdditionalInformation)
 	d.Set("cost_object", billingDomainFlattenCostObject(domain.CostObject))
 	d.Set("created_at", domain.CreatedAt.Format(time.RFC3339))
