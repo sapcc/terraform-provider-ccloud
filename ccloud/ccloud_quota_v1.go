@@ -143,3 +143,39 @@ func limesCCloudProjectQuotaV1GetQuota(client *gophercloud.ServiceClient, domain
 		return quota, "active", nil
 	}
 }
+
+func expandBurstingLimesCCloudProjectQuotaV1(raw interface{}) *limesresources.ProjectBurstingInfo {
+	v, ok := raw.([]interface{})
+	if !ok {
+		return nil
+	}
+
+	for _, v := range v {
+		v, ok := v.(map[string]interface{})
+		if !ok {
+			return nil
+		}
+		bursting := &limesresources.ProjectBurstingInfo{}
+		if v, ok := v["enabled"].(bool); ok {
+			bursting.Enabled = v
+		}
+		if v, ok := v["multiplier"].(float64); ok {
+			bursting.Multiplier = limesresources.BurstingMultiplier(v)
+		}
+		//nolint:staticcheck // we need the first element
+		return bursting
+	}
+
+	return nil
+}
+
+func flattenBurstingLimesCCloudProjectQuotaV1(bursting *limesresources.ProjectBurstingInfo) []map[string]interface{} {
+	if bursting == nil {
+		return nil
+	}
+
+	return []map[string]interface{}{{
+		"enabled":    bursting.Enabled,
+		"multiplier": bursting.Multiplier,
+	}}
+}

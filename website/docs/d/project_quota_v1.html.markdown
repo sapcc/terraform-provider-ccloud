@@ -38,6 +38,15 @@ The following arguments are supported:
 
 ## Attributes Reference
 
+* `bursting` -  Contains information about the project bursting. The `bursting`
+  object structure is documented below.
+
+The `bursting` block supports:
+
+* `enabled` - Indicates whether the quota bursting is enabled.
+
+* `multiplier` - Indicates the quota bursting multiplier.
+
 In addition to arguments above, extra attributes are exported. Please refer
 to the `ccloud_project_quota_v1` resource arguments and attributes
 [documentation](../resources/project_quota_v1.html) for more information.

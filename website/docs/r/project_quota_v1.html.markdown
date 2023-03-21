@@ -27,6 +27,10 @@ resource "ccloud_project_quota_v1" "quota" {
   domain_id  = data.openstack_identity_project_v3.demo.domain_id
   project_id = data.openstack_identity_project_v3.demo.id
 
+  bursting {
+    enabled = true
+  }
+
   compute {
     instances = 8
     cores     = 32
@@ -97,6 +101,12 @@ The following arguments are supported:
 * `project_id` - (Required) The ID of the project within the `domain_id` to
   manage the quota. Changing this forces a new resource to be created.
 
+* `bursting` - (Optional) If bursting is enabled, the project may exceed its
+  granted quota by a certain multiplier. In case the higher usage level becomes
+  permanent, users should request a quota extension from their domain admin or
+  cloud admin. This is because burst usage is typically billed at a higher price
+  than regular usage. The `bursting` object structure is documented below.
+
 * `compute` - (Optional) The list of compute resources quota. Consists of
   `cores`, `instances`, `ram` (Mebibytes), `server_groups` and
   `server_group_members`.
@@ -122,6 +132,12 @@ The following arguments are supported:
 
 * `keppel` - (Optional) The list of Image Registry resources quota. Consists of
   `images`.
+
+The `bursting` block supports:
+
+* `enabled` - (Optional) Enables or disables the quota bursting.
+
+* `multiplier` - (Computed) Indicates the quota bursting multiplier.
 
 ## Attributes Reference
 

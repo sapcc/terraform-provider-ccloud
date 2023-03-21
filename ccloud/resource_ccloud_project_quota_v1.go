@@ -48,6 +48,25 @@ func resourceCCloudProjectQuotaV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"bursting": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"multiplier": {
+							Type:     schema.TypeFloat,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 
@@ -106,6 +125,7 @@ func resourceCCloudProjectQuotaV1Read(ctx context.Context, d *schema.ResourceDat
 		d.Set(sanitize(service), []map[string]*uint64{res})
 	}
 
+	d.Set("bursting", flattenBurstingLimesCCloudProjectQuotaV1(quota.Bursting))
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -151,7 +171,14 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(ctx context.Context, d *schema.R
 		}
 	}
 
-	opts := projects.UpdateOpts{Services: services}
+	opts := projects.UpdateOpts{
+		Services: services,
+	}
+
+	if d.HasChange("bursting") {
+		opts.Bursting = expandBurstingLimesCCloudProjectQuotaV1(d.Get("bursting"))
+	}
+
 	warn, err := projects.Update(client, domainID, projectID, opts).Extract()
 	if err != nil {
 		if err, ok := err.(gophercloud.ErrDefault400); ok {

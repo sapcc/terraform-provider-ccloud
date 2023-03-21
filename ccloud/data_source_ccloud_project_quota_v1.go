@@ -28,6 +28,22 @@ func dataSourceCCloudProjectQuotaV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"bursting": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"multiplier": {
+							Type:     schema.TypeFloat,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 
