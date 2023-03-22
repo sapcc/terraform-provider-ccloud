@@ -11,16 +11,17 @@ import (
 	"github.com/sapcc/gophercloud-sapcc/resources/v1/domains"
 )
 
-func resourceCCloudDomainQuotaV1() *schema.Resource {
+func resourceCCloudQuotaDomainV1Deprecated() *schema.Resource {
 	quotaResource := &schema.Resource{
-		SchemaVersion: 1,
+		DeprecationMessage: "use ccloud_quota_domain_v1 resource instead",
+		SchemaVersion:      1,
 
-		ReadContext:   resourceCCloudDomainQuotaV1Read,
-		UpdateContext: resourceCCloudDomainQuotaV1CreateOrUpdate,
-		CreateContext: resourceCCloudDomainQuotaV1CreateOrUpdate,
-		DeleteContext: resourceCCloudDomainQuotaV1Delete,
+		ReadContext:   resourceCCloudQuotaDomainV1Read,
+		UpdateContext: resourceCCloudQuotaDomainV1CreateOrUpdate,
+		CreateContext: resourceCCloudQuotaDomainV1CreateOrUpdate,
+		DeleteContext: resourceCCloudQuotaDomainV1Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceCCloudDomainQuotaV1Import,
+			StateContext: resourceCCloudQuotaDomainV1Import,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -64,7 +65,60 @@ func resourceCCloudDomainQuotaV1() *schema.Resource {
 	return quotaResource
 }
 
-func resourceCCloudDomainQuotaV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCloudQuotaDomainV1() *schema.Resource {
+	quotaResource := &schema.Resource{
+		SchemaVersion: 1,
+
+		ReadContext:   resourceCCloudQuotaDomainV1Read,
+		UpdateContext: resourceCCloudQuotaDomainV1CreateOrUpdate,
+		CreateContext: resourceCCloudQuotaDomainV1CreateOrUpdate,
+		DeleteContext: resourceCCloudQuotaDomainV1Delete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceCCloudQuotaDomainV1Import,
+		},
+
+		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"domain_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+		},
+	}
+
+	for service, resources := range limesServices {
+		elem := &schema.Resource{
+			Schema: make(map[string]*schema.Schema, len(resources)),
+		}
+
+		for resource := range resources {
+			elem.Schema[resource] = &schema.Schema{
+				Type:     schema.TypeFloat,
+				Required: false,
+				Optional: true,
+				Computed: true,
+			}
+		}
+
+		quotaResource.Schema[sanitize(service)] = &schema.Schema{
+			Type:     schema.TypeList,
+			Optional: true,
+			Computed: true,
+			Elem:     elem,
+			MaxItems: 1,
+		}
+	}
+
+	return quotaResource
+}
+
+func resourceCCloudQuotaDomainV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	domainID := d.Get("domain_id").(string)
 
 	log.Printf("[DEBUG] Reading Quota for: %s", domainID)
@@ -97,7 +151,7 @@ func resourceCCloudDomainQuotaV1Read(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceCCloudDomainQuotaV1CreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCloudQuotaDomainV1CreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	domainID := d.Get("domain_id").(string)
 	services := limesresources.QuotaRequest{}
 
@@ -139,15 +193,15 @@ func resourceCCloudDomainQuotaV1CreateOrUpdate(ctx context.Context, d *schema.Re
 
 	d.SetId(domainID)
 
-	return resourceCCloudDomainQuotaV1Read(ctx, d, meta)
+	return resourceCCloudQuotaDomainV1Read(ctx, d, meta)
 }
 
-func resourceCCloudDomainQuotaV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCloudQuotaDomainV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	d.SetId("")
 	return nil
 }
 
-func resourceCCloudDomainQuotaV1Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCCloudQuotaDomainV1Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	d.Set("domain_id", d.Id())
 
 	return []*schema.ResourceData{d}, nil

@@ -1,17 +1,17 @@
 ---
 layout: "ccloud"
-page_title: "Converged Cloud: ccloud_domain_quota_v1"
-sidebar_current: "docs-ccloud-resource-domain-quota-v1"
+page_title: "Converged Cloud: ccloud_quota_domain_v1"
+sidebar_current: "docs-ccloud-resource-quota-domain-v1"
 description: |-
   Manages Domain Quota Resources
 ---
 
-# ccloud\_domain\_quota\_v1
+# ccloud\_quota\_domain\_v1
 
 Manages Limes (Quota) Domain resources.
 
 ~> **Note:** The `terraform destroy` command destroys the
-`ccloud_domain_quota_v1` state, but not the actual Limes domain quota.
+`ccloud_quota_domain_v1` state, but not the actual Limes domain quota.
 
 ~> **Note:** You _must_ have admin privileges in your OpenStack cloud to use
 this resource.
@@ -23,7 +23,7 @@ data "openstack_identity_project_v3" "demo" {
   name = "demo"
 }
 
-resource "ccloud_domain_quota_v1" "quota" {
+resource "ccloud_quota_domain_v1" "quota" {
   domain_id = data.openstack_identity_project_v3.demo.domain_id
 
   compute {
@@ -130,5 +130,5 @@ In addition to all arguments above, the following attributes are exported:
 Limes Domain Quota can be imported using the domain ID as an argument, e.g.
 
 ```
-$ terraform import ccloud_domain_quota_v1.demo bf2273b5-2926-4495-9fb7-f28c3abed5f6
+$ terraform import ccloud_quota_domain_v1.demo bf2273b5-2926-4495-9fb7-f28c3abed5f6
 ```

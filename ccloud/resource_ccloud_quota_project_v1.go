@@ -15,16 +15,17 @@ import (
 	"github.com/gophercloud/gophercloud"
 )
 
-func resourceCCloudProjectQuotaV1() *schema.Resource {
+func resourceCCloudQuotaProjectV1Deprecated() *schema.Resource {
 	quotaResource := &schema.Resource{
-		SchemaVersion: 1,
+		DeprecationMessage: "use ccloud_quota_project_v1 resource instead",
+		SchemaVersion:      1,
 
-		ReadContext:   resourceCCloudProjectQuotaV1Read,
-		UpdateContext: resourceCCloudProjectQuotaV1CreateOrUpdate,
-		CreateContext: resourceCCloudProjectQuotaV1CreateOrUpdate,
-		DeleteContext: resourceCCloudProjectQuotaV1Delete,
+		ReadContext:   resourceCCloudQuotaProjectV1Read,
+		UpdateContext: resourceCCloudQuotaProjectV1CreateOrUpdate,
+		CreateContext: resourceCCloudQuotaProjectV1CreateOrUpdate,
+		DeleteContext: resourceCCloudQuotaProjectV1Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceCCloudProjectQuotaV1Import,
+			StateContext: resourceCCloudQuotaProjectV1Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -96,7 +97,88 @@ func resourceCCloudProjectQuotaV1() *schema.Resource {
 	return quotaResource
 }
 
-func resourceCCloudProjectQuotaV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCloudQuotaProjectV1() *schema.Resource {
+	quotaResource := &schema.Resource{
+		SchemaVersion: 1,
+
+		ReadContext:   resourceCCloudQuotaProjectV1Read,
+		UpdateContext: resourceCCloudQuotaProjectV1CreateOrUpdate,
+		CreateContext: resourceCCloudQuotaProjectV1CreateOrUpdate,
+		DeleteContext: resourceCCloudQuotaProjectV1Delete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceCCloudQuotaProjectV1Import,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Minute),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"domain_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"project_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"bursting": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"multiplier": {
+							Type:     schema.TypeFloat,
+							Computed: true,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for service, resources := range limesServices {
+		elem := &schema.Resource{
+			Schema: make(map[string]*schema.Schema, len(resources)),
+		}
+
+		for resource := range resources {
+			elem.Schema[resource] = &schema.Schema{
+				Type:     schema.TypeFloat,
+				Required: false,
+				Optional: true,
+				Computed: true,
+			}
+		}
+
+		quotaResource.Schema[sanitize(service)] = &schema.Schema{
+			Type:     schema.TypeList,
+			Optional: true,
+			Computed: true,
+			Elem:     elem,
+			MaxItems: 1,
+		}
+	}
+
+	return quotaResource
+}
+
+func resourceCCloudQuotaProjectV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
 
@@ -131,7 +213,7 @@ func resourceCCloudProjectQuotaV1Read(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceCCloudProjectQuotaV1CreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCloudQuotaProjectV1CreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
 	services := limesresources.QuotaRequest{}
@@ -194,15 +276,15 @@ func resourceCCloudProjectQuotaV1CreateOrUpdate(ctx context.Context, d *schema.R
 
 	d.SetId(projectID)
 
-	return resourceCCloudProjectQuotaV1Read(ctx, d, meta)
+	return resourceCCloudQuotaProjectV1Read(ctx, d, meta)
 }
 
-func resourceCCloudProjectQuotaV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCloudQuotaProjectV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	d.SetId("")
 	return nil
 }
 
-func resourceCCloudProjectQuotaV1Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCCloudQuotaProjectV1Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("Invalid format specified for Quota. Format must be <domain id>/<project id>")

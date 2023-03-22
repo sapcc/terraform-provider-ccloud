@@ -1,12 +1,12 @@
 ---
 layout: "ccloud"
-page_title: "Converged Cloud: ccloud_project_quota_v1"
-sidebar_current: "docs-ccloud-datasource-project-quota-v1"
+page_title: "Converged Cloud: ccloud_quota_project_v1"
+sidebar_current: "docs-ccloud-datasource-quota-project-v1"
 description: |-
   Get information on the Project Quota Resources
 ---
 
-# ccloud\_project\_quota\_v1
+# ccloud\_quota\_project\_v1
 
 Use this data source to read the Limes (Quota) Project resources.
 
@@ -17,7 +17,7 @@ data "openstack_identity_project_v3" "demo" {
   name = "demo"
 }
 
-data "ccloud_project_quota_v1" "quota" {
+data "ccloud_quota_project_v1" "quota" {
   domain_id  = data.openstack_identity_project_v3.demo.domain_id
   project_id = data.openstack_identity_project_v3.demo.id
 }
@@ -48,5 +48,5 @@ The `bursting` block supports:
 * `multiplier` - Indicates the quota bursting multiplier.
 
 In addition to arguments above, extra attributes are exported. Please refer
-to the `ccloud_project_quota_v1` resource arguments and attributes
-[documentation](../resources/project_quota_v1.html) for more information.
+to the `ccloud_quota_project_v1` resource arguments and attributes
+[documentation](../resources/quota_project_v1.html) for more information.

@@ -124,9 +124,9 @@ func limesCCloudProjectQuotaV1GetQuota(client *gophercloud.ServiceClient, domain
 		if err != nil {
 			if _, ok := err.(gophercloud.ErrDefault404); ok && timeout > 0 {
 				// Retryable case, when timeout is set
-				return nil, fmt.Sprintf("Unable to retrieve %s/%s ccloud_project_quota_v1: %v", domainID, projectID, err), nil
+				return nil, fmt.Sprintf("Unable to retrieve %s/%s ccloud_quota_project_v1: %v", domainID, projectID, err), nil
 			}
-			return nil, "", fmt.Errorf("Unable to retrieve %s/%s ccloud_project_quota_v1: %v", domainID, projectID, err)
+			return nil, "", fmt.Errorf("Unable to retrieve %s/%s ccloud_quota_project_v1: %v", domainID, projectID, err)
 		}
 
 		// detect whether the quota is fully initialized before processing
@@ -138,7 +138,7 @@ func limesCCloudProjectQuotaV1GetQuota(client *gophercloud.ServiceClient, domain
 			}
 		}
 
-		log.Printf("[DEBUG] Retrieved ccloud_project_quota_v1 %s: %+v", projectID, *quota)
+		log.Printf("[DEBUG] Retrieved ccloud_quota_project_v1 %s: %+v", projectID, *quota)
 
 		return quota, "active", nil
 	}

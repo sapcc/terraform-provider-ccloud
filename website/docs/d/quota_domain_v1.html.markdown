@@ -1,12 +1,12 @@
 ---
 layout: "ccloud"
-page_title: "Converged Cloud: ccloud_domain_quota_v1"
-sidebar_current: "docs-ccloud-datasource-domain-quota-v1"
+page_title: "Converged Cloud: ccloud_quota_domain_v1"
+sidebar_current: "docs-ccloud-datasource-quota-domain-v1"
 description: |-
   Get information on the Domain Quota Resources
 ---
 
-# ccloud\_domain\_quota\_v1
+# ccloud\_quota\_domain\_v1
 
 Use this data source to read the Limes (Quota) Domain resources.
 
@@ -17,7 +17,7 @@ data "openstack_identity_project_v3" "demo" {
   name = "demo"
 }
 
-data "ccloud_domain_quota_v1" "quota" {
+data "ccloud_quota_domain_v1" "quota" {
   domain_id  = data.openstack_identity_project_v3.demo.domain_id
 }
 ```
@@ -35,5 +35,5 @@ The following arguments are supported:
 ## Attributes Reference
 
 In addition to arguments above, extra attributes are exported. Please refer
-to the `ccloud_domain_quota_v1` resource arguments and attributes
-[documentation](../resources/domain_quota_v1.html) for more information.
+to the `ccloud_quota_domain_v1` resource arguments and attributes
+[documentation](../resources/quota_domain_v1.html) for more information.
