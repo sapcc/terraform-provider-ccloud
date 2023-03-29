@@ -1,4 +1,4 @@
-Converged Cloud Enterprise Edition - Terraform Provider
+Converged Cloud - Terraform Provider
 =======================================================
 
 Documentation: [registry.terraform.io](https://registry.terraform.io/providers/sapcc/ccloud/latest/docs)

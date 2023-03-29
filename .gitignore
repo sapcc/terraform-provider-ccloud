@@ -4,6 +4,7 @@
 example.tf
 terraform.tfplan
 terraform.tfstate
+.terraform.lock.hcl
 bin/
 modules-dev/
 /pkg/
@@ -24,6 +25,7 @@ website/node_modules
 *.test
 *.iml
 
+vendor
 website/vendor
 
 # Test exclusions
