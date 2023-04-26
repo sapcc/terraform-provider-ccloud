@@ -113,29 +113,28 @@ func dataSourceCCloudBillingDomainMasterdataRead(ctx context.Context, d *schema.
 	}
 
 	domainID := d.Get("domain_id").(string)
-
-	var domain *domains.Domain
 	if domainID == "" {
-		allPages, err := domains.List(billing).AllPages()
+		// first call, expecting to get current scope domain
+		identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 		if err != nil {
-			return diag.Errorf("Error getting billing domain masterdata: %s", err)
+			return diag.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
-		allDomains, err := domains.ExtractDomains(allPages)
+		tokenDetails, err := getTokenDetails(identityClient)
 		if err != nil {
-			return diag.Errorf("Error extracting billing domains masterdata: %s", err)
+			return diag.FromErr(err)
 		}
 
-		if len(allDomains) != 1 {
-			return diag.Errorf("Error getting billing domain masterdata: expecting 1 domain, got %d", len(allDomains))
+		if tokenDetails.domain == nil {
+			return diag.Errorf("Error getting billing domain scope: %s", err)
 		}
 
-		domain = &allDomains[0]
-	} else {
-		domain, err = domains.Get(billing, domainID).Extract()
-		if err != nil {
-			return diag.Errorf("Error getting billing domain masterdata: %s", err)
-		}
+		domainID = tokenDetails.domain.ID
+	}
+
+	domain, err := domains.Get(billing, domainID).Extract()
+	if err != nil {
+		return diag.Errorf("Error getting billing domain masterdata: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved domain masterdata: %+v", domain)

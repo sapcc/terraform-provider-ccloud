@@ -241,29 +241,28 @@ func dataSourceCCloudBillingProjectMasterdataRead(ctx context.Context, d *schema
 	}
 
 	projectID := d.Get("project_id").(string)
-
-	var project *projects.Project
 	if projectID == "" {
-		allPages, err := projects.List(billing).AllPages()
+		// first call, expecting to get current scope project
+		identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 		if err != nil {
-			return diag.Errorf("Error getting billing project masterdata: %s", err)
+			return diag.Errorf("Error creating OpenStack identity client: %s", err)
 		}
 
-		allProjects, err := projects.ExtractProjects(allPages)
+		tokenDetails, err := getTokenDetails(identityClient)
 		if err != nil {
-			return diag.Errorf("Error extracting billing projects masterdata: %s", err)
+			return diag.FromErr(err)
 		}
 
-		if len(allProjects) != 1 {
-			return diag.Errorf("Error getting billing project masterdata: expecting 1 project, got %d", len(allProjects))
+		if tokenDetails.project == nil {
+			return diag.Errorf("Error getting billing project scope: %s", err)
 		}
 
-		project = &allProjects[0]
-	} else {
-		project, err = projects.Get(billing, projectID).Extract()
-		if err != nil {
-			return diag.Errorf("Error getting billing project masterdata: %s", err)
-		}
+		projectID = tokenDetails.project.ID
+	}
+
+	project, err := projects.Get(billing, projectID).Extract()
+	if err != nil {
+		return diag.Errorf("Error getting billing project masterdata: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved project masterdata: %+v", project)

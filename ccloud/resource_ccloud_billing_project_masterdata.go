@@ -356,36 +356,32 @@ func resourceCCloudBillingProjectMasterdataCreateOrUpdate(ctx context.Context, d
 	}
 
 	projectID := d.Get("project_id").(string)
-
-	var project *projects.Project
 	if d.Id() == "" && projectID == "" {
 		// first call, expecting to get current scope project
-		allPages, err := projects.List(billing).AllPages()
+		identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 		if err != nil {
+			return diag.Errorf("Error creating OpenStack identity client: %s", err)
+		}
+
+		tokenDetails, err := getTokenDetails(identityClient)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if tokenDetails.project == nil {
+			return diag.Errorf("Error getting billing project scope: %s", err)
+		}
+
+		projectID = tokenDetails.project.ID
+	}
+
+	project, err := projects.Get(billing, projectID).Extract()
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); d.Id() != "" || !ok {
 			return diag.Errorf("Error getting billing project masterdata: %s", err)
 		}
-
-		allProjects, err := projects.ExtractProjects(allPages)
-		if err != nil {
-			return diag.Errorf("Error extracting billing projects masterdata: %s", err)
-		}
-
-		if len(allProjects) != 1 {
-			return diag.Errorf("Error getting billing project masterdata: expecting 1 project, got %d", len(allProjects))
-		}
-
-		project = &allProjects[0]
-	} else {
-		// admin mode, when the project doesn't correspond to the scope
-		// or during the update, when project_id was already set
-		project, err = projects.Get(billing, projectID).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); d.Id() != "" || !ok {
-				return diag.Errorf("Error getting billing project masterdata: %s", err)
-			}
-			log.Printf("[DEBUG] Error getting billing project masterdata, probably this project was not created yet: %s", err)
-			project = &projects.Project{ProjectID: projectID}
-		}
+		log.Printf("[DEBUG] Error getting billing project masterdata, probably this project was not created yet: %s", err)
+		project = &projects.Project{ProjectID: projectID}
 	}
 
 	log.Printf("[DEBUG] Retrieved project masterdata before the created/update: %+v", project)

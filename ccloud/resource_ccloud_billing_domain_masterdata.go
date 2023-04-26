@@ -144,36 +144,32 @@ func resourceCCloudBillingDomainMasterdataCreateOrUpdate(ctx context.Context, d 
 	}
 
 	domainID := d.Get("domain_id").(string)
-
-	var domain *domains.Domain
 	if d.Id() == "" && domainID == "" {
 		// first call, expecting to get current scope domain
-		allPages, err := domains.List(billing).AllPages()
+		identityClient, err := config.IdentityV3Client(GetRegion(d, config))
 		if err != nil {
+			return diag.Errorf("Error creating OpenStack identity client: %s", err)
+		}
+
+		tokenDetails, err := getTokenDetails(identityClient)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if tokenDetails.domain == nil {
+			return diag.Errorf("Error getting billing domain scope: %s", err)
+		}
+
+		domainID = tokenDetails.domain.ID
+	}
+
+	domain, err := domains.Get(billing, domainID).Extract()
+	if err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); d.Id() != "" || !ok {
 			return diag.Errorf("Error getting billing domain masterdata: %s", err)
 		}
-
-		allDomains, err := domains.ExtractDomains(allPages)
-		if err != nil {
-			return diag.Errorf("Error extracting billing domains masterdata: %s", err)
-		}
-
-		if len(allDomains) != 1 {
-			return diag.Errorf("Error getting billing domain masterdata: expecting 1 domain, got %d", len(allDomains))
-		}
-
-		domain = &allDomains[0]
-	} else {
-		// admin mode, when the domain doesn't correspond to the scope
-		// or during the update, when domain_id was already set
-		domain, err = domains.Get(billing, domainID).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); d.Id() != "" || !ok {
-				return diag.Errorf("Error getting billing domain masterdata: %s", err)
-			}
-			log.Printf("[DEBUG] Error getting billing domain masterdata, probably this domain was not created yet: %s", err)
-			domain = &domains.Domain{DomainID: domainID}
-		}
+		log.Printf("[DEBUG] Error getting billing domain masterdata, probably this domain was not created yet: %s", err)
+		domain = &domains.Domain{DomainID: domainID}
 	}
 
 	log.Printf("[DEBUG] Retrieved domain masterdata before the created/update: %+v", domain)
