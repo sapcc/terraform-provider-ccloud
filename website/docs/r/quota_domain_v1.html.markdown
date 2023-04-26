@@ -19,13 +19,7 @@ this resource.
 ## Example Usage
 
 ```hcl
-data "openstack_identity_project_v3" "demo" {
-  name = "demo"
-}
-
 resource "ccloud_quota_domain_v1" "quota" {
-  domain_id = data.openstack_identity_project_v3.demo.domain_id
-
   compute {
     instances = 8
     cores     = 32
@@ -90,8 +84,9 @@ The following arguments are supported:
   omitted, the `region` argument of the provider is used. Changing this forces
   a new resource to be created.
 
-* `domain_id` – (Required) The ID of the domain to manage the quota. Changing
-  this forces a new resource to be created.
+* `domain_id` – (Optional) The ID of the domain to manage the quota. Defaults
+  to the current domain scope. Changing this forces a new resource to be
+  created.
 
 * `compute` - (Optional) The list of compute resources quota. Consists of
   `cores`, `instances`, `ram` (Mebibytes), `server_groups` and

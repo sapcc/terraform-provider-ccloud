@@ -19,14 +19,7 @@ this resource.
 ## Example Usage
 
 ```hcl
-data "openstack_identity_project_v3" "demo" {
-  name = "demo"
-}
-
 resource "ccloud_quota_project_v1" "quota" {
-  domain_id  = data.openstack_identity_project_v3.demo.domain_id
-  project_id = data.openstack_identity_project_v3.demo.id
-
   bursting {
     enabled = true
   }
@@ -95,11 +88,13 @@ The following arguments are supported:
   omitted, the `region` argument of the provider is used. Changing this forces
   a new resource to be created.
 
-* `domain_id` – (Required) The ID of the domain to manage the quota. Changing
-  this forces a new resource to be created.
+* `domain_id` – (Optional) The ID of the domain to manage the quota. Defaults
+  to the current domain scope. Changing this forces a new resource to be
+  created.
 
-* `project_id` - (Required) The ID of the project within the `domain_id` to
-  manage the quota. Changing this forces a new resource to be created.
+* `project_id` - (Optional) The ID of the project within the `domain_id` to
+  manage the quota. Defaults to the current project scope. Changing this forces
+  a new resource to be created.
 
 * `bursting` - (Optional) If bursting is enabled, the project may exceed its
   granted quota by a certain multiplier. In case the higher usage level becomes

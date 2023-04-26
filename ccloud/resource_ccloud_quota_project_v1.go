@@ -41,12 +41,12 @@ func resourceCCloudQuotaProjectV1Deprecated() *schema.Resource {
 			},
 			"domain_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"project_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"bursting": {
@@ -122,12 +122,12 @@ func resourceCCloudQuotaProjectV1() *schema.Resource {
 			},
 			"domain_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"project_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"bursting": {
@@ -179,12 +179,41 @@ func resourceCCloudQuotaProjectV1() *schema.Resource {
 }
 
 func resourceCCloudQuotaProjectV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*Config)
+
 	domainID := d.Get("domain_id").(string)
 	projectID := d.Get("project_id").(string)
+	if d.Id() == "" && (domainID == "" || projectID == "") {
+		// first call, expecting to get current scope domain
+		identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+		if err != nil {
+			return diag.Errorf("Error creating OpenStack identity client: %s", err)
+		}
+
+		tokenDetails, err := getTokenDetails(identityClient)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if domainID == "" {
+			if tokenDetails.domain == nil {
+				return diag.Errorf("Error getting quota domain scope: %s", err)
+			}
+
+			domainID = tokenDetails.domain.ID
+		}
+
+		if projectID == "" {
+			if tokenDetails.project == nil {
+				return diag.Errorf("Error getting quota project scope: %s", err)
+			}
+
+			projectID = tokenDetails.project.ID
+		}
+	}
 
 	log.Printf("[DEBUG] Reading Quota for: %s/%s", domainID, projectID)
 
-	config := meta.(*Config)
 	limes, err := config.limesV1Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack limes client: %s", err)

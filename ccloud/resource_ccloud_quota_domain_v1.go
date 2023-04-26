@@ -33,7 +33,7 @@ func resourceCCloudQuotaDomainV1Deprecated() *schema.Resource {
 			},
 			"domain_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 		},
@@ -86,7 +86,7 @@ func resourceCCloudQuotaDomainV1() *schema.Resource {
 			},
 			"domain_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 		},
@@ -152,12 +152,32 @@ func resourceCCloudQuotaDomainV1Read(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceCCloudQuotaDomainV1CreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*Config)
+
 	domainID := d.Get("domain_id").(string)
+	if d.Id() == "" && domainID == "" {
+		// first call, expecting to get current scope domain
+		identityClient, err := config.IdentityV3Client(GetRegion(d, config))
+		if err != nil {
+			return diag.Errorf("Error creating OpenStack identity client: %s", err)
+		}
+
+		tokenDetails, err := getTokenDetails(identityClient)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if tokenDetails.domain == nil {
+			return diag.Errorf("Error getting quota domain scope: %s", err)
+		}
+
+		domainID = tokenDetails.domain.ID
+	}
+
 	services := limesresources.QuotaRequest{}
 
 	log.Printf("[DEBUG] Updating Quota for: %s", domainID)
 
-	config := meta.(*Config)
 	client, err := config.limesV1Client(GetRegion(d, config))
 	if err != nil {
 		return diag.Errorf("Error creating OpenStack limes client: %s", err)

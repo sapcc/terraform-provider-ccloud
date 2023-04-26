@@ -21,12 +21,12 @@ func dataSourceCCloudQuotaProjectV1Deprecated() *schema.Resource {
 			},
 			"domain_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"project_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"bursting": {
@@ -83,12 +83,12 @@ func dataSourceCCloudQuotaProjectV1() *schema.Resource {
 			},
 			"domain_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"project_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"bursting": {

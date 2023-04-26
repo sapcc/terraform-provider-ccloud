@@ -21,7 +21,7 @@ func dataSourceCCloudQuotaDomainV1Deprecated() *schema.Resource {
 			},
 			"domain_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 		},
@@ -62,7 +62,7 @@ func dataSourceCCloudQuotaDomainV1() *schema.Resource {
 			},
 			"domain_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 		},
