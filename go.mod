@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.27.0
 	github.com/sapcc/go-api-declarations v1.7.0
 	github.com/sapcc/gophercloud-sapcc v0.0.0-20230714164029-731493e3d996
-	github.com/sapcc/kubernikus v1.0.1-0.20230315145322-320848252003
+	github.com/sapcc/kubernikus v1.5.0
 	k8s.io/client-go v0.27.4
 )
 

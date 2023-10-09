@@ -1263,6 +1263,8 @@ github.com/sapcc/gophercloud-sapcc v0.0.0-20230714164029-731493e3d996 h1:IQrDoa4
 github.com/sapcc/gophercloud-sapcc v0.0.0-20230714164029-731493e3d996/go.mod h1:H9kOk+pM1XxAHSwj6LDer8gfQVq/Y4na+dh0HHWd4kU=
 github.com/sapcc/kubernikus v1.0.1-0.20230315145322-320848252003 h1:gewbiN4ZNhW1/lnExrYbFL7kNHcGE6XQVdF3PXNFCaQ=
 github.com/sapcc/kubernikus v1.0.1-0.20230315145322-320848252003/go.mod h1:3RuwubPKnU3yqjVFzNFisEAd0h1+AXZiVyFqy0uVHH8=
+github.com/sapcc/kubernikus v1.5.0 h1:2oPZbQzbGVhE/0G6kE8eZ031itulsupRl1rVVbSeCRo=
+github.com/sapcc/kubernikus v1.5.0/go.mod h1:myK1pthNZIGRz7BRoztctl69QaZzj69fbGr4WvzEJ2M=
 github.com/satori/go.uuid v1.2.0/go.mod h1:dA0hQrYB0VpLJoorglMZABFdXlWrHn1NEOzdhQKdks0=
 github.com/sclevine/agouti v3.0.0+incompatible/go.mod h1:b4WX9W9L1sfQKXeJf1mUTLZKJ48R1S7H23Ji7oFO5Bw=
 github.com/sclevine/spec v1.2.0/go.mod h1:W4J29eT/Kzv7/b9IWLB055Z+qvVC9vt0Arko24q7p+U=
