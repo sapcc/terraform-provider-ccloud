@@ -3,12 +3,12 @@ layout: "ccloud"
 page_title: "Converged Cloud: ccloud_gslb_pool_v1"
 sidebar_current: "docs-ccloud-resource-gslb-pool-v1"
 description: |-
-  Manage GSLB Pools in your CCloud project
+  Manage GSLB Pools
 ---
 
 # ccloud\_gslb\_pool\_v1
 
-This resource allows you to manage GSLB Pools in your CCloud project.
+This resource allows you to manage GSLB Pools.
 
 ## Example Usage
 
@@ -24,25 +24,36 @@ resource "ccloud_gslb_pool_v1" "pool_1" {
 
 The following arguments are supported:
 
-- `admin_state_up` (Optional): Specifies whether the pool is administratively up or down. Defaults to `true`.
-- `domains` (Optional): A list of UUIDs referencing the domain names associated with the pool.
-- `name` (Optional): The name of the pool.
-- `project_id` (Optional): The ID of the project this pool belongs to. This field is computed if not set. Changes to this field will trigger a new resource.
+* `region` - (Optional) The region in which to obtain the Andromeda client. If
+  omitted, the `region` argument of the provider is used. Changing this creates
+  a new pool.
+
+* `admin_state_up` - (Optional) Specifies whether the pool is administratively
+  up or down. Defaults to `true`.
+
+* `domains` - (Optional) A list of UUIDs referencing the domain names
+  associated with the pool.
+
+* `name` - (Optional) The name of the pool.
+
+* `project_id` - (Optional) The ID of the project this pool belongs to. This
+  field is computed if not set. Changes to this field will trigger a new
+  resource.
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-- `members`: The list of members (servers) associated with this pool.
-- `monitors`: The list of health monitors associated with this pool.
-- `provisioning_status`: The provisioning status of the pool.
-- `status`: The operational status of the pool.
-- `created_at`: The timestamp when the pool was created.
-- `updated_at`: The timestamp when the pool was last updated.
+* `members` - The list of members (servers) associated with this pool.
+* `monitors` - The list of health monitors associated with this pool.
+* `provisioning_status` -  The provisioning status of the pool.
+* `status` - The operational status of the pool.
+* `created_at` - The timestamp when the pool was created.
+* `updated_at` - The timestamp when the pool was last updated.
 
 ## Import
 
-Pools can be imported using the `pool_id`, e.g.
+Pools can be imported using the `id`, e.g.
 
 ```hcl
 $ terraform import ccloud_gslb_pool_v1.pool_1 a4182fdb-a763-451e-8fd8-05f79d57128b

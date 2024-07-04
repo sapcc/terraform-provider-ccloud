@@ -26,6 +26,12 @@ func resourceCCloudGSLBGeoMapV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"assignments": {
 				Type: schema.TypeList,
 				Elem: &schema.Resource{
@@ -145,7 +151,7 @@ func resourceCCloudGSLBGeoMapV1Create(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	andromedaSetGeoMapResource(d, geomap)
+	andromedaSetGeoMapResource(d, config, geomap)
 
 	return nil
 }
@@ -168,7 +174,7 @@ func resourceCCloudGSLBGeoMapV1Read(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	andromedaSetGeoMapResource(d, geomap)
+	andromedaSetGeoMapResource(d, config, geomap)
 
 	return nil
 }
@@ -227,7 +233,7 @@ func resourceCCloudGSLBGeoMapV1Update(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	andromedaSetGeoMapResource(d, geomap)
+	andromedaSetGeoMapResource(d, config, geomap)
 
 	return nil
 }
@@ -312,7 +318,7 @@ func andromedaGetGeoMap(ctx context.Context, client geomaps.ClientService, id st
 	return res.Payload.Geomap, nil
 }
 
-func andromedaSetGeoMapResource(d *schema.ResourceData, geomap *models.Geomap) {
+func andromedaSetGeoMapResource(d *schema.ResourceData, config *Config, geomap *models.Geomap) {
 	d.Set("default_datacenter", geomap.DefaultDatacenter.String())
 	d.Set("name", ptrValue(geomap.Name))
 	d.Set("project_id", ptrValue(geomap.ProjectID))
@@ -324,6 +330,8 @@ func andromedaSetGeoMapResource(d *schema.ResourceData, geomap *models.Geomap) {
 	d.Set("provisioning_status", geomap.ProvisioningStatus)
 	d.Set("created_at", geomap.CreatedAt.String())
 	d.Set("updated_at", geomap.UpdatedAt.String())
+
+	d.Set("region", GetRegion(d, config))
 }
 
 func andromedaFlattenGeoMapAssignments(assignments []*models.GeomapAssignmentsItems0) []map[string]string {

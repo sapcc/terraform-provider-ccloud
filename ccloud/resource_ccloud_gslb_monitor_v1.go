@@ -26,6 +26,12 @@ func resourceCCloudGSLBMonitorV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -155,7 +161,7 @@ func resourceCCloudGSLBMonitorV1Create(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	andromedaSetMonitorResource(d, monitor)
+	andromedaSetMonitorResource(d, config, monitor)
 
 	return nil
 }
@@ -178,7 +184,7 @@ func resourceCCloudGSLBMonitorV1Read(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	andromedaSetMonitorResource(d, monitor)
+	andromedaSetMonitorResource(d, config, monitor)
 
 	return nil
 }
@@ -248,7 +254,7 @@ func resourceCCloudGSLBMonitorV1Update(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	andromedaSetMonitorResource(d, monitor)
+	andromedaSetMonitorResource(d, config, monitor)
 
 	return nil
 }
@@ -333,7 +339,7 @@ func andromedaGetMonitor(ctx context.Context, client monitors.ClientService, id 
 	return res.Payload.Monitor, nil
 }
 
-func andromedaSetMonitorResource(d *schema.ResourceData, monitor *models.Monitor) {
+func andromedaSetMonitorResource(d *schema.ResourceData, config *Config, monitor *models.Monitor) {
 	d.Set("admin_state_up", ptrValue(monitor.AdminStateUp))
 	d.Set("interval", ptrValue(monitor.Interval))
 	d.Set("name", ptrValue(monitor.Name))
@@ -348,4 +354,6 @@ func andromedaSetMonitorResource(d *schema.ResourceData, monitor *models.Monitor
 	d.Set("provisioning_status", monitor.ProvisioningStatus)
 	d.Set("created_at", monitor.CreatedAt.String())
 	d.Set("updated_at", monitor.UpdatedAt.String())
+
+	d.Set("region", GetRegion(d, config))
 }

@@ -117,8 +117,8 @@ The following arguments are supported:
   default virtual address, routed by the Kubernikus Wormhole tunnel on worker
   nodes. Changing this forces a new resource to be created.
 
-* `advertise_port` - (Optional) The port on which to advertise the API server 
-  to members of the cluster. Defaults to `6443`. 
+* `advertise_port` - (Optional) The port on which to advertise the API server
+  to members of the cluster. Defaults to `6443`.
 
 * `audit` - (Optional) Enables API server audit logging if set to one of
   `swift`, `stdout`, `http` or `elasticsearch`. Defaults to an empty string,
@@ -148,13 +148,13 @@ The following arguments are supported:
 * `no_cloud` - (Optional) Disable all Kubernetes cloud providers. Defaults to
   `false`. Changing this forces a new resource to be created.
 
-* `dex` - (Optional) Enable dex installation to Kubernetes cluster. It is possible 
-   to enable for all supported Kubernetes versions. Disabling is not supported in 
-   Kubernikus API. Defaults to `true`. 
+* `dex` - (Optional) Enable dex installation to Kubernetes cluster. It is possible
+   to enable for all supported Kubernetes versions. Disabling is not supported in
+   Kubernikus API. Defaults to `true`.
 
 * `dashboard` - (Optional) Enable Kubernetes dashboard installation to Kubernetes
-   cluster. It is possible to enable for Kubernetes versions >= 1.11.9. Disabling 
-   is not supported in Kubernikus API. Defaults to `true`. 
+   cluster. It is possible to enable for Kubernetes versions >= 1.11.9. Disabling
+   is not supported in Kubernikus API. Defaults to `true`.
 
 * `backup` - (Optional) Configures the etcd database backup behaviour. Can
   either be `on`, `off` or `externalAWS`. `externalAWS` option is available only

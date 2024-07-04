@@ -25,6 +25,12 @@ func resourceCCloudGSLBMemberV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"address": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -136,7 +142,7 @@ func resourceCCloudGSLBMemberV1Create(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	andromedaSetMemberResource(d, member)
+	andromedaSetMemberResource(d, config, member)
 
 	return nil
 }
@@ -159,7 +165,7 @@ func resourceCCloudGSLBMemberV1Read(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	andromedaSetMemberResource(d, member)
+	andromedaSetMemberResource(d, config, member)
 
 	return nil
 }
@@ -214,7 +220,7 @@ func resourceCCloudGSLBMemberV1Update(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	andromedaSetMemberResource(d, member)
+	andromedaSetMemberResource(d, config, member)
 
 	return nil
 }
@@ -299,7 +305,7 @@ func andromedaGetMember(ctx context.Context, client members.ClientService, id st
 	return res.Payload.Member, nil
 }
 
-func andromedaSetMemberResource(d *schema.ResourceData, member *models.Member) {
+func andromedaSetMemberResource(d *schema.ResourceData, config *Config, member *models.Member) {
 	d.Set("admin_state_up", ptrValue(member.AdminStateUp))
 	d.Set("address", ptrValue(member.Address))
 	d.Set("datacenter_id", ptrValue(member.DatacenterID))
@@ -313,4 +319,6 @@ func andromedaSetMemberResource(d *schema.ResourceData, member *models.Member) {
 	d.Set("status", member.Status)
 	d.Set("created_at", member.CreatedAt.String())
 	d.Set("updated_at", member.UpdatedAt.String())
+
+	d.Set("region", GetRegion(d, config))
 }

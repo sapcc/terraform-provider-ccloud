@@ -26,6 +26,12 @@ func resourceCCloudGSLBDatacenterV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -172,7 +178,7 @@ func resourceCCloudGSLBDatacenterV1Create(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	andromedaSetDatacenterResource(d, datacenter)
+	andromedaSetDatacenterResource(d, config, datacenter)
 
 	return nil
 }
@@ -195,7 +201,7 @@ func resourceCCloudGSLBDatacenterV1Read(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	andromedaSetDatacenterResource(d, datacenter)
+	andromedaSetDatacenterResource(d, config, datacenter)
 
 	return nil
 }
@@ -277,7 +283,7 @@ func resourceCCloudGSLBDatacenterV1Update(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	andromedaSetDatacenterResource(d, datacenter)
+	andromedaSetDatacenterResource(d, config, datacenter)
 
 	return nil
 }
@@ -362,7 +368,7 @@ func andromedaGetDatacenter(ctx context.Context, client datacenters.ClientServic
 	return res.Payload.Datacenter, nil
 }
 
-func andromedaSetDatacenterResource(d *schema.ResourceData, datacenter *models.Datacenter) {
+func andromedaSetDatacenterResource(d *schema.ResourceData, config *Config, datacenter *models.Datacenter) {
 	d.Set("admin_state_up", ptrValue(datacenter.AdminStateUp))
 	d.Set("city", ptrValue(datacenter.City))
 	d.Set("continent", ptrValue(datacenter.Continent))
@@ -380,4 +386,6 @@ func andromedaSetDatacenterResource(d *schema.ResourceData, datacenter *models.D
 	d.Set("meta", datacenter.Meta)
 	d.Set("created_at", datacenter.CreatedAt.String())
 	d.Set("updated_at", datacenter.UpdatedAt.String())
+
+	d.Set("region", GetRegion(d, config))
 }

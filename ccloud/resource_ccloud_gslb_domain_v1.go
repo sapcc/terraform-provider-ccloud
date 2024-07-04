@@ -26,6 +26,12 @@ func resourceCCloudGSLBDomainV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -171,7 +177,7 @@ func resourceCCloudGSLBDomainV1Create(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	andromedaSetDomainResource(d, domain)
+	andromedaSetDomainResource(d, config, domain)
 
 	return nil
 }
@@ -194,7 +200,7 @@ func resourceCCloudGSLBDomainV1Read(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	andromedaSetDomainResource(d, domain)
+	andromedaSetDomainResource(d, config, domain)
 
 	return nil
 }
@@ -263,7 +269,7 @@ func resourceCCloudGSLBDomainV1Update(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	andromedaSetDomainResource(d, domain)
+	andromedaSetDomainResource(d, config, domain)
 
 	return nil
 }
@@ -348,7 +354,7 @@ func andromedaGetDomain(ctx context.Context, client domains.ClientService, id st
 	return res.Payload.Domain, nil
 }
 
-func andromedaSetDomainResource(d *schema.ResourceData, domain *models.Domain) {
+func andromedaSetDomainResource(d *schema.ResourceData, config *Config, domain *models.Domain) {
 	d.Set("admin_state_up", ptrValue(domain.AdminStateUp))
 	d.Set("aliases", domain.Aliases)
 	d.Set("fqdn", ptrValue(domain.Fqdn))
@@ -365,4 +371,6 @@ func andromedaSetDomainResource(d *schema.ResourceData, domain *models.Domain) {
 	d.Set("status", domain.Status)
 	d.Set("created_at", domain.CreatedAt.String())
 	d.Set("updated_at", domain.UpdatedAt.String())
+
+	d.Set("region", GetRegion(d, config))
 }

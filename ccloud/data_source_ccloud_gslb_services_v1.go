@@ -16,6 +16,12 @@ func dataSourceCCloudGSLBServicesV1() *schema.Resource {
 		ReadContext: dataSourceCCloudGSLBServicesV1Read,
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"services": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -83,6 +89,7 @@ func dataSourceCCloudGSLBServicesV1Read(ctx context.Context, d *schema.ResourceD
 	id := andromedaServicesHash(res.Payload.Services)
 	d.SetId(id)
 	d.Set("services", andromedaFlattenServices(res.Payload.Services))
+	d.Set("region", GetRegion(d, config))
 
 	return diag.FromErr(err)
 }

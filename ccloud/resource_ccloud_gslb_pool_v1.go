@@ -25,6 +25,12 @@ func resourceCCloudGSLBPoolV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -128,7 +134,7 @@ func resourceCCloudGSLBPoolV1Create(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	andromedaSetPoolResource(d, pool)
+	andromedaSetPoolResource(d, config, pool)
 
 	return nil
 }
@@ -151,7 +157,7 @@ func resourceCCloudGSLBPoolV1Read(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	andromedaSetPoolResource(d, pool)
+	andromedaSetPoolResource(d, config, pool)
 
 	return nil
 }
@@ -205,7 +211,7 @@ func resourceCCloudGSLBPoolV1Update(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	andromedaSetPoolResource(d, pool)
+	andromedaSetPoolResource(d, config, pool)
 
 	return nil
 }
@@ -290,7 +296,7 @@ func andromedaGetPool(ctx context.Context, client pools.ClientService, id string
 	return res.Payload.Pool, nil
 }
 
-func andromedaSetPoolResource(d *schema.ResourceData, pool *models.Pool) {
+func andromedaSetPoolResource(d *schema.ResourceData, config *Config, pool *models.Pool) {
 	d.Set("admin_state_up", ptrValue(pool.AdminStateUp))
 	d.Set("domains", pool.Domains)
 	d.Set("name", ptrValue(pool.Name))
@@ -303,4 +309,6 @@ func andromedaSetPoolResource(d *schema.ResourceData, pool *models.Pool) {
 	d.Set("status", pool.Status)
 	d.Set("created_at", pool.CreatedAt.String())
 	d.Set("updated_at", pool.UpdatedAt.String())
+
+	d.Set("region", GetRegion(d, config))
 }

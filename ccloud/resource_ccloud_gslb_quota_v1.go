@@ -21,6 +21,12 @@ func resourceCCloudGSLBQuotaV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"datacenter": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -158,7 +164,7 @@ func resourceCCloudGSLBQuotaV1Read(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	andromedaSetQuotaResource(d, res.Payload, id)
+	andromedaSetQuotaResource(d, config, res.Payload)
 
 	return nil
 }
@@ -234,18 +240,19 @@ func resourceCCloudGSLBQuotaV1Delete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func andromedaSetQuotaResource(d *schema.ResourceData, q *administrative.GetQuotasProjectIDOKBody, projectID string) {
+func andromedaSetQuotaResource(d *schema.ResourceData, config *Config, q *administrative.GetQuotasProjectIDOKBody) {
 	d.Set("datacenter", ptrValue(q.Quota.Datacenter))
 	d.Set("domain", ptrValue(q.Quota.Domain))
 	d.Set("member", ptrValue(q.Quota.Member))
 	d.Set("monitor", ptrValue(q.Quota.Monitor))
 	d.Set("pool", ptrValue(q.Quota.Pool))
 
+	// computed
 	d.Set("in_use_datacenter", q.Quota.InUseDatacenter)
 	d.Set("in_use_domain", q.Quota.InUseDomain)
 	d.Set("in_use_member", q.Quota.InUseMember)
 	d.Set("in_use_monitor", q.Quota.InUseMonitor)
 	d.Set("in_use_pool", q.Quota.InUsePool)
 
-	d.Set("project_id", projectID)
+	d.Set("region", GetRegion(d, config))
 }

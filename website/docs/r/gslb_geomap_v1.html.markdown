@@ -3,14 +3,14 @@ layout: "ccloud"
 page_title: "Converged Cloud: ccloud_gslb_geomap_v1"
 sidebar_current: "docs-ccloud-resource-gslb-geomap-v1"
 description: |-
-  Manage GSLB Geomaps in your CCloud project
+  Manage GSLB geographical maps
 ---
 
 # ccloud\_gslb\_geomap\_v1
 
 ~> **Note:** This kind of resources is experimental in Andromeda.
 
-This resource allows you to manage GSLB Geomaps in your CCloud project.
+This resource allows to manage GSLB geographical maps.
 
 ## Example Usage
 
@@ -35,24 +35,40 @@ resource "ccloud_gslb_geomap_v1" "geomap_1" {
 
 The following arguments are supported:
 
-- `default_datacenter` (Required): The UUID of the default data center to use when no country match is found in the assignments.
-- `name` (Optional): The name of the GeoMap.
-- `project_id` (Optional): The ID of the project this GeoMap belongs to. This field is computed if not set. Changes to this field will trigger a new resource.
-- `service_provider` (Optional): The service provider for the GSLB GeoMap. Supported values are `akamai` and `f5`. Defaults to `akamai`.
-- `scope` (Optional): The scope of the GeoMap. Supported values are `private` and `shared`. Defaults to `private`.
-- `assignments` (Optional): A list of country to data center mappings. Each assignment specifies a `country` and a `datacenter` UUID.
+* `region` - (Optional) The region in which to obtain the Andromeda client. If
+  omitted, the `region` argument of the provider is used. Changing this creates
+  a new geographical map.
+
+* `default_datacenter` - (Required) The UUID of the default data center to use
+  when no country match is found in the assignments.
+
+* `name` - (Optional) The name of the geographical map.
+
+* `project_id` - (Optional) The ID of the project this geographical map belongs
+  to. This field is computed if not set. Changes to this field will trigger a
+  new resource.
+
+* `service_provider` - (Optional) The service provider for the GSLB geographical
+  map. Supported values are `akamai` and `f5`. Defaults to `akamai`.
+
+* `scope` - (Optional) The scope of the geographical map. Supported values are
+  `private` and `shared`. Defaults to `private`.
+
+* `assignments` - (Optional) A list of country to data center mappings. Each
+  assignment specifies a `country` and a `datacenter` UUID.
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-- `provisioning_status`: The provisioning status of the GeoMap.
-- `created_at`: The timestamp when the GeoMap was created.
-- `updated_at`: The timestamp when the GeoMap was last updated.
+* `id` -  The ID of the geographical map.
+* `provisioning_status` -  The provisioning status of the geographical map.
+* `created_at` -  The timestamp when the geographical map was created.
+* `updated_at` -  The timestamp when the geographical map was last updated.
 
 ## Import
 
-Geomaps can be imported using the `geomap_id`, e.g.
+Geographical map can be imported using the `id`, e.g.
 
 ```hcl
 $ terraform import ccloud_gslb_geomap_v1.geomap_1 24404021-e95a-4362-af9c-0e0cf8c6b856
