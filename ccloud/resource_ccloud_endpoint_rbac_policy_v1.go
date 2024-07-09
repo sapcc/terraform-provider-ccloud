@@ -203,7 +203,7 @@ func archerSetRBACPolicyResource(d *schema.ResourceData, config *Config, rbacPol
 	d.Set("service_id", ptrValue(rbacPolicy.ServiceID))
 	d.Set("project_id", rbacPolicy.ProjectID)
 	d.Set("target", rbacPolicy.Target)
-	d.Set("target_type", rbacPolicy.TargetType)
+	d.Set("target_type", ptrValue(rbacPolicy.TargetType))
 
 	// computed
 	d.Set("created_at", rbacPolicy.CreatedAt.String())
