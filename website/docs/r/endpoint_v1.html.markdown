@@ -14,7 +14,7 @@ Converged Cloud environment.
 ## Example Usage
 
 ```hcl
-date "ccloud_endpoint_service_v1" "service_1" {
+data "ccloud_endpoint_service_v1" "service_1" {
   name    = "service_1"
   status  = "AVAILABLE"
   enabled = true
@@ -35,15 +35,15 @@ resource "ccloud_endpoint_v1" "endpoint_1" {
 
 ## Argument Reference
 
-* `region` * (Optional) The region in which to create the endpoint. If omitted,
+* `region` - (Optional) The region in which to create the endpoint. If omitted,
   the `region` argument of the provider is used. Changing this forces a new
   resource to be created.
 
-* `name` - (Required) The name of the endpoint.
+* `name` - (Optional) The name of the endpoint.
 
 * `description` - (Optional) A description of the endpoint.
 
-* `project_id` - (Required) The ID of the project in which to create the
+* `project_id` - (Optional) The ID of the project in which to create the
   endpoint. Changing this forces a new resource to be created.
 
 * `service_id` - (Required) The ID of the service to which the endpoint is
