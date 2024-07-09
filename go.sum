@@ -82,8 +82,6 @@ github.com/google/gofuzz v1.2.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gophercloud/gophercloud v1.3.0/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
-github.com/gophercloud/gophercloud v1.12.1-0.20240626021613-7c0ae2f72529 h1:0QQzs4ZGANlS2wVUzx12YUME1LEGWEGRcmf1X6zbtGk=
-github.com/gophercloud/gophercloud v1.12.1-0.20240626021613-7c0ae2f72529/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
 github.com/gophercloud/gophercloud v1.13.0 h1:8iY9d1DAbzMW6Vok1AxbbK5ZaUjzMp0tdyt4fX9IeJ0=
 github.com/gophercloud/gophercloud v1.13.0/go.mod h1:aAVqcocTSXh2vYFZ1JTvx4EQmfgzxRcNupUfxZbBNDM=
 github.com/gophercloud/utils v0.0.0-20231010081019-80377eca5d56 h1:sH7xkTfYzxIEgzq1tDHIMKRh1vThOEOGNsettdEeLbE=
@@ -194,8 +192,6 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.11.0 h1:cWPaGQEPrBb5/AsnsZesgZZ9yb1OQ+GOISoDNXVBh4M=
 github.com/rogpeppe/go-internal v1.11.0/go.mod h1:ddIwULY96R17DhadqLgMfk9H9tvdUzkipdSkR5nkCZA=
-github.com/sapcc/andromeda v0.0.2-0.20240708030448-e1ee3841282e h1:lMWB/41odcIid1jxNcKEhVSNUFWSOzu4Fj7j5OXONOQ=
-github.com/sapcc/andromeda v0.0.2-0.20240708030448-e1ee3841282e/go.mod h1:7uTlgV56JprJAAk6xYQ5L+wjuPCOpkOFpCVPdpuPY5U=
 github.com/sapcc/andromeda v0.0.2-0.20240708183330-cef127e17395 h1:3N52RabcT4i+S2oNuQFIFnv2FSjpU+LDoE7aJwk5om8=
 github.com/sapcc/andromeda v0.0.2-0.20240708183330-cef127e17395/go.mod h1:+gQJT0K0NF7P/CydFpEFhnfYrdQnUKBMhd1+2wzuesQ=
 github.com/sapcc/gophercloud-sapcc v1.0.0 h1:jPPIygmrHNS/d1fGEmxfSK99TgfL2p8UX+l6veYHcJw=

@@ -188,7 +188,7 @@ provider "ccloud" {
   endpoint_overrides = {
     "arc"        = "https://arc.example.com/api/v1/"
     "automation" = "https://lyra.example.com:8776/api/v1/"
-    "andromeda"  = "https://gtm.example.com/v1"
+    "gtm"        = "https://gtm.example.com/v1"
   }
 
 }

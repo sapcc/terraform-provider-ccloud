@@ -20,14 +20,14 @@ func newAndromedaV1(c *Config, eo gophercloud.EndpointOpts) (*client.Andromeda, 
 	var endpoint string
 	var aurl *url.URL
 
-	if v, ok := c.EndpointOverrides["andromeda"]; ok {
+	if v, ok := c.EndpointOverrides["gtm"]; ok {
 		if e, ok := v.(string); ok && e != "" {
 			endpoint = e
 		}
 	}
 
 	if endpoint == "" && !reflect.DeepEqual(eo, gophercloud.EndpointOpts{}) {
-		eo.ApplyDefaults("andromeda")
+		eo.ApplyDefaults("gtm")
 		endpoint, err = c.OsClient.EndpointLocator(eo)
 		if err != nil {
 			return nil, err
