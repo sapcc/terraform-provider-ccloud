@@ -240,6 +240,9 @@ func resourceCCloudGSLBMemberV1Delete(ctx context.Context, d *schema.ResourceDat
 	}
 	_, err = client.DeleteMembersMemberID(opts)
 	if err != nil {
+		if _, ok := err.(*members.DeleteMembersMemberIDNotFound); ok {
+			return nil
+		}
 		return diag.Errorf("error deleting Andromeda member: %s", err)
 	}
 

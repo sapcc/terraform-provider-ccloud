@@ -274,6 +274,9 @@ func resourceCCloudGSLBMonitorV1Delete(ctx context.Context, d *schema.ResourceDa
 	}
 	_, err = client.DeleteMonitorsMonitorID(opts)
 	if err != nil {
+		if _, ok := err.(*monitors.DeleteMonitorsMonitorIDNotFound); ok {
+			return nil
+		}
 		return diag.Errorf("error deleting Andromeda monitor: %s", err)
 	}
 

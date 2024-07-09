@@ -234,6 +234,9 @@ func resourceCCloudGSLBQuotaV1Delete(ctx context.Context, d *schema.ResourceData
 	}
 	_, err = client.DeleteQuotasProjectID(opts)
 	if err != nil {
+		if _, ok := err.(*administrative.DeleteQuotasProjectIDNotFound); ok {
+			return nil
+		}
 		return diag.Errorf("error deleting Andromeda quota: %s", err)
 	}
 

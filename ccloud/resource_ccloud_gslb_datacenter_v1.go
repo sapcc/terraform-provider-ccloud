@@ -303,6 +303,9 @@ func resourceCCloudGSLBDatacenterV1Delete(ctx context.Context, d *schema.Resourc
 	}
 	_, err = client.DeleteDatacentersDatacenterID(opts)
 	if err != nil {
+		if _, ok := err.(*datacenters.DeleteDatacentersDatacenterIDNotFound); ok {
+			return nil
+		}
 		return diag.Errorf("error deleting Andromeda datacenter: %s", err)
 	}
 

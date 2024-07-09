@@ -253,6 +253,9 @@ func resourceCCloudGSLBGeoMapV1Delete(ctx context.Context, d *schema.ResourceDat
 	}
 	_, err = client.DeleteGeomapsGeomapID(opts)
 	if err != nil {
+		if _, ok := err.(*geomaps.DeleteGeomapsGeomapIDNotFound); ok {
+			return nil
+		}
 		return diag.Errorf("error deleting Andromeda geographic map: %s", err)
 	}
 

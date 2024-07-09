@@ -231,6 +231,9 @@ func resourceCCloudGSLBPoolV1Delete(ctx context.Context, d *schema.ResourceData,
 	}
 	_, err = client.DeletePoolsPoolID(opts)
 	if err != nil {
+		if _, ok := err.(*pools.DeletePoolsPoolIDNotFound); ok {
+			return nil
+		}
 		return diag.Errorf("error deleting Andromeda pool: %s", err)
 	}
 
