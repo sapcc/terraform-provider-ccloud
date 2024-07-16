@@ -14,16 +14,16 @@ This resource allows you to manage GSLB datacenters.
 
 ```hcl
 resource "ccloud_gslb_datacenter_v1" "datacenter_1" {
-  admin_state_up = true
-  city = "City Name"
-  continent = "Continent Name"
-  country = "Country Name"
-  latitude = 12.34
-  longitude = 56.78
-  name = "Datacenter Name"
-  project_id = "Project ID"
-  service_provider = "akamai"
-  scope = "private"
+  admin_state_up    = true
+  city              = "City Name"
+  continent         = "Continent Name"
+  country           = "Country Name"
+  latitude          = 12.34
+  longitude         = 56.78
+  name              = "Datacenter Name"
+  project_id        = "Project ID"
+  service_provider  = "akamai"
+  scope             = "private"
   state_or_province = "State or Province Name"
 }
 ```

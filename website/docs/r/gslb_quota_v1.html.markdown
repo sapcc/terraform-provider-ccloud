@@ -20,10 +20,10 @@ zero.
 ```hcl
 resource "ccloud_gslb_quota_v1" "quota_1" {
   datacenter = 10
-  domain = 20
-  member = 30
-  monitor = 40
-  pool = 50
+  domain     = 20
+  member     = 30
+  monitor    = 40
+  pool       = 50
   project_id = "ea3b508ba36142d9888dc087b014ef78"
 }
 ```
