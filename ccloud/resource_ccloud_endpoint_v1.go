@@ -20,6 +20,9 @@ func resourceCCloudEndpointV1() *schema.Resource {
 		ReadContext:   resourceCCloudEndpointV1Read,
 		UpdateContext: resourceCCloudEndpointV1Update,
 		DeleteContext: resourceCCloudEndpointV1Delete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"region": {
