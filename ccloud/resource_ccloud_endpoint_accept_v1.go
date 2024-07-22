@@ -212,6 +212,7 @@ func archerGetServiceEndpointConsumerStatus(ctx context.Context, c *archer, id, 
 func archerGetServiceEndpointConsumer(ctx context.Context, c *archer, id, serviceID string) (*models.EndpointConsumer, error) {
 	opts := &service.GetServiceServiceIDEndpointsParams{
 		ServiceID: strfmt.UUID(serviceID),
+		Context:   ctx,
 	}
 	res, err := c.Service.GetServiceServiceIDEndpoints(opts, c.authFunc())
 	if err != nil {
