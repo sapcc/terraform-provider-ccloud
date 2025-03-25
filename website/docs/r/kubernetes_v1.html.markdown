@@ -91,9 +91,9 @@ resource "ccloud_kubernetes_v1" "demo" {
   }
 }
 
-resource "local_file" "kubeconfig" {
-  sensitive_content = ccloud_kubernetes_v1.demo.kube_config_raw
-  filename          = "kubeconfig"
+resource "local_sensitive_file" "kubeconfig" {
+  content  = ccloud_kubernetes_v1.demo.kube_config_raw
+  filename = "kubeconfig"
 }
 ```
 
