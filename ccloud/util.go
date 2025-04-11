@@ -113,6 +113,17 @@ func expandToNodePoolConfig(v []interface{}) *models.NodePoolConfig {
 	return c
 }
 
+func expandObjectTags(d *schema.ResourceData) []string {
+	rawTags := d.Get("tags").(*schema.Set).List()
+	tags := make([]string, len(rawTags))
+
+	for i, raw := range rawTags {
+		tags[i] = raw.(string)
+	}
+
+	return tags
+}
+
 func normalizeJSONString(v interface{}) string {
 	json, _ := structure.NormalizeJsonString(v)
 	return json
