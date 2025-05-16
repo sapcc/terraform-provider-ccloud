@@ -3,13 +3,13 @@ layout: "sci"
 page_title: "Provider: SAP Cloud Infrastructure"
 sidebar_current: "docs-sci-index"
 description: |-
-  The Converged Cloud provider is used to interact with the many resources supported by Converged Cloud. The provider needs to be configured with the proper credentials before it can be used.
+  The SAP Cloud Infrastructure provider is used to interact with the many resources supported by SAP Cloud Infrastructure. The provider needs to be configured with the proper credentials before it can be used.
 ---
 
-# Converged Cloud Provider
+# SAP Cloud Infrastructure Provider
 
-The Converged Cloud provider is used to interact with the
-many resources supported by Converged Cloud. The provider needs to be configured
+The SAP Cloud Infrastructure provider is used to interact with the
+many resources supported by SAP Cloud Infrastructure. The provider needs to be configured
 with the proper credentials before it can be used.
 
 Use the navigation to the left to read about the available resources.
@@ -30,7 +30,7 @@ terraform {
   }
 }
 
-# Configure the Converged Cloud Provider
+# Configure the SAP Cloud Infrastructure Provider
 provider "sci" {
   user_name   = "admin"
   tenant_name = "admin"
@@ -58,11 +58,11 @@ The following arguments are supported:
   for more information about `clouds.yaml` files. If omitted, the `OS_CLOUD`
   environment variable is used.
 
-* `region` - (Optional) The region of the Converged Cloud cloud to use. If omitted,
+* `region` - (Optional) The region of the SAP Cloud Infrastructure to use. If omitted,
   the `OS_REGION_NAME` environment variable is used. If `OS_REGION_NAME` is
   not set, then no region will be used. It should be possible to omit the
-  region in single-region Converged Cloud environments, but this behavior may vary
-  depending on the Converged Cloud environment being used.
+  region in single-region SAP Cloud Infrastructure environments, but this behavior may vary
+  depending on the SAP Cloud Infrastructure environment being used.
 
 * `user_name` - (Optional) The Username to login with. If omitted, the
   `OS_USERNAME` environment variable is used.
@@ -150,7 +150,7 @@ The following arguments are supported:
   variable. If not set, public endpoints is used.
 
 * `endpoint_overrides` - (Optional) A set of key/value pairs that can
-  override an endpoint for a specified Converged Cloud service. Setting an override
+  override an endpoint for a specified SAP Cloud Infrastructure service. Setting an override
   requires you to specify the full and complete endpoint URL. This might
   also invalidate any region you have set, too. Please see below for more details.
   Please use this at your own risk.
@@ -199,7 +199,7 @@ Note how each URL ends in a "/" and the `volumev2` service includes the
 tenant/project UUID. You must make sure you specify the full and complete
 endpoint URL for this to work.
 
-The service keys are the standard service entries used in the Converged Cloud
+The service keys are the standard service entries used in the SAP Cloud Infrastructure
 Identity/Keystone service catalog. This provider supports:
 
 * `arc`: Arc / Arc v1
@@ -215,7 +215,7 @@ to override an endpoint, you most likely do not need to override one.
 ## Additional Logging
 
 This provider has the ability to log all HTTP requests and responses between
-Terraform and the Converged Cloud cloud which is useful for troubleshooting and
+Terraform and the SAP Cloud Infrastructure which is useful for troubleshooting and
 debugging.
 
 To enable these logs, set the `OS_DEBUG` environment variable to `1` along
