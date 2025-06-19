@@ -1,0 +1,76 @@
+# This GitHub action will publish assets for release when a tag is created
+# that matches the pattern "v*" (ie. v0.1.0).
+#
+# Based on the configuration provided at:
+# https://github.com/hashicorp/terraform-provider-scaffolding
+name: Release dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+      previous_tag:
+        required: true
+      project_name:
+        default: 'terraform-provider-sci'
+      goreleaser_version:
+        default: 'v2'
+      use_old_key:
+        type: boolean
+        default: false
+
+# to allow the action to create a release
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ github.event.inputs.tag }}
+
+      - name: Unshallow
+        run: git fetch --prune --unshallow
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Import GPG key
+        id: import_gpg
+        if: ${{ github.event.inputs.use_old_key == 'false' }}
+        uses: crazy-max/ghaction-import-gpg@v6.3.0
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+
+      - name: Import old GPG key
+        id: import_gpg_old
+        if: ${{ github.event.inputs.use_old_key == 'true' }}
+        uses: crazy-max/ghaction-import-gpg@v6.3.0
+        with:
+          gpg_private_key: ${{ secrets.OLD_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.OLD_GPG_PASSPHRASE }}
+
+      - name: Copy goreleaser config to temp location
+        run: cp .goreleaser.yml /tmp/.goreleaser.yml
+
+      - name: Override project_name in copied config
+        run: yq -i '.project_name = "${{ github.event.inputs.project_name }}"' /tmp/.goreleaser.yml
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: ${{ github.event.inputs.goreleaser_version }}
+          args: release --clean --config /tmp/.goreleaser.yml
+        env:
+          GPG_FINGERPRINT: ${{ github.event.inputs.use_old_key == 'true' && steps.import_gpg_old.outputs.fingerprint || steps.import_gpg.outputs.fingerprint }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_CURRENT_TAG: ${{ github.event.inputs.tag }}
+          GORELEASER_PREVIOUS_TAG: ${{ github.event.inputs.previous_tag }}
