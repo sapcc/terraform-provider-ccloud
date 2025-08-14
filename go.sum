@@ -188,6 +188,8 @@ github.com/sapcc/gophercloud-sapcc/v2 v2.0.3 h1:w6xb4mLvYBIzfHctLqw/FpMi+FSDt7Cq
 github.com/sapcc/gophercloud-sapcc/v2 v2.0.3/go.mod h1:8FiEk0Zz+tpqptR90x/ETUe630sDv0hbt8lKQtHeksk=
 github.com/sapcc/kubernikus v1.0.1-0.20250603090049-415897d6bcf8 h1:9WMqMoLoCLs15+bXl+KCI2yTl3GOeofLIuzShBzw8Ls=
 github.com/sapcc/kubernikus v1.0.1-0.20250603090049-415897d6bcf8/go.mod h1:/1LjWPFHG0NhLQD+IMXmIlKTaUTtByRzUooyabmaktA=
+github.com/sapcc/kubernikus v1.5.0 h1:2oPZbQzbGVhE/0G6kE8eZ031itulsupRl1rVVbSeCRo=
+github.com/sapcc/kubernikus v1.5.0/go.mod h1:myK1pthNZIGRz7BRoztctl69QaZzj69fbGr4WvzEJ2M=
 github.com/spf13/cobra v1.8.1 h1:e5/vxKd/rZsfSJMUX1agtjeTDf+qv1/JdBF8gg5k9ZM=
 github.com/spf13/cobra v1.8.1/go.mod h1:wHxEcudfqmLYa8iTfL+OuZPbBZkmvliBWKIezN3kD9Y=
 github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
