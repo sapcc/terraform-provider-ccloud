@@ -58,8 +58,12 @@ func resourceSCIEndpointServiceV1() *schema.Resource {
 				},
 				Required: true,
 			},
-			"port": {
-				Type:     schema.TypeInt,
+			"ports": {
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type:         schema.TypeInt,
+					ValidateFunc: validation.IsPortNumber,
+				},
 				Required: true,
 			},
 			"network_id": {
@@ -145,7 +149,7 @@ func resourceSCIEndpointServiceV1Create(ctx context.Context, d *schema.ResourceD
 		ProjectID:   models.Project(d.Get("project_id").(string)),
 		Enabled:     &enabled,
 		NetworkID:   &networkID,
-		Port:        int32(d.Get("port").(int)),
+		Ports:       []int32{int32(d.Get("ports").(int))},
 		IPAddresses: expandToStrFmtIPv4Slice(d.Get("ip_addresses").([]interface{})),
 	}
 	if v, ok := getOkExists(d, "proxy_protocol"); ok {
@@ -247,8 +251,8 @@ func resourceSCIEndpointServiceV1Update(ctx context.Context, d *schema.ResourceD
 		svc.Description = &v
 	}
 	if d.HasChange("port") {
-		v := int32(d.Get("port").(int))
-		svc.Port = &v
+		v := []int32{int32(d.Get("port").(int))}
+		svc.Ports = v
 	}
 	if d.HasChange("proxy_protocol") {
 		v := d.Get("proxy_protocol").(bool)
@@ -375,7 +379,7 @@ func archerSetServiceResource(d *schema.ResourceData, config *Config, svc *model
 	_ = d.Set("ip_addresses", flattenToStrFmtIPv4Slice(svc.IPAddresses))
 	_ = d.Set("name", svc.Name)
 	_ = d.Set("description", svc.Description)
-	_ = d.Set("port", svc.Port)
+	_ = d.Set("ports", svc.Ports)
 	_ = d.Set("network_id", ptrValue(svc.NetworkID))
 	_ = d.Set("project_id", svc.ProjectID)
 	_ = d.Set("tags", svc.Tags)
